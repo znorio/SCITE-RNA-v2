@@ -75,7 +75,9 @@ To set up the SCITE-RNA project locally:
 
 ### Data Preparation
 
-To reproduce the figures quickly, extract `data.zip`.
+To reproduce the figures quickly, extract `data.zip`. 
+
+(`data.zip` will be made available soon - currently problems with file size)
 
 
 ## Running the Model
