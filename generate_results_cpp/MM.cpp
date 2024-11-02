@@ -1,3 +1,7 @@
+/*
+Script used to run SCITE-RNA on the multiple myeloma dataset MM34.
+*/
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -120,26 +124,26 @@ std::vector<std::vector<int>> read_csv(const std::string& filename) {
 int main() {
     int bootstrap_samples = 1000;
     int n_snps = 3000;
-    std::string sample = "34";
+    std::string sample = "mm34";
     std::string reduced =  ""; // "_reduced";
-    std::string ref_to_alt = "_only_ref_to_alt";
+    std::string ref_to_alt = "_only_ref_to_alt"; // ""
     std::vector<std::string> tree_space = {"c", "m"};
     bool reverse_mutations = false;
     std::string bootstrap_folder = "/bootstrap_";
     if (reverse_mutations){
         bootstrap_folder = "/bootstrap_reverse_mut_";
     }
-    std::string base_path = "."; // Local path
+    std::string base_path = "../data/"; // Local path
     if (!std::filesystem::exists(base_path + sample)) {
-        base_path = ".";  // alternative path
+        base_path = "../data/";  // alternative path
     }
 
-    std::string path = base_path + sample + "/results";
-    std::string reference_file = base_path + sample + "/data/ref" + reduced + ".csv";
-    std::string alternative_file = base_path + sample + "/data/alt" + reduced + ".csv";
+    std::string path = base_path  + "results/" + sample;
+    std::string reference_file = base_path + "input_data/" +  sample + "/ref" + reduced + ".csv";
+    std::string alternative_file = base_path + "input_data/" +  sample + "/alt" + reduced + ".csv";
 
-    std::string pathout = base_path + sample + "/data" + bootstrap_folder +  std::to_string(n_snps) +
-            reduced + std::to_string(bootstrap_samples) + ref_to_alt;
+    std::string pathout = path + bootstrap_folder + std::to_string(bootstrap_samples) + "_snvs_" +
+            std::to_string(n_snps) + reduced + ref_to_alt;
     std::filesystem::create_directories(pathout + "/sciterna_parent_vec");
     std::filesystem::create_directories(pathout + "/sciterna_mut_loc");
     std::filesystem::create_directories(pathout + "/sciterna_selected_loci");
@@ -161,7 +165,7 @@ int main() {
     std::vector<char> gt1;
     std::vector<char> gt2;
 
-    for (int loop = 354; loop < 370; ++loop) {
+    for (int loop = 0; loop < 1000; ++loop) {
         std::cout << std::to_string(loop) << ". bootstrap sample" << std::endl;
         selected = bootstrap_selected[loop];
         gt1 = bootstrap_gt1[loop];
@@ -173,7 +177,7 @@ int main() {
         SwapOptimizer optimizer(tree_space, reverse_mutations, n_snps,
                                 static_cast<int> (llh_1.size()));
         optimizer.fit_llh(llh_1, llh_2);
-        optimizer.optimize();
+        optimizer.optimize(100,false);
         // save parent vector
         std::ofstream parent_vec_file(pathout + "/sciterna_parent_vec/sciterna_parent_vec_" + std::to_string(loop) + ".txt");
         for (const auto& parent : optimizer.ct.parent_vector_ct) {

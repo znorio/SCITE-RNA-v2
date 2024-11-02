@@ -1,3 +1,8 @@
+/*
+This code calculates the posterior probability of different mutation types and genotypes given the data
+and can filter SNVs based on this posterior.
+*/
+
 #include <vector>
 #include <cmath>
 #include <stdexcept>

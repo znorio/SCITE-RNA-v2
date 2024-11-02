@@ -1,3 +1,7 @@
+/*
+Defines cell lineage trees and how they are optimized.
+*/
+
 #include <chrono>
 #include <random>
 #include <vector>

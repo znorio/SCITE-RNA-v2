@@ -29,7 +29,7 @@ public:
     void updateAll();
     void updateCumulLlr();
     void updateCellLoc();
-    void exhaustiveOptimize();
+    void exhaustiveOptimize(bool insert_nodes);
     void greedyAttach(int subroot);
     void greedyAttachNode(int subroot);
 

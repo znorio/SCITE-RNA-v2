@@ -1,3 +1,7 @@
+/*
+To optimize the trees, SCITE-RNA alternates between mutation and cell lineage tree spaces.
+*/
+
 #include <algorithm>
 
 #include "swap_optimizer.h"
@@ -38,7 +42,7 @@ void SwapOptimizer::fit_llh(const std::vector<std::vector<double>>& llh_1, const
 }
 
 // optimize mutation and cell lineage tree spaces
-void SwapOptimizer::optimize(int max_loops) {
+void SwapOptimizer::optimize(int max_loops, bool insert_nodes) {
     std::vector<bool> converged = {spaces.end() == std::find(spaces.begin(), spaces.end(), "c"),
                                    spaces.end() == std::find(spaces.begin(), spaces.end(), "m")};
 
@@ -60,7 +64,7 @@ void SwapOptimizer::optimize(int max_loops) {
             mt.updateAll();
         } else {
             std::cout << "Optimizing mutation tree ..." << std::endl;
-            mt.exhaustiveOptimize();
+            mt.exhaustiveOptimize(insert_nodes);
             ct.fitMutationTree(mt);
             ct.updateAll();
         }
