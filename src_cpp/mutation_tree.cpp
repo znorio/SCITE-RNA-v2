@@ -1,3 +1,7 @@
+/*
+Defines the mutation tree and how it is optimized.
+*/
+
 #include <iostream>
 #include <stdexcept>
 #include <random>
@@ -227,24 +231,25 @@ void MutationTree::updateCellLoc() {
 }
 
 // prune individual mutations and subtrees, then reattach them at their optimal location
-void MutationTree::exhaustiveOptimize() {
+void MutationTree::exhaustiveOptimize(bool insert_nodes) {
     std::vector<int> mut_random_order(n_mut);
     std::iota(mut_random_order.begin(), mut_random_order.end(), 0);
 
-    for (int subroot : mut_random_order) {
-        if (children_list_mt[subroot].size() > 1) {
-            continue;
+    if (insert_nodes) {
+        for (int subroot: mut_random_order) {
+            if (children_list_mt[subroot].size() > 1) {
+                continue;
+            }
+            if (subroot == main_root_mt) {
+                continue;
+            }
+            pruneNode(subroot);
+            updateAll();
+            greedyAttachNode(subroot);
         }
-        if (subroot == main_root_mt){
-            continue;
-        }
-        pruneNode(subroot);
         updateAll();
-        greedyAttachNode(subroot);
+        std::cout << "After Node reattachment " << joint << std::endl;
     }
-
-    updateAll();
-    std::cout << "After Node reattachment " << joint << std::endl;
 
     std::shuffle(mut_random_order.begin(), mut_random_order.end(), std::mt19937{std::random_device{}()});
     for (int subroot : mut_random_order) {

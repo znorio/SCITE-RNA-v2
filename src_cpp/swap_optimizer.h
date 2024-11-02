@@ -24,7 +24,7 @@ public:
     [[nodiscard]] double getCurrentJoint() const;
     [[nodiscard]] double getMtJoint() const;
     void fit_llh(const std::vector<std::vector<double>>& llh_1, const std::vector<std::vector<double>>& llh_2);
-    void optimize(int max_loops = 100);
+    void optimize(int max_loops = 100, bool insert_nodes = true);
     static double round_to_n_decimals(double value, int n_decimals);
     MutationTree mt;
     CellTree ct;
