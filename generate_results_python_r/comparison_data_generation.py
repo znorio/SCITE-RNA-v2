@@ -108,7 +108,6 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
     for i in tqdm(range(0, n_tests)):
         alt = np.loadtxt(os.path.join(path, "alt", 'alt_%i.txt' % i)).T
         ref = np.loadtxt(os.path.join(path, "ref", 'ref_%i.txt' % i)).T
-        mut_indicator = np.loadtxt(os.path.join(path, f'mut_indicator/mut_indicator_{i}.txt'))
 
         mf = MutationFilter(f=config["f"], omega=config["omega"], h_factor=config["h_factor"], genotype_freq=config["genotype_freq"],
                             mut_freq=config["mut_freq"])

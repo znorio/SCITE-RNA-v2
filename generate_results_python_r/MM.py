@@ -9,6 +9,10 @@ import numpy as np
 import pandas as pd
 import json
 import os
+import yaml
+
+with open('../config/config.yaml', 'r') as file:
+    config = yaml.safe_load(file)
 
 def create_mutation_matrix(parent_vector, mutation_indices, ct):
     n_cells = len(parent_vector)
@@ -58,7 +62,9 @@ def main():
     ref = np.nan_to_num(np.array(reference), 0)[:,:]
     alt = np.nan_to_num(np.array(alternative), 0)[:,:]
 
-    mf = MutationFilter()
+    mf = MutationFilter(f=config["f"], omega=config["omega"], h_factor=config["h_factor"],
+                        genotype_freq=config["genotype_freq"],
+                        mut_freq=config["mut_freq"])
     optimizer = SwapOptimizer(reverse_mutations=reverse_mut)
     selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method='first_k', n_exp=n_snps, only_ref_to_alt=only_ref_to_alt)
 
