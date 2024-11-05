@@ -224,5 +224,5 @@ for s, (n_cells, n_mut) in enumerate(zip(n_cells_list, n_mut_list)):
         axes[1, s].set_ylabel('Normalized Log Likelihood vs. Cell Tree', fontsize=19)
 
 plt.tight_layout()
-plt.savefig("../data/results/figures/space_switching.png")
+# plt.savefig("../data/results/figures/space_switching.png")
 plt.show()
