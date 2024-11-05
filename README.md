@@ -32,11 +32,11 @@ This repository provides:
 
 ## Repository Structure
 
-**SCITE-RNA**/<br>
+**SCITE-RNA**<br>
 ├── data/                       # Input data files and results <br>
-   ├── input_data               # Alternative and reference read counts among other files. <br>
-   ├── results                  # Inferred trees of the multiple myeloma dataset and figures <br>
-   └── simulated_data           # Summary statistics of simulated data and respective inferred trees <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── input_data               # Alternative and reference read counts among other files. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── results                  # Inferred trees of the multiple myeloma dataset and figures <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── simulated_data           # Summary statistics of simulated data and respective inferred trees <br>
 ├── generate_results_cpp/       # C++ scripts for tree inference <br>
 ├── generate_results_python_r/  # Python and R scripts for simulating data, inferring trees and visualization <br>
 ├── src_cpp/                    # C++ source files for SCITE-RNA <br>
