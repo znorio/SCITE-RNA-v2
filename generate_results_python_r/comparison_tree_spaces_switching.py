@@ -66,7 +66,6 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
     for i in tqdm(range(0, n_tests)):
         alt = np.loadtxt(os.path.join(path, "alt", 'alt_%i.txt' % i)).T
         ref = np.loadtxt(os.path.join(path, "ref", 'ref_%i.txt' % i)).T
-        mut_indicator = np.loadtxt(os.path.join(path, f'mut_indicator/mut_indicator_{i}.txt'))
 
         mf = MutationFilter(f=config["f"], omega=config["omega"], h_factor=config["h_factor"], genotype_freq=config["genotype_freq"],
                             mut_freq=config["mut_freq"])
@@ -98,8 +97,8 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
 
 
 n_tests = 100
-n_cells_list = [500, 100, 500]
-n_mut_list = [100, 500, 500]
+n_cells_list = [100, 500, 500]
+n_mut_list = [500, 500, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 
@@ -121,6 +120,7 @@ for s, (n_cells, n_mut) in enumerate(zip(n_cells_list, n_mut_list)):
     optimal_tree_llh = {}
     file_path = rf"../data/results/figures/optimal_tree_llh_comparison_{n_cells}c{n_mut}m.json"
     if not os.path.exists(file_path):
+        os.makedirs(r"../data/results/figures", exist_ok=True)
         for space in tree_spaces:
             optimal_tree_llh["_".join(space)] = {}
             path = f"../data/simulated_data/{n_cells}c{n_mut}m"
@@ -175,8 +175,8 @@ for s, (n_cells, n_mut) in enumerate(zip(n_cells_list, n_mut_list)):
 
     for patch, color in zip(box['boxes'], colors):
         patch.set_facecolor(color)
-    for median, color in zip(box['medians'], colors):
-        median.set_color(color)
+    # for median, color in zip(box['medians'], colors):
+    #     median.set_color(color)
 
     labels = ["m", "c", "cm", "mc"]
     means = np.mean(all_data, axis=1)
@@ -213,8 +213,8 @@ for s, (n_cells, n_mut) in enumerate(zip(n_cells_list, n_mut_list)):
 
     for patch, color in zip(box['boxes'], colors):
         patch.set_facecolor(color)
-    for median, color in zip(box['medians'], colors):
-        median.set_color(color)
+    # for median, color in zip(box['medians'], colors):
+    #     median.set_color(color)
 
     axes[1, s].axhline(0, color='orange', linestyle='--', linewidth=2)
     axes[1, s].set_xticks(range(1, len(labels) + 1))
@@ -224,5 +224,5 @@ for s, (n_cells, n_mut) in enumerate(zip(n_cells_list, n_mut_list)):
         axes[1, s].set_ylabel('Normalized Log Likelihood vs. Cell Tree', fontsize=19)
 
 plt.tight_layout()
-# plt.savefig("../data/results/figures/space_switching.png")
+plt.savefig("../data/results/figures/space_switching.png")
 plt.show()

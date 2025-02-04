@@ -50,6 +50,7 @@ public:
     // helper functions
     static std::vector<double> getMaxValues(const std::vector<std::vector<double>>& matrix, const std::vector<int>& indices);
     static std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b);
+    static std::mt19937& create_rng();
 
     // public variables
     double joint = -std::numeric_limits<double>::infinity();

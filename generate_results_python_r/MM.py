@@ -68,7 +68,7 @@ def main():
     optimizer = SwapOptimizer(reverse_mutations=reverse_mut)
     selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method='first_k', n_exp=n_snps, only_ref_to_alt=only_ref_to_alt)
 
-    np.random.seed(0)
+    np.random.seed(config["random_seed"])
     indices = np.random.choice(len(selected), (bootstrap_samples, len(selected)), replace=True)
 
     bootstrap_selected = np.array(selected)[indices]

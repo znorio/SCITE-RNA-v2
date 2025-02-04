@@ -8,8 +8,10 @@ Script used to run SCITE-RNA on simulated data with a variable number of cells, 
 #include <string>
 #include <cstdlib>
 #include <filesystem>
+
 #include <mutation_filter.h>
 #include <swap_optimizer.h>
+#include "config.h"
 
 // using indices to extract columns of matrix
 std::vector<std::vector<int>> slice_columns(const std::vector<std::vector<int>>& matrix, const std::vector<int>& indices) {
@@ -136,7 +138,7 @@ void generate_sciterna_results(std::string const& path = "", int n_tests = 100,
 //        std::basic_string<char> path_g(path + "/sciterna_inferred_mut_types/sciterna_inferred_mut_types_" + std::to_string(i) + ".txt");
 
         auto [selected, gt1, gt2, gt_not_selected] = mf.filter_mutations(ref, alt,
-                                                                    "first_k", 0.5, select_n, true);
+                                                                    "first_k", 0.5, select_n, true, i);
 
 
         auto [llh_1, llh_2] = mf.get_llh_mat(slice_columns(ref, selected), slice_columns(alt, selected), gt1, gt2);
@@ -208,10 +210,13 @@ void generate_sciterna_results(std::string const& path = "", int n_tests = 100,
 int main() {
     int n_tests = 100; //number of runs
     std::vector<int> n_cells_list = {50, 100, 100};
-    std::vector<int> n_mut_list = {100, 100, 50};
+    std::vector<int> n_mut_list = {100, 50, 100};
     std::vector<std::string> tree_space = {"c", "m"};
     std::vector<std::string> clones = {"5", "10", "20", ""};
     bool flipped = false;
+
+    load_config("../config/config.yaml");
+    std::cout << "Random seed: " << config_variables["random_seed"] << std::endl;
 
     for (const auto& clone : clones) {
         for (int i = 0; i < n_cells_list.size(); ++i) {

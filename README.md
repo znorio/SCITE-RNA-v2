@@ -85,12 +85,11 @@ using
 
 ### Set Model Parameters
 
-Adjust model parameters in `configs/config.yaml` for Python 
-or adjust them in `src_cpp/mutation_filter.h` for C++.
+Adjust model parameters in `configs/config.yaml`.
 
 ### Simulated Data
 
-To **generate new simulated data** execute:
+To **generate new simulated data** and compare different numbers of clones execute:
 
     generate_results_python_r/comparison_data_generation.py
 

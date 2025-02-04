@@ -3,9 +3,11 @@
 library(DENDRO)
 library(SClineager)
 
+script_dir <- dirname(sys.frame(1)$ofile)
+
 n_tests <- 100
-n_cells_list <- c(200, 300)
-n_mut_list <- c(200, 300)
+n_cells_list <- c(50, 100, 100)
+n_mut_list <- c(100, 50, 100)
 clones_list <- c(5, 10, 20, "")
 
 
@@ -41,6 +43,7 @@ generate.parent.vec <- function(path=NA, n.tests=10, clones=5){
   dir.create("dendro_parent_vec", recursive = TRUE)
   dir.create("dendro_clones", recursive = TRUE)
   
+  cat("Theoretical number of clones: ", clones)
   
   pb <- txtProgressBar(min=0, max=n.tests, initial=0, style=3)
   for (i in 0:(n.tests-1)){
@@ -49,6 +52,10 @@ generate.parent.vec <- function(path=NA, n.tests=10, clones=5){
     coverage <- ref + alt
     mut_indicator <- read.matrix(sprintf("mut_indicator/mut_indicator_%d.txt", i))
     mutations_mat = alt / coverage
+    
+    unique_rows <- unique(t(mut_indicator))
+    clones <- nrow(unique_rows) # actual number of clones
+    cat("Actual number of clones: ", clones)
     
     # TRUE if the corresponding row's maximum and minimum values differ
     # by more than 0.1 and FALSE otherwise -> get rows with multiple genotypes
@@ -66,7 +73,7 @@ generate.parent.vec <- function(path=NA, n.tests=10, clones=5){
       sclineager_internal(
         mutations_mat = mutations_mat_sclineager,
         coverage_mat = coverage_sclineager,
-        max_iter = 200,
+        max_iter = 2000,
         vaf_offset = 0.01,
         dfreedom = ncol(mutations_mat),
         psi = diag(10, ncol(mutations_mat)),
@@ -88,12 +95,28 @@ generate.parent.vec <- function(path=NA, n.tests=10, clones=5){
   }
 }
 
-# Combine lists and create paths
-paths <- paste(base_dir, n_cells_list, "c", n_mut_list, "m", clones_list, sep = "")
+
+paths <- c()
+clones <- c()
+
+for (i in seq_along(n_cells_list)) {
+  n_cells <- n_cells_list[i]
+  n_mut <- n_mut_list[i]
+  
+  for (clone in clones_list) {
+    path <- paste(base_dir, n_cells, "c", n_mut, "m", clone, sep = "")
+    paths <- c(paths, path)
+    clones <- c(clones, clone)
+    
+  }
+}
+
+print(paths)
 
 for (i in seq_along(paths)) {
-  clones <- clones_list[i]
+  n_clones <- clones[i]
   path <- paths[i]
-  generate.parent.vec(path, n_tests, clones)
+  setwd(script_dir)
+  generate.parent.vec(path, n_tests, n_clones)
 }
 

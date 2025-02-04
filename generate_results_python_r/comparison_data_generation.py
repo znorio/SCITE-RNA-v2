@@ -19,6 +19,8 @@ from src_python.swap_optimizer import SwapOptimizer
 with open('../config/config.yaml', 'r') as file:
     config = yaml.safe_load(file)
 
+seed = config["random_seed"]
+np.random.seed(seed)
 def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./comparison_data/', seed=None, n_clones= None):
     if seed is not None:
         np.random.seed(seed)
@@ -140,13 +142,13 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
 
 if __name__ == '__main__':
     n_tests = 100
-    n_cells_list = [200, 300]
-    n_mut_list = [200, 300]
-    clones = [5, 10, 20, ""]
+    n_cells_list =  [500, 100, 500]
+    n_mut_list =  [100, 500, 500]
+    clones =  [""] # [5, 10, 20, ""]
     flipped = False
 
     for clone in clones:
         for n_cells, n_mut in zip(n_cells_list, n_mut_list):
             path = f'../data/simulated_data/{n_cells}c{n_mut}m{clone}'
             generate_comparison_data(n_cells, n_mut, n_tests, path=path, n_clones = clone)
-            generate_sciterna_results(path, n_tests, path,["c", "m"], flipped, n_mut)
+            # generate_sciterna_results(path, n_tests, path,["c", "m"], flipped, n_mut)

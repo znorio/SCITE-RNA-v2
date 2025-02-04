@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <random>
 
 #include <mutation_tree.h>
 
@@ -60,6 +61,7 @@ public:
 
     // helper functions
     static std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b);
+    static std::mt19937& create_rng();
 
     // public variables
     double joint = -std::numeric_limits<double>::infinity();

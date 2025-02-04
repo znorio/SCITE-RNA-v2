@@ -26,7 +26,7 @@ private:
 public:
     // mutation filter functions
     explicit MutationFilter(double f = 0.95, int omega = 100, double h_factor = 0.5,
-                   const std::unordered_map<char, double>& genotype_freq = {{'R', 0.25}, {'H', 0.5}, {'A', 0.25}},
+                   const std::unordered_map<char, double>& genotype_freq = get_genotype_freq(),
                    double mut_freq = 0.5, int min_grp_size = 1);
     void set_betabinom();
     void set_mut_type_prior();
@@ -42,7 +42,7 @@ public:
                                     const std::string& method = "highest_post",
                                     double t = 0.0,
                                     int n_exp = 0,
-                                    bool reversible = true);
+                                    bool reversible = true, int n_test = 0);
     std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> get_llh_mat(
                 const std::vector<std::vector<int>>& ref,
                 const std::vector<std::vector<int>>& alt,
@@ -63,6 +63,7 @@ public:
     std::vector<double> concat(const std::vector<double>& first, const Vectors&... rest) const;
     static std::vector<double> add_vectors(const std::vector<double>& a, const std::vector<double>& b);
     static std::vector<double> add_scalar_to_vector(double scalar, const std::vector<double>& vec);
+    static std::unordered_map<char, double> get_genotype_freq();
 };
 
 #endif //SCITE_RNA_CPP_MUTATION_FILTER_H

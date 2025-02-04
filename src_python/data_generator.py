@@ -3,15 +3,21 @@ This script is used to generate simulated read counts, ground truth genotypes an
 """
 
 
-from numba import njit
+# from numba import njit # problem with random seed
 import numpy as np
+import yaml
 from scipy.stats import poisson, geom
 
 from .cell_tree import CellTree
 from .mutation_tree import MutationTree
 
+with open('../config/config.yaml', 'r') as file:
+    config = yaml.safe_load(file)
 
-@njit
+seed = config["random_seed"]
+np.random.seed(seed)
+
+# @njit
 def betabinom_rvs(coverage, alpha, beta_param):
     p = np.random.beta(alpha, beta_param)
     return np.random.binomial(coverage, p)
