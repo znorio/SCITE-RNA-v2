@@ -15,9 +15,11 @@ add_executable(SCITE-RNA
         src_cpp/swap_optimizer.h
         src_cpp/mutation_filter.cpp
         src_cpp/mutation_filter.h
+        src_cpp/config.cpp
+        src_cpp/config.h
 #        generate_results_cpp/comparison_num_clones.cpp
-        generate_results_cpp/run_sciterna.cpp
+#        generate_results_cpp/run_sciterna.cpp
 #        generate_results_cpp/MM.cpp
-#        generate_results_cpp/comparison_tree_spaces_switching.cpp
+        generate_results_cpp/comparison_tree_spaces_switching.cpp
 
 )

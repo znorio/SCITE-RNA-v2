@@ -4,11 +4,16 @@ To optimize the trees, SCITE-RNA alternates between mutation and cell lineage tr
 
 import warnings
 import numpy as np
+import yaml
 
 from .cell_tree import CellTree
 from .mutation_tree import MutationTree
 
+with open('../config/config.yaml', 'r') as file:
+    config = yaml.safe_load(file)
 
+seed = config["random_seed"]
+np.random.seed(seed)
 class SwapOptimizer:
     def __init__(self, sig_digits=10, spaces=["c", "m"], reverse_mutations=True):
         '''

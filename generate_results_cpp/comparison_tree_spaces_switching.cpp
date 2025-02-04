@@ -193,8 +193,8 @@ void generate_sciterna_results(std::string const& path = "", int n_tests = 100, 
 int main() {
     int n_tests = 100; //number of runs
     std::vector<int> n_cells_list = {500, 100, 500};
-    std::vector<int> n_mut_list = {500, 500, 100};
-    std::vector<std::vector<std::string>> tree_spaces = {{"m"}, {"c"}, {"c", "m"}, {"m", "c"}}; // {"m"}, {"c"}, {"c", "m"},  {"m", "c"}
+    std::vector<int> n_mut_list = {100, 500, 500};
+    std::vector<std::vector<std::string>> tree_spaces = {{"m"}, {"c"}, {"c", "m"},  {"m", "c"}}; // {"m"}, {"c"}, {"c", "m"},  {"m", "c"}
     bool flipped = false;
 
     for (const auto& space : tree_spaces) {

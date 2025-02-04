@@ -12,6 +12,7 @@ Script used to run SCITE-RNA on the multiple myeloma dataset MM34.
 #include <filesystem>
 #include <mutation_filter.h>
 #include <swap_optimizer.h>
+#include "config.h"
 
 // using indices to extract columns of matrix
 std::vector<std::vector<int>> slice_columns(const std::vector<std::vector<int>>& matrix, const std::vector<int>& indices) {
@@ -155,17 +156,44 @@ int main() {
     auto ref = read_csv(reference_file);
     auto alt = read_csv(alternative_file);
 
-    std::vector<std::vector<int>> bootstrap_selected = loadIntMatrix(selected_file);
-    std::vector<std::vector<char>> bootstrap_gt1 = loadStringMatrix(gt1_file);
-    std::vector<std::vector<char>> bootstrap_gt2 = loadStringMatrix(gt2_file);
+    MutationFilter mf;
+    std::vector<std::vector<char>> bootstrap_gt1, bootstrap_gt2;
+    std::vector<std::vector<int>>  bootstrap_selected;
 
-    int n_loops = bootstrap_samples;
+    if (!std::filesystem::exists(selected_file)) {
+        auto [new_selected, new_gt1, new_gt2, not_selected_genotypes] = mf.filter_mutations(ref, alt,
+                                                                                            "first_k", 0.5, n_snps, false);
+        load_config("../config/config.yaml");
+        std::mt19937 gen = std::mt19937(std::stoi(config_variables["random_seed"]));
+        std::uniform_int_distribution<size_t> dist(0, new_selected.size() - 1);
+
+        bootstrap_selected.resize(bootstrap_samples, std::vector<int>(new_selected.size()));
+        bootstrap_gt1.resize(bootstrap_samples, std::vector<char>(new_gt1.size()));
+        bootstrap_gt2.resize(bootstrap_samples, std::vector<char>(new_gt2.size()));
+
+        for (int i = 0; i < bootstrap_samples; ++i) {
+            for (size_t j = 0; j < new_selected.size(); ++j) {
+                size_t index = dist(gen);
+                bootstrap_selected[i][j] = new_selected[index];
+                bootstrap_gt1[i][j] = new_gt1[index];
+                bootstrap_gt2[i][j] = new_gt2[index];
+            }
+        }
+    }
+
+    else {
+
+        bootstrap_selected = loadIntMatrix(selected_file);
+        bootstrap_gt1 = loadStringMatrix(gt1_file);
+        bootstrap_gt2 = loadStringMatrix(gt2_file);
+    }
+
 
     std::vector<int> selected;
     std::vector<char> gt1;
     std::vector<char> gt2;
 
-    for (int loop = 0; loop < 1000; ++loop) {
+    for (int loop = 0; loop < bootstrap_samples; ++loop) {
         std::cout << std::to_string(loop) << ". bootstrap sample" << std::endl;
         selected = bootstrap_selected[loop];
         gt1 = bootstrap_gt1[loop];

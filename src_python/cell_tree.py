@@ -5,9 +5,15 @@ Defines the cell lineage tree and how it is optimized.
 import numpy as np
 import graphviz
 import warnings
-import random
+import yaml
 
 from .tree_base import PruneTree
+
+with open('../config/config.yaml', 'r') as file:
+    config = yaml.safe_load(file)
+
+seed = config["random_seed"]
+np.random.seed(seed)
 
 class CellTree(PruneTree):
     def __init__(self, n_cells=3, n_mut=0, reversible_mut=False):
@@ -80,7 +86,7 @@ class CellTree(PruneTree):
                 sample.remove(np.random.choice(sample))
 
             all_muts = list(range(self.n_mut))
-            random.shuffle(all_muts)
+            np.random.shuffle(all_muts)
 
             # first assign 1 random mutation per clone
             sample_copy = sample.copy()
@@ -179,7 +185,6 @@ class CellTree(PruneTree):
             # LLR is the sum of the children LLRs
 
         self.joint = loc_joint.sum()
-
 
     def update_all(self):
         self.update_llr()
@@ -284,7 +289,7 @@ class CellTree(PruneTree):
             self.insert(anchor, best_target)
             self.update_all()
                                                                                                                            
-    def exhaustive_optimize(self, leaf_only=False):
+    def exhaustive_optimize(self, leaf_only=False, loop_count=1):
         self.update_all()
 
         sr_candidates = list(range(self.n_cells)) if leaf_only else list(range(self.n_vtx))

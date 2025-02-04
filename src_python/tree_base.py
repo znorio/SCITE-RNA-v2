@@ -3,6 +3,13 @@ Defines the base class for all trees with some simple functions.
 """
 
 import numpy as np
+import yaml
+
+with open('../config/config.yaml', 'r') as file:
+    config = yaml.safe_load(file)
+
+seed = config["random_seed"]
+np.random.seed(seed)
 
 class PruneTree:
     '''

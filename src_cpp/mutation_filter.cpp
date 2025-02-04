@@ -9,8 +9,11 @@ and can filter SNVs based on this posterior.
 #include <string>
 #include <algorithm>
 #include <numeric>
+#include <fstream>
+#include <iomanip>
 
 #include "mutation_filter.h"
+#include "config.h"
 
 // initialize filter mutations based on posterior likelihoods
 MutationFilter::MutationFilter(double f, int omega, double h_factor,
@@ -18,6 +21,17 @@ MutationFilter::MutationFilter(double f, int omega, double h_factor,
         : f_(f), omega_(omega), h_factor_(h_factor), genotype_freq_(genotype_freq), mut_freq_(mut_freq), min_grp_size_(min_grp_size) {
     set_betabinom();
     set_mut_type_prior();
+    load_config("../config/config.yaml");
+
+    try {
+        f_ = std::stod(config_variables["f"]);
+        omega_ = std::stoi(config_variables["omega"]);
+        h_factor_ = std::stod(config_variables["h_factor"]);
+        mut_freq_ =  std::stod(config_variables["h_factor"]);
+    }
+    catch (const std::invalid_argument& e) {
+        throw std::runtime_error("Invalid value in configuration file: " + std::string(e.what()));
+    }
 }
 
 // calculate parameters of the beta binomial distribution
@@ -172,7 +186,7 @@ std::tuple<std::vector<int>, std::vector<char>, std::vector<char>, std::vector<c
                             const std::string& method,
                             double t,
                             int n_exp,
-                            bool reversible) {
+                            bool reversible, int n_test) {
 
     n_loci = static_cast<int>(ref[0].size());
     n_cells = static_cast<int>(ref.size());
@@ -205,11 +219,49 @@ std::tuple<std::vector<int>, std::vector<char>, std::vector<char>, std::vector<c
             mut_posteriors.push_back(sum_posterior);
         }
 
+//        std::ofstream outFile("../data/simulated_data/50c100m5/mut_posteriors/mut_posteriors_" + std::to_string(n_test) + ".txt");
+//        if (outFile.is_open()) {
+//            outFile << std::setprecision(std::numeric_limits<double>::max_digits10) << std::fixed;
+//            for (const auto& value : mut_posteriors) {
+//                outFile << value << '\n';
+//            }
+//            outFile.close();
+//        } else {
+//            std::cerr << "Unable to open file for writing." << std::endl;
+//        }
+//
+//        std::ofstream posteriorFile("../data/simulated_data/50c100m5/posteriors/posteriors_" + std::to_string(n_test) + ".txt");
+//        if (posteriorFile.is_open()) {
+//            posteriorFile << std::setprecision(std::numeric_limits<double>::max_digits10) << std::fixed;
+//            for (const auto& row : posteriors) {
+//                for (size_t i = 0; i < row.size(); ++i) {
+//                    posteriorFile << row[i];
+//                    if (i < row.size() - 1) {
+//                        posteriorFile << '\t'; // Use tab-delimited format
+//                    }
+//                }
+//                posteriorFile << '\n';
+//            }
+//            posteriorFile.close();
+//        } else {
+//            std::cerr << "Unable to open posteriors file for writing." << std::endl;
+//        }
+
         std::vector<int> order(n_loci);
         std::iota(order.begin(), order.end(), 0);
         std::sort(order.begin(), order.end(), [&](int a, int b) {
-            return mut_posteriors[a] < mut_posteriors[b];
+            // Scale and truncate to integer precision to avoid precision artifacts
+            auto scaled_a = static_cast<long long>(mut_posteriors[a] * 1e7);
+            auto scaled_b = static_cast<long long>(mut_posteriors[b] * 1e7);
+
+            if (scaled_a == scaled_b) {
+                return a < b;  // Tie-breaker based on index
+            }
+            return scaled_a < scaled_b;
         });
+//        std::sort(order.begin(), order.end(), [&](int a, int b) {
+//            return  mut_posteriors[a] < mut_posteriors[b];
+//        });
 
         for (int i = n_loci - 1; i >= std::max(0, n_loci - n_exp); --i) {
             selected.push_back(order[i]);
@@ -350,14 +402,7 @@ double MutationFilter::betaln(double x, double y) {
 
 // Function to compute the natural logarithm of the factorial of n
 double MutationFilter::factorial(int n) {
-    if (n == 0 || n == 1) {
-        return 0.0; // log(1) = 0
-    }
-    double result = 0.0;
-    for (int i = 2; i <= n; ++i) {
-        result += std::log(i);
-    }
-    return result;
+    return std::lgamma(n + 1); // log(n!)
 }
 
 // Function to compute the natural logarithm of the binomial coefficient
@@ -417,14 +462,27 @@ double MutationFilter::logsumexp(const std::vector<double>& v) {
 
 // lognormalize and exp of vector
 std::vector<double> MutationFilter::lognormalize_exp(const std::vector<double>& v) {
-    double max_val = *std::max(v.begin(), v.end());
-    double sum_exp = 0.0;
-    for (double x : v) {
-        sum_exp += std::exp(x - max_val);
+//    double max_val = *std::max(v.begin(), v.end());
+//    double sum_exp = 0.0;
+//    for (double x : v) {
+//        sum_exp += std::exp(x - max_val);
+//    }
+//    std::vector<double> result(v.size());
+//    for (size_t i = 0; i < v.size(); ++i) {
+//        result[i] = std::exp(v[i] - max_val - std::log(sum_exp));
+//    }
+//    return result;
+
+    double max_val = *std::max_element(v.begin(), v.end());
+    std::vector<double> exp_values(v.size());
+    for (size_t i = 0; i < v.size(); ++i) {
+        exp_values[i] = std::exp(v[i] - max_val);
     }
+    double sum_exp = std::accumulate(exp_values.begin(), exp_values.end(), 0.0);
+
     std::vector<double> result(v.size());
     for (size_t i = 0; i < v.size(); ++i) {
-        result[i] = std::exp(v[i] - max_val - std::log(sum_exp));
+        result[i] = exp_values[i] / sum_exp;
     }
     return result;
 }
@@ -470,4 +528,17 @@ std::vector<double> MutationFilter::add_scalar_to_vector(double scalar, const st
         result[i] = scalar + vec[i];
     }
     return result;
+}
+
+// get genotype frequencies from config file
+std::unordered_map<char, double> MutationFilter::get_genotype_freq() {
+    std::unordered_map<char, double> genotype_freq;
+    for (const auto& [key, value] : config_variables) {
+        // Check if the key starts with "genotype_freq."
+        if (key.rfind("genotype_freq.", 0) == 0) {
+            char genotype = key.back(); // Extract the last character as the genotype
+            genotype_freq[genotype] = std::stod(value);
+        }
+    }
+    return genotype_freq;
 }

@@ -5,10 +5,15 @@ Defines the mutation tree and how it is optimized.
 import numpy as np
 import graphviz
 import warnings
-import random
+import yaml
 
 from .tree_base import PruneTree
 
+with open('../config/config.yaml', 'r') as file:
+    config = yaml.safe_load(file)
+
+seed = config["random_seed"]
+np.random.seed(seed)
 
 class MutationTree(PruneTree):
     def __init__(self, n_mut=2, n_cells=0):
@@ -46,7 +51,7 @@ class MutationTree(PruneTree):
 
     def random_mutation_clone_tree(self, num_clones):
         # generates a mutation tree with roughly equally sized clones.
-        random_numbers = np.unique([random.randint(1, num_clones) for _ in range(self.n_mut)], return_counts=True)[1]
+        random_numbers = np.unique([np.random.randint(1, num_clones) for _ in range(self.n_mut)], return_counts=True)[1]
         muts = list(range(self.n_mut))
         chosen_muts = np.random.choice(muts, random_numbers[0], replace=False)
         muts = [m for m in muts if m not in chosen_muts]

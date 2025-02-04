@@ -6,8 +6,14 @@ and can filter SNVs based on this posterior.
 import numpy as np
 from numba import njit
 import math
+import yaml
 from scipy.special import loggamma, logsumexp
 
+with open('../config/config.yaml', 'r') as file:
+    config = yaml.safe_load(file)
+
+seed = config["random_seed"]
+np.random.seed(seed)
 
 @njit
 def ln_gamma(z):

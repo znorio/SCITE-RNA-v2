@@ -12,7 +12,7 @@ Defines cell lineage trees and how they are optimized.
 #include <limits>
 
 #include "cell_tree.h"
-
+#include "config.h"
 
 // CELL TREE FUNCTIONS
 
@@ -89,10 +89,9 @@ void CellTree::randSubtree(bool initialTree, std::vector<int>* leaves, std::vect
 //    std::sort(local_internals.begin(), local_internals.end());
 
     // Randomly assign two children to an internal vertex
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 rng = create_rng();
     for (int parent : local_internals) {
-        std::shuffle(local_leaves.begin(), local_leaves.end(), gen);
+        std::shuffle(local_leaves.begin(), local_leaves.end(), rng);
         int child1 = local_leaves.front();
         local_leaves.erase(local_leaves.begin());
         int child2 = local_leaves.front();
@@ -286,9 +285,12 @@ void CellTree::exhaustiveOptimize(bool leaf_only) {
             sr_candidates.push_back(i);
         }
     }
+
     // randomize order of candidate roots
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::shuffle(sr_candidates.begin(), sr_candidates.end(), std::default_random_engine(seed));
+
+    std::mt19937 rng = create_rng(); // Persistent RNG for this function
+
+    std::shuffle(sr_candidates.begin(), sr_candidates.end(), rng);
 
     for (int sr : sr_candidates) {
         if (sr == main_root_ct) {
@@ -410,15 +412,15 @@ std::pair<int, double> CellTree::searchInsertionLoc(int target, int anchor, int 
 
     // choose random best target
 
-    std::random_device rd;   // Seed generator
-    std::mt19937 gen(rd());  // Mersenne Twister RNG
+//    std::random_device rd;   // Seed generator
+//    std::mt19937 gen(rd());  // Mersenne Twister RNG
+    std::mt19937 rng = create_rng();
     std::uniform_int_distribution<std::vector<int>::size_type> dis(0, best_targets.size() - 1); // Uniform distribution over the vector indices
-
 //    for (int element : best_targets) {
 //        std::cout << element << " ";
 //    }
 //    std::cout << std::endl;
-    int random_best_target = best_targets[dis(gen)];
+    int random_best_target = best_targets[dis(rng)];
 //    auto min_iter = std::min_element(best_targets.begin(), best_targets.end());
 //    int random_best_target = *min_iter;
     return {random_best_target, best_joint};
@@ -749,4 +751,12 @@ std::vector<double> CellTree::addVectors(const std::vector<double>& a, const std
         result[i] = a[i] + b[i];
     }
     return result;
+}
+
+std::mt19937& CellTree::create_rng() {
+    static std::mt19937 rng([] {
+        load_config("../config/config.yaml");
+        return std::mt19937(std::stoi(config_variables["random_seed"]));
+    }());
+    return rng;
 }
