@@ -62,7 +62,7 @@ def betabinom_pmf(k, n, a, b):
 
 
 class MutationFilter:
-    def __init__(self, f=0.95, omega=100, h_factor=0.5, genotype_freq=None, mut_freq=0.5):
+    def __init__(self, error_rate=0.05, overdispersion=10, genotype_freq=None, mut_freq=0.5):
         if genotype_freq is None:
             genotype_freq = {'R': 1 / 4, 'H': 1 / 2, 'A': 1 / 4}
         self.set_betabinom(f, omega, h_factor)
