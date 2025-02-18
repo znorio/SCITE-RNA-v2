@@ -46,20 +46,17 @@ def main():
     bootstrap_samples = 1000
     n_snps = 3000
     sample = "mm34"
-    bootstrap_folder = "bootstrap_"
     reverse_mut = False
-    training = False
-    if reverse_mut:
-        bootstrap_folder = "bootstrap_reverse_mut_"
+    training = True
 
     reference = pd.read_csv(rf'../data/input_data/{sample}/ref.csv', index_col=0)
     alternative = pd.read_csv(rf'../data/input_data/{sample}/alt.csv', index_col=0)
     ref = np.nan_to_num(np.array(reference), 0)[:,:]
     alt = np.nan_to_num(np.array(alternative), 0)[:,:]
 
-    mf = MutationFilter(f=config["f"], omega=config["omega"], h_factor=config["h_factor"],
-                        genotype_freq=config["genotype_freq"],
-                        mut_freq=config["mut_freq"])
+    mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"], genotype_freq=config["genotype_freq"],
+                        mut_freq=config["mut_freq"], alpha_h=config["alpha_h"], beta_h=config["beta_h"],
+                        dropout_prob=config["dropout_prob"], dropout_direction_prob=config["dropout_direction_prob"])
     optimizer = SwapOptimizer(reverse_mutations=reverse_mut)
     selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method='first_k', n_exp=n_snps)
 
@@ -71,7 +68,7 @@ def main():
     bootstrap_gt2 = np.array(gt2)[indices]
     bootstrap_selected_genes = np.array(reference.columns)[bootstrap_selected]
 
-    base_path =rf"../data/results/{sample}/{bootstrap_folder}{bootstrap_samples}_snvs_{n_snps}"
+    base_path =rf"../data/results/{sample}/{bootstrap_samples}_snvs_{n_snps}"
     if not os.path.exists(os.path.join(base_path, f"selected.txt")):
         os.makedirs(base_path, exist_ok=True)
         np.savetxt(os.path.join(base_path, f"selected.txt"), bootstrap_selected, fmt='%d', delimiter=',')
