@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import json
 import yaml
 
-from src_python.mutation_filter import MutationFilter
+from src_python.noise_mutation_filter import MutationFilter
 from src_python.swap_optimizer import SwapOptimizer
 from src_python.cell_tree import CellTree
 
@@ -67,8 +67,10 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
         alt = np.loadtxt(os.path.join(path, "alt", 'alt_%i.txt' % i)).T
         ref = np.loadtxt(os.path.join(path, "ref", 'ref_%i.txt' % i)).T
 
-        mf = MutationFilter(f=config["f"], omega=config["omega"], h_factor=config["h_factor"], genotype_freq=config["genotype_freq"],
-                            mut_freq=config["mut_freq"])
+        mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
+                            genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
+                            alpha_h=config["alpha_h"], beta_h=config["beta_h"],
+                        dropout_prob=config["dropout_prob"], dropout_direction_prob=config["dropout_direction_prob"])
         selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method='first_k', n_exp=n_keep, t=0.5) #  method='threshold', t=0.5,
         llh_1, llh_2 = mf.get_llh_mat(ref[:, selected], alt[:, selected], gt1, gt2)
 
@@ -97,12 +99,12 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
 
 
 n_tests = 100
-n_cells_list = [100, 500, 500]
-n_mut_list = [500, 500, 100]
+n_cells_list = [100, 100, 50]
+n_mut_list = [50, 100, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 
-generate_results = False # set to True to rerun the SCITE-RNA tree inference
+generate_results = False  # set to True to rerun the SCITE-RNA tree inference
 flipped = False # flip mutations or not
 cpp = "_cpp"
 
@@ -126,8 +128,10 @@ for s, (n_cells, n_mut) in enumerate(zip(n_cells_list, n_mut_list)):
             path = f"../data/simulated_data/{n_cells}c{n_mut}m"
             path_results = f'../data/simulated_data/{n_cells}c{n_mut}m/sciterna_tree_space_comparison{cpp}_{"_".join(space)}'
             optimal_tree_llh["_".join(space)][f"{n_cells}_{n_mut}"] = []
-            mf = MutationFilter(f=config["f"], omega=config["omega"], h_factor=config["h_factor"], genotype_freq=config["genotype_freq"],
-                            mut_freq=config["mut_freq"])
+            mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
+                            genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
+                            alpha_h=config["alpha_h"], beta_h=config["beta_h"],
+                        dropout_prob=config["dropout_prob"], dropout_direction_prob=config["dropout_direction_prob"])
             for i in tqdm(range(n_tests)):
                 sciterna_parent_vec = np.loadtxt(os.path.join(path_results, f'sciterna_parent_vec/sciterna_parent_vec_{i}.txt'), dtype=int)
                 true_parent_vec = np.loadtxt(os.path.join(path, f'parent_vec/parent_vec_{i}.txt'), dtype=int)
