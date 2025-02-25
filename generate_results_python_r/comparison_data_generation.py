@@ -13,7 +13,7 @@ sys.path.append('../')
 
 from src_python.data_generator import DataGenerator
 from src_python.mutation_tree import MutationTree
-from src_python.mutation_filter import MutationFilter
+from src_python.noise_mutation_filter import MutationFilter
 from src_python.swap_optimizer import SwapOptimizer
 
 with open('../config/config.yaml', 'r') as file:
@@ -24,16 +24,16 @@ np.random.seed(seed)
 def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./comparison_data/', seed=None, n_clones= None):
     if seed is not None:
         np.random.seed(seed)
-    if os.path.exists(path):
-        while True:
-            ans = input(f'Directory {path} already exists. Existing files will be overwritten. Continue? [Y/N] ')
-            match ans:
-                case 'Y' | 'y' | 'Yes' | 'yes':
-                    break
-                case 'N' | 'n' | 'No' | 'no':
-                    return
-    else:
-        os.makedirs(path)
+    # if os.path.exists(path):
+    #     while True:
+    #         ans = input(f'Directory {path} already exists. Existing files will be overwritten. Continue? [Y/N] ')
+    #         match ans:
+    #             case 'Y' | 'y' | 'Yes' | 'yes':
+    #                 break
+    #             case 'N' | 'n' | 'No' | 'no':
+    #                 return
+    # else:
+    #     os.makedirs(path)
 
     os.makedirs(os.path.join(path, "ref"), exist_ok=True)
     os.makedirs(os.path.join(path, "alt"), exist_ok=True)
@@ -111,8 +111,10 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
         alt = np.loadtxt(os.path.join(path, "alt", 'alt_%i.txt' % i)).T
         ref = np.loadtxt(os.path.join(path, "ref", 'ref_%i.txt' % i)).T
 
-        mf = MutationFilter(f=config["f"], omega=config["omega"], h_factor=config["h_factor"], genotype_freq=config["genotype_freq"],
-                            mut_freq=config["mut_freq"])
+        mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
+                            genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
+                            alpha_h=config["alpha_h"], beta_h=config["beta_h"],
+                        dropout_prob=config["dropout_prob"], dropout_direction_prob=config["dropout_direction_prob"])
         selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method='first_k', n_exp=n_keep, t=0.5) #  method='threshold', t=0.5,
         llh_1, llh_2 = mf.get_llh_mat(ref[:, selected], alt[:, selected], gt1, gt2)
 
@@ -142,9 +144,11 @@ def generate_sciterna_results(path='./comparison_data/', n_tests=100, pathout=".
 
 if __name__ == '__main__':
     n_tests = 100
-    n_cells_list =  [500, 100, 500]
-    n_mut_list =  [100, 500, 500]
-    clones =  [""] # [5, 10, 20, ""]
+    #[500, 100, 500]
+    #[100, 500, 500]
+    n_cells_list = [100, 100, 50]
+    n_mut_list = [50, 100, 100]
+    clones = [""]  # [5, 10, 20, ""]
     flipped = False
 
     for clone in clones:

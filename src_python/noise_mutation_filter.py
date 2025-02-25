@@ -8,6 +8,7 @@ from numba import njit
 import math
 import yaml
 from scipy.special import loggamma, logsumexp
+from scipy.optimize import minimize_scalar, minimize
 
 with open('../config/config.yaml', 'r') as file:
     config = yaml.safe_load(file)
@@ -285,6 +286,7 @@ class MutationFilter:
         # '''
 
         # f_R_est, f_H_est, f_A_est = self.em_algorithm_genotypes(ref, alt)
+        # print(f_R_est, f_H_est, f_A_est)
 
         llh_RH = self.k_mut_llh(ref, alt, 'R', 'H')
         llh_HA = self.k_mut_llh(ref, alt, 'H', 'A')
@@ -400,3 +402,224 @@ class MutationFilter:
                 llh_mat_2[i, j] = self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt2[j])
 
         return llh_mat_1, llh_mat_2
+
+
+    # def fit_parameters(self, ref, alt, inferred_genotypes, initial_params=None,
+    #                                     max_iterations=100,
+    #                                     tolerance=1e-5,
+    #                                     damping_factor=0.5):
+    #     """
+    #         Fit dropout probability, dropout direction probability, overdispersion, error rate,
+    #         and heterozygous-specific alpha and beta using coordinate descent with damping.
+    #         """
+    #
+    #     def optimize_param(param_idx, params, k_obs, N_obs, genotypes, bounds=None):
+    #         """Optimize a single parameter while keeping others fixed."""
+    #
+    #         def objective(param_value):
+    #             new_params = params.copy()
+    #             new_params[param_idx] = param_value
+    #             return self.total_log_likelihood(new_params, k_obs, N_obs, genotypes)
+    #
+    #         if bounds is None:
+    #             bounds = [
+    #                 (0.01, 0.99),  # dropout_prob
+    #                 (0.01, 0.99),  # dropout_direction_prob
+    #                 (0.1, 100),  # overdispersion
+    #                 (0.001, 0.1),  # error_rate
+    #                 (0.1, 50),  # alpha_h for heterozygous
+    #                 (0.1, 50)  # beta_h for heterozygous
+    #             ]
+    #
+    #         result = minimize_scalar(objective, bounds=bounds[param_idx], method="bounded")
+    #
+    #         if result.success:
+    #             return result.x
+    #         else:
+    #             raise RuntimeError(f"Optimization failed for parameter {param_idx}")
+    #
+    #     total = ref + alt
+    #
+    #     # Initialization
+    #     if initial_params is None:
+    #         initial_params = [0.1, 0.5, 5, 0.01, 2, 2]
+    #     params = np.array(initial_params)
+    #     param_names = ["dropout_prob", "dropout_direction_prob", "overdispersion", "error_rate", "alpha_h", "beta_h"]
+    #
+    #     prev_log_likelihood = None
+    #     for iteration in range(max_iterations):
+    #         prev_params = params.copy()
+    #         for param_idx, param_name in enumerate(param_names):
+    #             # Optimize one parameter at a time to make it faster
+    #             optimized_param = optimize_param(param_idx, params, alt, total, inferred_genotypes)
+    #
+    #             # Apply damped update to parameter
+    #             params[param_idx] = (1 - damping_factor) * params[param_idx] + damping_factor * optimized_param
+    #
+    #         # Check convergence
+    #         log_likelihood = -self.total_log_likelihood(params, alt, total, inferred_genotypes)
+    #         # print(f"Iteration {iteration + 1}, Log Likelihood: {log_likelihood}")
+    #         if prev_log_likelihood is not None and abs(log_likelihood - prev_log_likelihood) < tolerance:
+    #             print(f"Converged after {iteration + 1} iterations")
+    #             break
+    #         prev_log_likelihood = log_likelihood
+    #
+    #         # Check if parameters are changing significantly
+    #         max_change = np.max(np.abs(params - prev_params))
+    #         if max_change < tolerance:
+    #             print(f"Parameters stabilized after {iteration + 1} iterations")
+    #             break
+    #     else:
+    #         print("Reached max iterations without convergence")
+    #     return params
+
+
+    def total_log_likelihood(self, params, k_obs, N_obs, genotypes):
+        """
+        Computes the total log-likelihood of the observations for the given parameters and genotypes.
+        """
+        dropout_prob, dropout_direction_prob, overdispersion, error_rate, alpha_h, beta_h = params
+        log_likelihood = 0
+
+        for k, n, genotype in zip(k_obs, N_obs, genotypes):
+            if genotype == "R":
+                alpha_R = (error_rate) * overdispersion
+                beta_R = overdispersion - alpha_R
+                log_likelihood += np.log(betabinom_pmf(k, n, alpha_R, beta_R))
+
+            elif genotype == "H":
+
+                log_no_dropout = np.log(1 - dropout_prob) + np.log(betabinom_pmf(k, n, alpha_h, beta_h))
+
+                # Dropout to "R"
+                alpha_R = error_rate * overdispersion
+                beta_R = overdispersion - alpha_R
+                log_dropout_R = np.log(dropout_prob) + np.log(1 - dropout_direction_prob) + \
+                                np.log(betabinom_pmf(k, n, alpha_R, beta_R))
+
+                # Dropout to "A"
+                alpha_A = (1 - error_rate) * overdispersion
+                beta_A = overdispersion - alpha_A
+                log_dropout_A = np.log(dropout_prob) + np.log(dropout_direction_prob) + \
+                                np.log(betabinom_pmf(k, n, alpha_A, beta_A))
+
+                # Combine probabilities
+                log_likelihood += logsumexp([log_no_dropout, log_dropout_R, log_dropout_A])
+
+            elif genotype == "A":
+
+                alpha_A = (1 - error_rate) * overdispersion
+                beta_A = overdispersion - alpha_A
+                log_likelihood += np.log(betabinom_pmf(k, n, alpha_A, beta_A))
+
+            else:
+                raise ValueError(f"Unexpected genotype: {genotype}")
+
+        return -log_likelihood  # Negative because we're minimizing
+
+    def fit_parameters(self, ref, alt, genotypes, initial_params=None,
+                                        max_iterations=50,
+                                        tolerance=1e-5):
+        bounds = [
+            (0.01, 0.99),  # dropout_prob heterozygous
+            (0.01, 0.99),  # dropout_direction_prob heterozygous
+            (0.1, 100),  # overdispersion for homozygous
+            (0.001, 0.1),  # error_rate
+            (0.1, 50),  # alpha_h for heterozygous
+            (0.1, 50)  # beta_h for heterozygous
+        ]
+
+        total = alt + ref
+        ind_nonzero = np.where(total != 0)[0]
+        vaf = alt[ind_nonzero] / total[ind_nonzero]
+        alt_norm = vaf * np.mean(total[ind_nonzero]) # having a constant coverage makes it easier to fit the parameters
+        total_norm = np.ones(len(ind_nonzero)) * np.mean(total[ind_nonzero])
+        genotypes_nonzero = genotypes[ind_nonzero]
+        alt_norm = alt[ind_nonzero]
+        total_norm = total[ind_nonzero]
+
+        def objective(params):
+            return self.total_log_likelihood(params, alt_norm, total_norm, genotypes_nonzero)
+
+        # indices = np.where(genotypes == "H")[0]
+        # if len(indices) != 0:
+        #     plt.title("Heterozygous SNVs")
+        #     plt.hist((alt / (alt + ref))[indices], bins=50)
+        #     plt.show()
+        #
+        # indices = np.where(genotypes == "R")[0]
+        #
+        # if len(indices) != 0:
+        #     plt.title("Reference SNVs")
+        #     plt.hist((alt / (alt + ref))[indices], bins=50)
+        #     plt.show()
+        #
+        # indices = np.where(genotypes == "A")[0]
+        # if len(indices) != 0:
+        #     plt.title("Alternative SNVs")
+        #     plt.hist((alt / (alt + ref))[indices], bins=50)
+        #     plt.show()
+
+        result = minimize(
+            objective,
+            initial_params,
+            method="L-BFGS-B",  # Gradient-based, bounded optimization
+            bounds=bounds,
+            options={"maxiter": max_iterations, "ftol": tolerance}
+        )
+
+        if not result.success:
+            print(f"Optimization failed: {result.message}")
+
+        return result.x
+
+    def update_parameters(self, ref, alt, inferred_genotypes):
+        dropout_probs, dropout_direction_probs, overdispersions, error_rates, alpha_hs, beta_hs = [], [], [], [], [], []
+
+        all_ref_counts = ref.flatten()
+        all_alt_counts = alt.flatten()
+        all_genotypes = inferred_genotypes.flatten()
+
+        # Fit only error_rate and overdispersion using all SNVs
+        global_params = self.fit_parameters(
+            all_ref_counts, all_alt_counts, all_genotypes,
+            initial_params=[0.5, 0.5, 0.5, 0.5, 0.5, 0.5] #[0.2, 0.5, 10, 0.05, 2, 2]  # Initial values dropout_probs, dropout_direction_probs, overdispersions, error_rates, alpha_hs, beta_hs
+        )
+
+        print(f"Global parameters: {global_params}")
+        # _, _, global_overdispersion, global_error_rate, _, _ = global_params
+        dropout_probs, dropout_direction_probs, overdispersions, error_rates, alpha_hs, beta_hs = global_params
+
+
+        # for snv in range(len(inferred_genotypes[:, 0])):
+            # indices = np.where(inferred_genotypes[:, snv] == "H")[0]
+            # if len(indices) != 0:
+            #     plt.title("Heterozygous SNVs")
+            #     plt.hist((alt[:, snv] / (alt[:, snv] + ref[:, snv]))[indices], bins=50)
+            #     plt.show()
+            #
+            # indices = np.where(inferred_genotypes[:, snv] == "R")[0]
+            #
+            # if len(indices) != 0:
+            #     plt.title("Reference SNVs")
+            #     plt.hist((alt[:, snv] / (alt[:, snv] + ref[:, snv]))[indices], bins=50)
+            #     plt.show()
+            #
+            # indices = np.where(inferred_genotypes[:, snv] == "A")[0]
+            # if len(indices) != 0:
+            #     plt.title("Alternative SNVs")
+            #     plt.hist((alt[:, snv] / (alt[:, snv] + ref[:, snv]))[indices], bins=50)
+            #     plt.show()
+
+            # fitted_params = self.fit_parameters(ref[:, snv], alt[:, snv], inferred_genotypes[:, snv])
+            # dropout_prob, dropout_direction_prob, overdispersion, error_rate, alpha_h, beta_h = fitted_params
+            # dropout_probs.append(dropout_prob)
+            # dropout_direction_probs.append(dropout_direction_prob)
+            # overdispersions.append(overdispersion)
+            # error_rates.append(error_rate)
+            # alpha_hs.append(alpha_h)
+            # beta_hs.append(beta_h)
+            # print(dropout_prob, dropout_direction_prob, overdispersion, error_rate, alpha_h, beta_h)
+
+        return dropout_probs, dropout_direction_probs, overdispersions, error_rates, alpha_hs, beta_hs
+

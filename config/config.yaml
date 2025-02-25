@@ -1,5 +1,5 @@
 error_rate: 0.05 # expected variant allele frequency for the homozygous alternative genotype
-overdispersion: 100 # overdispersion reflecting the uncertainty of f for the homozygous case
+overdispersion: 10 # overdispersion reflecting the uncertainty of f for the homozygous case
 alpha_h: 2
 beta_h: 2
 dropout_prob: 0.2
@@ -10,3 +10,6 @@ genotype_freq: # prior of the genotype frequencies
   A: 0.25
 mut_freq: 0.5 # prior of frequency of mutated loci during the mutation selection step
 random_seed: 0
+f: 0.95 # expected variant allele frequency for the homozygous alternative genotype
+omega: 100 # overdispersion reflecting the uncertainty of f for the homozygous case
+h_factor: 0.5 # overdispersion is reduced by this factor for the heterozygous case because of increased uncertainty

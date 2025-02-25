@@ -6,6 +6,7 @@ This script is used to generate simulated read counts, ground truth genotypes an
 import numpy as np
 import yaml
 from scipy.stats import poisson, geom, nbinom
+import matplotlib.pyplot as plt
 
 from .cell_tree import CellTree
 from .mutation_tree import MutationTree
@@ -101,7 +102,7 @@ class DataGenerator:
             case "zinb":
                 mu, theta, pi = 60, 0.17, 0.38
                 nb_samples = nbinom.rvs(theta, theta / (theta + mu), size=(self.n_cells, self.n_mut))
-                zero_inflation_mask = np.random.rand((self.n_cells, self.n_mut)) < pi
+                zero_inflation_mask = np.random.rand(self.n_cells, self.n_mut) < pi
                 self.coverage = np.where(zero_inflation_mask, 0, nb_samples)
             case 'sample':
                 self.coverage = np.random.choice(self.coverage_sample, size=(self.n_cells, self.n_mut), replace=True)
@@ -114,12 +115,17 @@ class DataGenerator:
         elif genotype == 'A':
             n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)
         elif genotype == 'H':
-            n_alt = (1 - self.dropout_prob) * betabinom_rvs(coverage, self.alpha_H, self.beta_H)
-            n_alt += self.dropout_prob * (1 - self.dropout_direction_prob) * \
-                     betabinom_rvs(coverage, self.alpha_R, self.beta_R)
+            dropout_occurs = np.random.rand() < self.dropout_prob
 
-            n_alt += self.dropout_prob * self.dropout_direction_prob * \
-                     betabinom_rvs(coverage, self.alpha_A, self.beta_A)
+            if dropout_occurs:
+                # Determine dropout direction
+                dropout_to_A = np.random.rand() < self.dropout_direction_prob
+                if dropout_to_A:
+                    n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)  # Dropout to A
+                else:
+                    n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)  # Dropout to R
+            else:
+                n_alt = betabinom_rvs(coverage, self.alpha_H, self.beta_H)  # No dropout
 
         else:
             raise ValueError('[generate_single_read] ERROR: invalid genotype.')
@@ -149,6 +155,10 @@ class DataGenerator:
             for j in range(self.n_mut):
                 ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j])
 
+        # for ttt in range(5):
+        #     print(np.unique(self.genotype[:,ttt], return_counts=True))
+        #     plt.hist(alt[:,ttt]/(alt[:,ttt] + ref[:,ttt]), bins=100)
+        #     plt.show()
         return ref, alt
 
     def mut_indicator(self):
