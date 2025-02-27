@@ -571,6 +571,8 @@ class MutationFilter:
         if not result.success:
             print(f"Optimization failed: {result.message}")
 
+        print("optimized: ", self.total_log_likelihood(result.x, alt_norm, total_norm, genotypes_nonzero))
+        print("ground truth: ", self.total_log_likelihood([0.2, 0.5, 10, 0.05, 2, 2], alt_norm, total_norm, genotypes_nonzero))
         return result.x
 
     def update_parameters(self, ref, alt, inferred_genotypes):
@@ -583,7 +585,7 @@ class MutationFilter:
         # Fit only error_rate and overdispersion using all SNVs
         global_params = self.fit_parameters(
             all_ref_counts, all_alt_counts, all_genotypes,
-            initial_params=[0.5, 0.5, 0.5, 0.5, 0.5, 0.5] #[0.2, 0.5, 10, 0.05, 2, 2]  # Initial values dropout_probs, dropout_direction_probs, overdispersions, error_rates, alpha_hs, beta_hs
+            initial_params=[0.2, 0.5, 10, 0.05, 2, 2] #[0.2, 0.5, 10, 0.05, 2, 2]  # Initial values dropout_probs, dropout_direction_probs, overdispersions, error_rates, alpha_hs, beta_hs
         )
 
         print(f"Global parameters: {global_params}")

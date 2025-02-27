@@ -60,6 +60,7 @@ class DataGenerator:
         self.beta_A = omega - self.alpha_A
         self.alpha_H = alpha_h
         self.beta_H = beta_h
+        print(self.alpha_H, self.beta_H)
 
     def random_mut_type_params(self, mut_prop, genotype_freq):
         self.mut_prop = mut_prop
