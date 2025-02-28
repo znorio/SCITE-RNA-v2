@@ -4,6 +4,10 @@ alpha_h: 2
 beta_h: 2
 dropout_prob: 0.2
 dropout_direction_prob: 0.5
+dropout_alpha: 2
+dropout_beta: 8
+dropout_dir_alpha: 4
+dropout_dir_beta: 4
 genotype_freq: # prior of the genotype frequencies
   R: 0.25
   H: 0.50

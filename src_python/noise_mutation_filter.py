@@ -71,14 +71,18 @@ def betabinom_pmf(k, n, a, b):
 
 class MutationFilter:
     def __init__(self, error_rate=0.05, overdispersion=10, genotype_freq=None, mut_freq=0.5, alpha_h=2, beta_h=2,
-                 dropout_prob=0.2, dropout_direction_prob=0.5):
+                 dropout_alpha=2, dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4):
         if genotype_freq is None:
             genotype_freq = {'R': 1 / 4, 'H': 1 / 2, 'A': 1 / 4}
         self.genotype_freq = genotype_freq
         self.set_betabinom(error_rate, overdispersion, alpha_h, beta_h)
         self.set_mut_type_prior(genotype_freq, mut_freq)
-        self.dropout_prob = dropout_prob
-        self.dropout_direction_prob = dropout_direction_prob
+        self.dropout_prob = dropout_alpha/(dropout_alpha + dropout_beta)
+        self.dropout_direction_prob = dropout_dir_alpha/(dropout_dir_alpha + dropout_dir_beta)
+        # self.dropout_alpha = dropout_alpha
+        # self.dropout_beta = dropout_beta
+        # self.dropout_dir_alpha = dropout_dir_alpha
+        # self.dropout_dir_beta = dropout_dir_beta
 
     def set_betabinom(self, f, omega, alpha_h, beta_h):
         '''
