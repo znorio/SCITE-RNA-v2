@@ -30,7 +30,9 @@ class DataGenerator:
     def __init__(self, n_cells, n_mut,
                  mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
                  alpha_h=2, beta_h=2, dropout_prob=0.2, dropout_direction_prob=0.5,
-                 coverage_method='zinb', coverage_mean=60, coverage_sample=None):
+                 coverage_method='zinb', coverage_mean=60, coverage_sample=None, dropout_alpha=2,
+                 dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4):  # samples the dropout rate
+
         self.ct = CellTree(n_cells, n_mut)
         self.mt = MutationTree(n_mut, n_cells)
         self.random_mut_type_params(mut_prop, genotype_freq)
@@ -39,6 +41,10 @@ class DataGenerator:
         self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
         self.dropout_prob = dropout_prob
         self.dropout_direction_prob = dropout_direction_prob
+        self.dropout_alpha = dropout_alpha
+        self.dropout_beta = dropout_beta
+        self.dropout_dir_alpha = dropout_dir_alpha
+        self.dropout_dir_beta = dropout_dir_beta
 
     @property
     def n_cells(self):
@@ -60,7 +66,6 @@ class DataGenerator:
         self.beta_A = omega - self.alpha_A
         self.alpha_H = alpha_h
         self.beta_H = beta_h
-        print(self.alpha_H, self.beta_H)
 
     def random_mut_type_params(self, mut_prop, genotype_freq):
         self.mut_prop = mut_prop
@@ -110,24 +115,24 @@ class DataGenerator:
             case _:
                 raise ValueError('Invalid coverage sampling method.')
 
-    def generate_single_read(self, genotype, coverage):
+    def generate_single_read(self, genotype, coverage, dropout_prob, dropout_direction):
         if genotype == 'R':
             n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
         elif genotype == 'A':
             n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)
         elif genotype == 'H':
-            dropout_occurs = np.random.rand() < self.dropout_prob
+            # Determine if dropout occurs
+            dropout_occurs = np.random.rand() < dropout_prob
 
             if dropout_occurs:
-                # Determine dropout direction
-                dropout_to_A = np.random.rand() < self.dropout_direction_prob
+                # Determine dropout direction based on sampled probabilities
+                dropout_to_A = np.random.rand() < dropout_direction
                 if dropout_to_A:
                     n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)  # Dropout to A
                 else:
                     n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)  # Dropout to R
             else:
                 n_alt = betabinom_rvs(coverage, self.alpha_H, self.beta_H)  # No dropout
-
         else:
             raise ValueError('[generate_single_read] ERROR: invalid genotype.')
 
@@ -152,15 +157,28 @@ class DataGenerator:
         # actual reads
         ref = np.empty((self.n_cells, self.n_mut), dtype=int)
         alt = np.empty((self.n_cells, self.n_mut), dtype=int)
-        for i in range(self.n_cells):
-            for j in range(self.n_mut):
-                ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j])
+
+        all_dropout_probs = []
+        all_dropout_directions = []
+
+
+        for j in range(self.n_mut):
+            # Sample dropout probabilities from beta distributions for each SNV
+            dropout_prob = np.random.beta(self.dropout_alpha, self.dropout_beta)  # samples the dropout rate
+            dropout_direction = np.random.beta(self.dropout_dir_alpha,
+                                               self.dropout_dir_beta)  # samples how imbalanced the dropout is between the alleles
+
+            all_dropout_probs.append(dropout_prob)
+            all_dropout_directions.append(dropout_direction)
+
+            for i in range(self.n_cells):
+                ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j], dropout_prob, dropout_direction)
 
         # for ttt in range(5):
         #     print(np.unique(self.genotype[:,ttt], return_counts=True))
         #     plt.hist(alt[:,ttt]/(alt[:,ttt] + ref[:,ttt]), bins=100)
         #     plt.show()
-        return ref, alt
+        return ref, alt, all_dropout_probs, all_dropout_directions
 
     def mut_indicator(self):
         ''' Return a 2D Boolean array in which [i,j] indicates whether cell i is affected by mutation j '''
