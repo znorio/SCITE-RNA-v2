@@ -42,11 +42,13 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
     os.makedirs(os.path.join(path, "genotype"), exist_ok=True)
     os.makedirs(os.path.join(path, "dropout_probs"), exist_ok=True)
     os.makedirs(os.path.join(path, "dropout_directions"), exist_ok=True)
+    os.makedirs(os.path.join(path, "alphas_H"), exist_ok=True)
+    os.makedirs(os.path.join(path, "betas_H"), exist_ok=True)
     
     generator = DataGenerator(n_cells, n_mut)
     
     for i in tqdm(range(size)):
-        ref, alt, dropout_probs, dropout_directions = generator.generate_reads(new_tree=True, new_mut_type=True, num_clones=n_clones)
+        ref, alt, dropout_probs, dropout_directions, alphas_H, betas_H = generator.generate_reads(new_tree=True, new_mut_type=True, num_clones=n_clones)
 
         mut_indicator = np.zeros((n_cells, n_mut), dtype=bool)
         for j in range(generator.n_mut):
@@ -65,6 +67,9 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
         np.savetxt(os.path.join(path, f'genotype/genotype_{i}.txt'), generator.genotype.T, fmt='%s')
         np.savetxt(os.path.join(path, f'dropout_probs/dropout_probs_{i}.txt'), dropout_probs)
         np.savetxt(os.path.join(path, f'dropout_directions/dropout_directions_{i}.txt'), dropout_directions)
+        np.savetxt(os.path.join(path, f'alphas_H/alphas_H_{i}.txt'), alphas_H)
+        np.savetxt(os.path.join(path, f'betas_H/betas_H_{i}.txt'), betas_H)
+
 
 def create_genotype_matrix(not_selected_genotypes, selected, gt1, gt2, mutation_matrix, flipped):
     n_cells = mutation_matrix.shape[1]
