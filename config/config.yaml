@@ -1,20 +1,15 @@
 error_rate: 0.05 # expected variant allele frequency for the homozygous alternative genotype
 overdispersion: 10 # overdispersion reflecting the uncertainty of f for the homozygous case
-alpha_h: 2
-beta_h: 2
-overdispersion_h: 5
-dropout_prob: 0.2
-dropout_direction_prob: 0.5
-dropout_alpha: 2
+overdispersion_h: 6 # overdispersion reflecting the uncertainty of the read counts in the heterozygous case
+dropout_prob: 0.2 # mean dropout probability
+dropout_direction_prob: 0.5 # mean dropout direction probability. Larger values favor dropout towards the alternative allele
+dropout_alpha: 2 # the dropout parameters are drawn from a beta distribution with these parameters
 dropout_beta: 8
-dropout_dir_alpha: 4
+dropout_dir_alpha: 4 # the dropout direction parameters are drawn from a beta distribution with these parameters
 dropout_dir_beta: 4
 genotype_freq: # prior of the genotype frequencies
   R: 0.25
   H: 0.50
   A: 0.25
 mut_freq: 0.5 # prior of frequency of mutated loci during the mutation selection step
-random_seed: 0
-f: 0.95 # expected variant allele frequency for the homozygous alternative genotype
-omega: 100 # overdispersion reflecting the uncertainty of f for the homozygous case
-h_factor: 0.5 # overdispersion is reduced by this factor for the heterozygous case because of increased uncertainty
+random_seed: 0 # random seed for reproducibility
