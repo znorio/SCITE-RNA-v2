@@ -2,6 +2,7 @@ error_rate: 0.05 # expected variant allele frequency for the homozygous alternat
 overdispersion: 10 # overdispersion reflecting the uncertainty of f for the homozygous case
 alpha_h: 2
 beta_h: 2
+overdispersion_h: 5
 dropout_prob: 0.2
 dropout_direction_prob: 0.5
 dropout_alpha: 2

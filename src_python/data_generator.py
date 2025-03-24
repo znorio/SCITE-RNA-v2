@@ -5,7 +5,7 @@ This script is used to generate simulated read counts, ground truth genotypes an
 # from numba import njit # problem with random seed
 import numpy as np
 import yaml
-from scipy.stats import poisson, geom, nbinom
+from scipy.stats import poisson, geom, nbinom, gamma, beta
 import matplotlib.pyplot as plt
 
 from .cell_tree import CellTree
@@ -31,7 +31,7 @@ class DataGenerator:
                  mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
                  alpha_h=2, beta_h=2, dropout_prob=0.2, dropout_direction_prob=0.5,
                  coverage_method='zinb', coverage_mean=60, coverage_sample=None, dropout_alpha=2,
-                 dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4):  # samples the dropout rate
+                 dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4, overdispersion_h=6):
 
         self.ct = CellTree(n_cells, n_mut)
         self.mt = MutationTree(n_mut, n_cells)
@@ -39,12 +39,13 @@ class DataGenerator:
         self.random_coverage_params(coverage_method, coverage_mean, coverage_sample)
         self.betabinom_params(error_rate, overdispersion, alpha_h, beta_h)
         self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
-        self.dropout_prob = dropout_prob
-        self.dropout_direction_prob = dropout_direction_prob
+        # self.dropout_prob = dropout_prob
+        # self.dropout_direction_prob = dropout_direction_prob
         self.dropout_alpha = dropout_alpha
         self.dropout_beta = dropout_beta
         self.dropout_dir_alpha = dropout_dir_alpha
         self.dropout_dir_beta = dropout_dir_beta
+        self.overdispersion_h = overdispersion_h
 
     @property
     def n_cells(self):
@@ -115,7 +116,7 @@ class DataGenerator:
             case _:
                 raise ValueError('Invalid coverage sampling method.')
 
-    def generate_single_read(self, genotype, coverage, dropout_prob, dropout_direction):
+    def generate_single_read(self, genotype, coverage, dropout_prob, dropout_direction, alpha_H, beta_H):
         if genotype == 'R':
             n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
         elif genotype == 'A':
@@ -132,7 +133,7 @@ class DataGenerator:
                 else:
                     n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)  # Dropout to R
             else:
-                n_alt = betabinom_rvs(coverage, self.alpha_H, self.beta_H)  # No dropout
+                n_alt = betabinom_rvs(coverage, alpha_H, beta_H)  # No dropout
         else:
             raise ValueError('[generate_single_read] ERROR: invalid genotype.')
 
@@ -160,6 +161,8 @@ class DataGenerator:
 
         all_dropout_probs = []
         all_dropout_directions = []
+        all_alphas = []
+        all_betas = []
 
 
         for j in range(self.n_mut):
@@ -171,14 +174,35 @@ class DataGenerator:
             all_dropout_probs.append(dropout_prob)
             all_dropout_directions.append(dropout_direction)
 
+            # sample shape of the beta distribution for the heterozygous case from gamma distributions
+            min_value = 2.5  # Shift
+            shape = 2  # Shape parameter (k), adjust if needed
+
+            scale = (self.overdispersion_h - min_value) / shape  # θ = (mean - shift) / k
+
+            overdispersion_H = gamma.rvs(shape, loc=min_value, scale=scale)
+
+            alpha_H = 0.5 * overdispersion_H
+            beta_H = overdispersion_H - alpha_H
+
+            # scale_alpha = (self.alpha_H - shift) / (shape - 1) this fixes the max prob to self.alpha_H
+            # scale_alpha = (self.alpha_H - shift) / shape # mean prob = self.alpha_H
+            # alpha_H = gamma.rvs(shape, loc=shift, scale=scale_alpha)
+            # # scale_beta = (self.beta_H - shift) / (shape - 1)
+            # scale_beta = (self.beta_H - shift) / shape  # mean prob = self.beta_H
+            # beta_H = gamma.rvs(shape, loc=shift, scale=scale_beta)
+            all_alphas.append(alpha_H)
+            all_betas.append(beta_H)
+
             for i in range(self.n_cells):
-                ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j], dropout_prob, dropout_direction)
+                ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j],
+                                                            dropout_prob, dropout_direction, alpha_H, beta_H)
 
         # for ttt in range(5):
         #     print(np.unique(self.genotype[:,ttt], return_counts=True))
         #     plt.hist(alt[:,ttt]/(alt[:,ttt] + ref[:,ttt]), bins=100)
         #     plt.show()
-        return ref, alt, all_dropout_probs, all_dropout_directions
+        return ref, alt, all_dropout_probs, all_dropout_directions, all_alphas, all_betas
 
     def mut_indicator(self):
         ''' Return a 2D Boolean array in which [i,j] indicates whether cell i is affected by mutation j '''
