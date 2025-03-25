@@ -5,15 +5,12 @@ Defines the cell lineage tree and how it is optimized.
 import numpy as np
 import graphviz
 import warnings
-import yaml
 
-from .tree_base import PruneTree
+from src_python.tree_base import PruneTree
+from src_python.utils import load_config_and_set_random_seed
 
-with open('../config/config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
+config = load_config_and_set_random_seed()
 
-seed = config["random_seed"]
-np.random.seed(seed)
 
 class CellTree(PruneTree):
     def __init__(self, n_cells=3, n_mut=0, reversible_mut=False):

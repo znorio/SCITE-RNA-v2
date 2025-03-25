@@ -10,12 +10,11 @@ import yaml
 from scipy.special import loggamma, logsumexp
 from scipy.optimize import minimize_scalar, minimize, differential_evolution
 from scipy.stats import gamma, beta, lognorm
+import os
 
-with open('../config/config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
+from src_python.utils import load_config_and_set_random_seed
 
-seed = config["random_seed"]
-np.random.seed(seed)
+config = load_config_and_set_random_seed()
 
 
 @njit
@@ -574,15 +573,11 @@ class MutationFilter:
 
         print(f"Global parameters: {global_params}")
 
-        dropout_probs, dropout_direction_probs, overdispersions, error_rates, overdispersion_hs = global_params
-
-        alpha_hs = 0.5 * overdispersion_hs
-        beta_hs = overdispersion_hs - alpha_hs
+        dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h = global_params
 
         individual_dropout_probs = []
         individual_dropout_direction_probs = []
-        individual_alphas_h = []
-        individual_betas_h = []
+        individual_overdispersions_h = []
 
         for snv in range(len(inferred_genotypes[0])):
             indices = np.where(inferred_genotypes[:, snv] == "H")[0]
@@ -619,7 +614,7 @@ class MutationFilter:
 
             if len(total_reads) > 5:
                 individual_params = self.fit_parameters_individual(
-                    alt_het, total_reads, overdispersions, error_rates,
+                    alt_het, total_reads, overdispersion, error_rate,
                     initial_params=[0.2, 0.5, 6]
                     # Initial values dropout_probs, dropout_direction_probs, overdispersions_hs
                 )
@@ -630,12 +625,7 @@ class MutationFilter:
 
             individual_dropout_probs.append(posterior_dropout_prob)
             individual_dropout_direction_probs.append(posterior_dropout_direction_prob)
+            individual_overdispersions_h.append(posterior_overdispersion_hs)
 
-            posterior_alpha_hs = posterior_overdispersion_hs * 0.5
-            posterior_beta_hs = posterior_overdispersion_hs - posterior_alpha_hs
-
-            individual_alphas_h.append(posterior_alpha_hs)
-            individual_betas_h.append(posterior_beta_hs)
-
-        return dropout_probs, dropout_direction_probs, overdispersions, error_rates, alpha_hs, beta_hs, \
-            individual_dropout_probs, individual_dropout_direction_probs, individual_alphas_h, individual_betas_h
+        return dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h, \
+            individual_dropout_probs, individual_dropout_direction_probs, individual_overdispersions_h

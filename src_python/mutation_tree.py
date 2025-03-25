@@ -5,22 +5,19 @@ Defines the mutation tree and how it is optimized.
 import numpy as np
 import graphviz
 import warnings
-import yaml
 
-from .tree_base import PruneTree
+from src_python.tree_base import PruneTree
+from src_python.utils import load_config_and_set_random_seed
 
-with open('../config/config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
+config = load_config_and_set_random_seed()
 
-seed = config["random_seed"]
-np.random.seed(seed)
 
 class MutationTree(PruneTree):
     def __init__(self, n_mut=2, n_cells=0):
         if n_mut < 2:
             warnings.warn('Mutation tree too small, nothing to explore.', RuntimeWarning)
-        
-        super().__init__(n_mut+1)
+
+        super().__init__(n_mut + 1)
         self.n_mut = n_mut
         self.n_cells = n_cells
 
@@ -34,16 +31,13 @@ class MutationTree(PruneTree):
         #     18, 10, 37, 36, 31, -1
         # ])
 
-    
     @property
     def wt(self):
         return self.n_mut
 
-
     @property
     def n_cells(self):
         return len(self.cell_loc)
-
 
     @n_cells.setter
     def n_cells(self, n_cells):
@@ -71,6 +65,7 @@ class MutationTree(PruneTree):
             potential_branch_points.append(chosen_muts[-1])
 
         self.cell_loc = [np.random.choice(potential_branch_points) for _ in range(self.n_cells)]
+
     def random_mutation_tree(self):
         # Randomly choose one mutation to have self.wt as its parent
         root_assigned = np.random.randint(0, self.n_mut - 1)
@@ -83,7 +78,7 @@ class MutationTree(PruneTree):
 
             # Assign a random parent from the set of already assigned mutations or self.wt
             potential_parents = [i for i in range(self.n_mut) if i != vtx and self._pvec[i] != -1]
-            parent = np.random.choice(potential_parents+[self.wt])
+            parent = np.random.choice(potential_parents + [self.wt])
             self.assign_parent(vtx, parent)
 
     def fit_llh(self, llh_1, llh_2):
@@ -95,7 +90,7 @@ class MutationTree(PruneTree):
             llh1: 2D array in which entry [i,j] is the log-likelihood of cell i having gt1 at locus j
             llh2: 2D array in which entry [i,j] is the log-likelihood of cell i having gt2 at locus j
         '''
-        assert(llh_1.shape == llh_2.shape)
+        assert (llh_1.shape == llh_2.shape)
 
         if llh_1.shape[1] != self.n_mut:
             self.__init__(llh_1.shape[1], llh_1.shape[0])
@@ -104,7 +99,7 @@ class MutationTree(PruneTree):
 
         self.llr = np.empty((self.n_cells, self.n_vtx))
         self.llr[:, :self.n_mut] = llh_2 - llh_1
-        self.llr[:,self.n_mut] = 0 # stands for wildtype
+        self.llr[:, self.n_mut] = 0  # stands for wildtype
         self.cumul_llr = np.empty_like(self.llr)
 
         # joint likelihood of each locus when all cells have genotype 1 or 2
@@ -112,29 +107,28 @@ class MutationTree(PruneTree):
         self.loc_joint_2 = llh_2.sum(axis=0)
 
         self.update_all()
-    
 
     def fit_cell_tree(self, ct):
-        assert(self.n_mut == ct.n_mut)
-        assert(len(ct.roots) == 1)
+        assert (self.n_mut == ct.n_mut)
+        assert (len(ct.roots) == 1)
 
-        mrm = np.empty(ct.n_vtx+1, dtype=int) # mrm for "most recent mutation"
-        mrm[-1] = self.wt # put wildtype at sentinel
-        
+        mrm = np.empty(ct.n_vtx + 1, dtype=int)  # mrm for "most recent mutation"
+        mrm[-1] = self.wt  # put wildtype at sentinel
+
         for cvtx in ct.dfs_experimental(ct.main_root):  # cvtx for "cell vertex"
-            mut_list = np.where(ct.mut_loc == cvtx)[0] # mutations attached to the edge above cvtx
+            mut_list = np.where(ct.mut_loc == cvtx)[0]  # mutations attached to the edge above cvtx
             parent_mut = mrm[ct.parent(cvtx)]
             if mut_list.size > 0:
-                np.random.shuffle(mut_list) # randomize the order of mutations at the same edge
+                np.random.shuffle(mut_list)  # randomize the order of mutations at the same edge
                 np.sort(mut_list)
-                self.assign_parent(mut_list[0], parent_mut) # assigns the first mutation to the parent_mut
-                for mut1, mut2 in zip(mut_list, mut_list[1:]): 
+                self.assign_parent(mut_list[0], parent_mut)  # assigns the first mutation to the parent_mut
+                for mut1, mut2 in zip(mut_list, mut_list[1:]):
                     self.assign_parent(mut2, mut1)
 
                 mrm[cvtx] = mut_list[-1]
-            else: 
+            else:
                 mrm[cvtx] = mrm[ct.parent(cvtx)]
-        
+
         self.flipped[:-1] = ct.flipped
 
     def update_cumul_llr(self):
@@ -144,11 +138,12 @@ class MutationTree(PruneTree):
                 if self.isroot(vtx):
                     self.cumul_llr[:, vtx] = llr_summand
                 else:
-                    self.cumul_llr[:,vtx] = self.cumul_llr[:, self.parent(vtx)] + llr_summand
+                    self.cumul_llr[:, vtx] = self.cumul_llr[:, self.parent(vtx)] + llr_summand
 
     def update_cell_loc(self):
         self.cell_loc = self.cumul_llr.argmax(axis=1)
-        wt_llh = np.where(self.flipped[:-1], self.loc_joint_2, self.loc_joint_1).sum() # as filpped isn't updated this could be made a constant
+        wt_llh = np.where(self.flipped[:-1], self.loc_joint_2,
+                          self.loc_joint_1).sum()  # as filpped isn't updated this could be made a constant
         self.joint = self.cumul_llr.max(axis=1).sum() + wt_llh
 
     def update_all(self):
@@ -173,7 +168,7 @@ class MutationTree(PruneTree):
             best_locs = []
             for vtx in self.dfs_experimental(self.main_root):
                 # calculate the llr of the tree with reattached subtree at the vtx
-                total_llr = np.maximum(main_tree_max, subtree_max + self.cumul_llr[:,vtx]).sum()
+                total_llr = np.maximum(main_tree_max, subtree_max + self.cumul_llr[:, vtx]).sum()
                 if total_llr == best_llr:
                     best_locs.append(vtx)
                 if total_llr > best_llr:
@@ -229,7 +224,7 @@ class MutationTree(PruneTree):
             if best_llr_append > best_llr_insert:
                 self.assign_parent(subroot, best_loc)
             else:
-                self.insert(subroot, np.random.choice(best_inserts)) # best_child
+                self.insert(subroot, np.random.choice(best_inserts))  # best_child
 
             self.update_all()
 
@@ -237,10 +232,11 @@ class MutationTree(PruneTree):
 
         mut_random_order = list(range(self.n_mut))
         np.random.shuffle(mut_random_order)
-        if prune_single_mutations: # prune single mutations and attach/insert them at their optimal location
+        if prune_single_mutations:  # prune single mutations and attach/insert them at their optimal location
             for subroot in mut_random_order:
 
-                if len(self._clist[subroot]) > 1: # reconstructing the original subtree gets very complex if more than 1 child is appended to a parent
+                if len(self._clist[
+                           subroot]) > 1:  # reconstructing the original subtree gets very complex if more than 1 child is appended to a parent
                     continue
 
                 self.prune_node(subroot)
@@ -250,15 +246,14 @@ class MutationTree(PruneTree):
 
         np.random.shuffle(mut_random_order)
 
-        for subroot in mut_random_order: # prune subtrees and insert them at their optimal location
+        for subroot in mut_random_order:  # prune subtrees and insert them at their optimal location
             self.prune(subroot)
             self.update_all()
             self.greedy_attach()
 
-
-    def to_graphviz(self, filename=None, engine='dot'): 
+    def to_graphviz(self, filename=None, engine='dot'):
         dgraph = graphviz.Digraph(filename=filename, engine=engine)
-        
+
         dgraph.node(str(self.wt), label='wt', shape='rectangle', color='gray')
         for vtx in range(self.n_mut):
             dgraph.node(str(vtx), shape='rectangle', style='filled', color='gray')
@@ -269,10 +264,10 @@ class MutationTree(PruneTree):
             else:
                 dgraph.node(str(vtx), shape='rectangle', style='filled', color='gray')
                 dgraph.edge(str(self.parent(vtx)), str(vtx))
-        
+
         for i in range(self.n_cells):
             name = 'c' + str(i)
-            dgraph.node(name, shape = 'circle')
+            dgraph.node(name, shape='circle')
             dgraph.edge(str(self.cell_loc[i]), name)
-        
+
         return dgraph

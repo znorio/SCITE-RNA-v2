@@ -4,8 +4,12 @@ Defines the base class for all trees with some simple functions.
 
 import numpy as np
 import yaml
+import os
 
-with open('../config/config.yaml', 'r') as file:
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, "..", "config", "config.yaml")
+
+with open(config_path, 'r') as file:
     config = yaml.safe_load(file)
 
 seed = config["random_seed"]
