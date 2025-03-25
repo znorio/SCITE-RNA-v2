@@ -4,18 +4,16 @@ To optimize the trees, SCITE-RNA alternates between mutation and cell lineage tr
 
 import warnings
 import numpy as np
-import yaml
 
-from .cell_tree import CellTree
-from .mutation_tree import MutationTree
+from src_python.cell_tree import CellTree
+from src_python.mutation_tree import MutationTree
+from src_python.utils import load_config_and_set_random_seed
 
-with open('../config/config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
+config = load_config_and_set_random_seed()
 
-seed = config["random_seed"]
-np.random.seed(seed)
+
 class SwapOptimizer:
-    def __init__(self, sig_digits=10, spaces=["c", "m"], reverse_mutations=True):
+    def __init__(self, sig_digits=10, spaces=None, reverse_mutations=True):
         '''
         [Arguments]
             spaces: spaces that will be searched and the order of the search
@@ -23,6 +21,8 @@ class SwapOptimizer:
                     default is ['c','m'], i.e. start with cell tree and search both spaces
             sig_dig: number of significant digits to use when calculating joint probability
         '''
+        if spaces is None:
+            spaces = ["c", "m"]
         self.sig_digits = sig_digits
         self.spaces = spaces
         self.reverse_mutations = reverse_mutations

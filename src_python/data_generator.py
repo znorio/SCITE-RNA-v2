@@ -3,18 +3,13 @@ This script is used to generate simulated read counts, ground truth genotypes an
 """
 
 import numpy as np
-import yaml
-from scipy.stats import poisson, geom, nbinom, gamma, beta
-import matplotlib.pyplot as plt
+from scipy.stats import poisson, geom, nbinom, gamma
 
 from src_python.cell_tree import CellTree
 from src_python.mutation_tree import MutationTree
+from src_python.utils import load_config_and_set_random_seed
 
-with open('../config/config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
-
-seed = config["random_seed"]
-np.random.seed(seed)
+config = load_config_and_set_random_seed()
 
 
 def betabinom_rvs(coverage, alpha, beta_param):
@@ -26,7 +21,26 @@ def betabinom_rvs(coverage, alpha, beta_param):
 
 
 class DataGenerator:
-    mutation_types = ['RH', 'AH', 'HR', 'HA']
+    """
+    DataGenerator is a class used to generate simulated read counts, ground truth genotypes, and ground truth trees
+    for single-cell sequencing data. Mutation types are ['RH', 'AH', 'HR', 'HA']
+
+    Attributes:
+        n_cells – Number of cells.
+        n_mut – Number of mutations.
+        mut_prop – Proportion of mutations.
+        error_rate – Error rate for read counts.
+        overdispersion – Overdispersion parameter of error rate.
+        genotype_freq – Frequencies of genotypes.
+        coverage_method – Method to generate coverage values.
+        coverage_mean – Mean coverage value.
+        coverage_sample – Array of coverage values to sample from.
+        dropout_alpha – Alpha parameter of the beta distribution the dropout probability is sampled from.
+        dropout_beta – Beta parameter of the beta distribution the dropout probability is sampled from.
+        dropout_dir_alpha – Alpha parameter of the beta distribution the dropout direction probability is sampled from.
+        dropout_dir_beta – Beta parameter of the beta distribution the dropout direction probability is sampled from.
+        overdispersion_h – Overdispersion parameter for the read counts in the heterozygous case.
+    """
 
     def __init__(self, n_cells, n_mut,
                  mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
@@ -34,8 +48,8 @@ class DataGenerator:
                  dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4, overdispersion_h=6):
 
         self.coverage = None
-        self.ct = CellTree(n_cells, n_mut)
-        self.mt = MutationTree(n_mut, n_cells)
+        self.ct = CellTree(n_cells=n_cells, n_mut=n_mut)
+        self.mt = MutationTree(n_mut=n_mut, n_cells=n_cells)
 
         self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
         self.mut_prop = mut_prop
@@ -78,6 +92,13 @@ class DataGenerator:
                 self.gt2[j] = 'H'
 
     def random_tree(self, num_clones, stratified=False):
+        """
+        Generate a random tree
+
+        [Arguments]
+            num_clones: Number of clones (cells with the same genotype) in the tree.
+            stratified: If True, generate, where each clone has roughly the same number of cells.
+        """
         if stratified and num_clones != "":
             self.mt.random_mutation_clone_tree(num_clones)
             self.ct.fit_mutation_tree(self.mt)
@@ -98,19 +119,19 @@ class DataGenerator:
         """
         match self.coverage_method:
             case 'constant':
-                self.coverage = np.ones((self.n_mut, self.n_cells), dtype=int) * self.coverage_mean
+                self.coverage = np.ones((self.n_cells, self.n_mut), dtype=int) * self.coverage_mean
             case 'geometric':
-                self.coverage = geom.rvs(p=1 / (self.coverage_mean + 1), loc=-1, size=(self.n_mut, self.n_cells))
+                self.coverage = geom.rvs(p=1 / (self.coverage_mean + 1), loc=-1, size=(self.n_cells, self.n_mut))
             case 'poisson':
-                self.coverage = poisson.rvs(mu=self.coverage_mean, size=(self.n_mut, self.n_cells))
+                self.coverage = poisson.rvs(mu=self.coverage_mean, size=(self.n_cells, self.n_mut))
             # parameters 60, 0.17, 0.38 learned from mm34 scRNA seq dataset
             case "zinb":
                 mu, theta, pi = self.coverage_mean, 0.17, 0.38
-                nb_samples = nbinom.rvs(theta, theta / (theta + mu), size=(self.n_mut, self.n_cells))
-                zero_inflation_mask = np.random.rand(self.n_mut, self.n_cells) < pi
+                nb_samples = nbinom.rvs(theta, theta / (theta + mu), size=(self.n_cells, self.n_mut))
+                zero_inflation_mask = np.random.rand(self.n_cells, self.n_mut) < pi
                 self.coverage = np.where(zero_inflation_mask, 0, nb_samples)
             case 'sample':
-                self.coverage = np.random.choice(self.coverage_sample, size=(self.n_mut, self.n_cells), replace=True)
+                self.coverage = np.random.choice(self.coverage_sample, size=(self.n_cells, self.n_mut), replace=True)
             case _:
                 raise ValueError('Invalid coverage sampling method.')
 
@@ -180,20 +201,20 @@ class DataGenerator:
             self.random_coverage()
 
         # determine genotypes
-        self.genotype = np.empty((self.n_mut, self.n_cells), dtype=str)
+        self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
         mut_indicator = self.mut_indicator()
-        for i in range(self.n_mut):
-            for j in range(self.n_cells):
-                self.genotype[i, j] = self.gt2[i] if mut_indicator[i, j] else self.gt1[i]
+        for i in range(self.n_cells):
+            for j in range(self.n_mut):
+                self.genotype[i, j] = self.gt2[j] if mut_indicator[i, j] else self.gt1[j]
 
-        ref = np.empty((self.n_mut, self.n_cells), dtype=int)
-        alt = np.empty((self.n_mut, self.n_cells), dtype=int)
+        ref = np.empty((self.n_cells, self.n_mut), dtype=int)
+        alt = np.empty((self.n_cells, self.n_mut), dtype=int)
 
         all_dropout_probs = []
         all_dropout_directions = []
         all_overdispersions_h = []
 
-        for i in range(self.n_mut):
+        for j in range(self.n_mut):
             # Sample dropout probabilities from beta distributions for each SNV
             dropout_prob = np.random.beta(self.dropout_alpha, self.dropout_beta)
             dropout_direction = np.random.beta(self.dropout_dir_alpha,
@@ -211,7 +232,7 @@ class DataGenerator:
             # are assumed to be symmetric and only affect the overdispersion
             alpha_H = beta_H = 0.5 * overdispersion_H
 
-            for j in range(self.n_cells):
+            for i in range(self.n_cells):
                 ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j],
                                                                  dropout_prob, dropout_direction, alpha_H, beta_H)
 
@@ -219,8 +240,8 @@ class DataGenerator:
 
     def mut_indicator(self):
         """ Return a 2D Boolean array in which [i,j] indicates whether cell i is affected by mutation j """
-        res = np.zeros((self.n_mut, self.n_cells), dtype=bool)
-        for i in range(self.n_mut):  # determine for each mutation the cells below it in the tree
-            for j in self.ct.leaves(self.ct.mut_loc[i]):
+        res = np.zeros((self.n_cells, self.n_mut), dtype=bool)
+        for j in range(self.n_mut):  # determine for each mutation the cells below it in the tree
+            for i in self.ct.leaves(self.ct.mut_loc[j]):
                 res[i, j] = True
         return res
