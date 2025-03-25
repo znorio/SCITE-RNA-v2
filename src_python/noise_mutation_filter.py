@@ -482,7 +482,7 @@ class MutationFilter:
             (0.01, 0.99),  # dropout_direction_prob heterozygous
             (0.1, 100),  # overdispersion for homozygous
             (0.001, 0.1),  # error_rate
-            (2, 50),  # overdispersion_h for heterozygous
+            (2.5, 50),  # overdispersion_h for heterozygous
         ]
 
         total = alt + ref
@@ -540,7 +540,7 @@ class MutationFilter:
         bounds = [
             (0.01, 0.99),  # dropout_prob heterozygous
             (0.01, 0.99),  # dropout_direction_prob heterozygous
-            (2, 50),  # overdispersion_h for heterozygous
+            (2.5, 50),  # overdispersion_h for heterozygous
         ]
 
         def objective(params):

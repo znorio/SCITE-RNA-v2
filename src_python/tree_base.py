@@ -6,14 +6,9 @@ import numpy as np
 import yaml
 import os
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-config_path = os.path.join(script_dir, "..", "config", "config.yaml")
+from src_python.utils import load_config_and_set_random_seed
 
-with open(config_path, 'r') as file:
-    config = yaml.safe_load(file)
-
-seed = config["random_seed"]
-np.random.seed(seed)
+config = load_config_and_set_random_seed()
 
 class PruneTree:
     '''
