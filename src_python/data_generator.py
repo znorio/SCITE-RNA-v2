@@ -23,7 +23,7 @@ def betabinom_rvs(coverage, alpha, beta_param):
 class DataGenerator:
     """
     DataGenerator is a class used to generate simulated read counts, ground truth genotypes, and ground truth trees
-    for single-cell sequencing data. Mutation types are ['RH', 'AH', 'HR', 'HA']
+    for single-cell sequencing data. Mutation types are ["RH", "AH", "HR", "HA"]
 
     Attributes:
         n_cells – Number of cells.
@@ -44,7 +44,7 @@ class DataGenerator:
 
     def __init__(self, n_cells, n_mut,
                  mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
-                 coverage_method='zinb', coverage_mean=60, coverage_sample=None, dropout_alpha=2,
+                 coverage_method="zinb", coverage_mean=60, coverage_sample=None, dropout_alpha=2,
                  dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4, overdispersion_h=6):
 
         self.coverage = None
@@ -54,13 +54,13 @@ class DataGenerator:
         self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
         self.mut_prop = mut_prop
         self.genotype_freq = [1 / 3, 1 / 3, 1 / 3] if genotype_freq is None else genotype_freq
-        self.gt1 = np.random.choice(['R', 'H', 'A'], size=self.n_mut, replace=True, p=self.genotype_freq)
+        self.gt1 = np.random.choice(["R", "H", "A"], size=self.n_mut, replace=True, p=self.genotype_freq)
         self.gt2 = np.empty_like(self.gt1)
 
         self.coverage_method = coverage_method
         self.coverage_mean = coverage_mean
-        if coverage_method == 'sample' and coverage_sample is None:
-            raise ValueError('Please provide array of coverage values to be sampled from.')
+        if coverage_method == "sample" and coverage_sample is None:
+            raise ValueError("Please provide array of coverage values to be sampled from.")
         self.coverage_sample = coverage_sample
 
         self.dropout_alpha = dropout_alpha
@@ -86,10 +86,10 @@ class DataGenerator:
     def random_mut_type(self):
         mutated = np.random.choice(self.n_mut, size=round(self.n_mut * self.mut_prop), replace=False)
         for j in mutated:
-            if self.gt1[j] == 'H':
-                self.gt2[j] = np.random.choice(['R', 'A'])  # mutation HA and HR with equal probability
+            if self.gt1[j] == "H":
+                self.gt2[j] = np.random.choice(["R", "A"])  # mutation HA and HR with equal probability
             else:
-                self.gt2[j] = 'H'
+                self.gt2[j] = "H"
 
     def random_tree(self, num_clones, stratified=False):
         """
@@ -111,18 +111,18 @@ class DataGenerator:
         Generate random coverage values for each cell and mutation based on the specified coverage method.
 
         The coverage values are generated using one of the following methods:
-        - 'constant': All coverage values are set to the mean coverage.
-        - 'geometric': Coverage values are sampled from a geometric distribution.
-        - 'poisson': Coverage values are sampled from a Poisson distribution.
-        - 'zinb': Coverage values are sampled from a zero-inflated negative binomial distribution.
-        - 'sample': Coverage values are sampled from a provided array of coverage values.
+        - "constant": All coverage values are set to the mean coverage.
+        - "geometric": Coverage values are sampled from a geometric distribution.
+        - "poisson": Coverage values are sampled from a Poisson distribution.
+        - "zinb": Coverage values are sampled from a zero-inflated negative binomial distribution.
+        - "sample": Coverage values are sampled from a provided array of coverage values.
         """
         match self.coverage_method:
-            case 'constant':
+            case "constant":
                 self.coverage = np.ones((self.n_cells, self.n_mut), dtype=int) * self.coverage_mean
-            case 'geometric':
+            case "geometric":
                 self.coverage = geom.rvs(p=1 / (self.coverage_mean + 1), loc=-1, size=(self.n_cells, self.n_mut))
-            case 'poisson':
+            case "poisson":
                 self.coverage = poisson.rvs(mu=self.coverage_mean, size=(self.n_cells, self.n_mut))
             # parameters 60, 0.17, 0.38 learned from mm34 scRNA seq dataset
             case "zinb":
@@ -130,17 +130,17 @@ class DataGenerator:
                 nb_samples = nbinom.rvs(theta, theta / (theta + mu), size=(self.n_cells, self.n_mut))
                 zero_inflation_mask = np.random.rand(self.n_cells, self.n_mut) < pi
                 self.coverage = np.where(zero_inflation_mask, 0, nb_samples)
-            case 'sample':
+            case "sample":
                 self.coverage = np.random.choice(self.coverage_sample, size=(self.n_cells, self.n_mut), replace=True)
             case _:
-                raise ValueError('Invalid coverage sampling method.')
+                raise ValueError("Invalid coverage sampling method.")
 
     def generate_single_read(self, genotype, coverage, dropout_prob, dropout_direction, alpha_h, beta_h):
         """
         Generate read counts for a single cell and mutation.
 
         [Arguments]
-            genotype: the genotype of the cell ('R', 'H', or 'A')
+            genotype: the genotype of the cell ("R", "H", or "A")
             coverage: the total read coverage for the cell and mutation
             dropout_prob: the probability of dropout for heterozygous genotypes
             dropout_direction: the probability of dropout direction for heterozygous genotypes
@@ -151,11 +151,11 @@ class DataGenerator:
             n_ref: the number of reference reads
             n_alt: the number of alternative reads
         """
-        if genotype == 'R':
+        if genotype == "R":
             n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
-        elif genotype == 'A':
+        elif genotype == "A":
             n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)
-        elif genotype == 'H':
+        elif genotype == "H":
             # Determine if dropout occurs
             dropout_occurs = np.random.rand() < dropout_prob
 
@@ -169,7 +169,7 @@ class DataGenerator:
             else:
                 n_alt = betabinom_rvs(coverage, alpha_h, beta_h)  # No dropout
         else:
-            raise ValueError('[generate_single_read] ERROR: invalid genotype.')
+            raise ValueError("[generate_single_read] ERROR: invalid genotype.")
 
         n_ref = coverage - n_alt
         return n_ref, n_alt
