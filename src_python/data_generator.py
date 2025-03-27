@@ -239,7 +239,9 @@ class DataGenerator:
         return ref, alt, all_dropout_probs, all_dropout_directions, all_overdispersions_h
 
     def mut_indicator(self):
-        """ Return a 2D Boolean array in which [i,j] indicates whether cell i is affected by mutation j """
+        """
+        Return a 2D Boolean array in which [i,j] indicates whether cell i is affected by mutation j
+        """
         res = np.zeros((self.n_cells, self.n_mut), dtype=bool)
         for j in range(self.n_mut):  # determine for each mutation the cells below it in the tree
             for i in self.ct.leaves(self.ct.mut_loc[j]):

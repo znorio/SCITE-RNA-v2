@@ -2,15 +2,13 @@
 This code calculates the posterior probability of different mutation types and genotypes given the data
 and can filter SNVs based on this posterior.
 """
-import matplotlib.pyplot as plt
+
 import numpy as np
 from numba import njit
 import math
-import yaml
 from scipy.special import loggamma, logsumexp
-from scipy.optimize import minimize_scalar, minimize, differential_evolution
+from scipy.optimize import minimize
 from scipy.stats import gamma, beta, lognorm
-import os
 
 from src_python.utils import load_config_and_set_random_seed
 
@@ -55,7 +53,7 @@ def log_binomial_coefficient(n, k):
         return 0.0  # Return 0.0 for invalid inputs
 
 
-# custom betabinom_pmf function, as it is called a lot and faster than the scipy version.
+# custom betabinom_pmf function
 @njit
 def betabinom_pmf(k, n, a, b):
     if n < 0 or k < 0 or k > n or a <= 0 or b <= 0:
@@ -71,6 +69,9 @@ def betabinom_pmf(k, n, a, b):
 
 def calculate_heterozygous_log_likelihoods(k, n, dropout_prob, dropout_direction_prob, alpha_h, beta_h,
                                            error_rate, overdispersion):
+    """
+    Calculates the log-likelihood of observing k alternative reads with n coverage for a heterozygous locus.
+    """
     log_no_dropout = np.log(1 - dropout_prob) + np.log(betabinom_pmf(k, n, alpha_h, beta_h))
 
     # Dropout to "R"
@@ -107,12 +108,8 @@ def total_log_likelihood(params, k_obs, n_obs, genotypes):
 
         elif genotype == "H":
 
-            log_no_dropout, log_dropout_R, log_dropout_A = calculate_heterozygous_log_likelihoods(k, n,
-                                                                                                  dropout_prob,
-                                                                                                  dropout_direction_prob,
-                                                                                                  alpha_h, beta_h,
-                                                                                                  error_rate,
-                                                                                                  overdispersion)
+            log_no_dropout, log_dropout_R, log_dropout_A = calculate_heterozygous_log_likelihoods(
+                k, n, dropout_prob, dropout_direction_prob, alpha_h, beta_h, error_rate, overdispersion)
 
             # Combine probabilities
             log_likelihood += logsumexp([log_no_dropout, log_dropout_R, log_dropout_A])
@@ -132,6 +129,21 @@ def total_log_likelihood(params, k_obs, n_obs, genotypes):
 class MutationFilter:
     def __init__(self, error_rate=0.05, overdispersion=10, genotype_freq=None, mut_freq=0.5,
                  dropout_alpha=2, dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4, overdispersion_h=6):
+        """
+       Filter mutations in single-cell RNA sequencing data and calculate the posterior probability of different
+       mutation types given the observed alternative and reference read counts.
+
+       Attributes:
+           error_rate (float): The error rate for sequencing.
+           overdispersion (float): The overdispersion parameter for homozygous genotypes.
+           genotype_freq (dict): The frequency of each genotype.
+           mut_freq (float): The mutation frequency.
+           dropout_alpha (float): Alpha parameter for dropout probability.
+           dropout_beta (float): Beta parameter for dropout probability.
+           dropout_dir_alpha (float): Alpha parameter for dropout direction probability.
+           dropout_dir_beta (float): Beta parameter for dropout direction probability.
+           overdispersion_h (float): The overdispersion parameter for heterozygous genotypes.
+       """
 
         self.mut_type_prior = {s: np.nan for s in ['R', 'H', 'A', 'RH', 'HR', 'AH', 'HA']}
         if genotype_freq is None:
@@ -189,10 +201,10 @@ class MutationFilter:
             result_no_dropout = np.log(1 - self.dropout_prob) + \
                                 np.log(betabinom_pmf(n_alt, n_total, self.alpha_H, self.beta_H))
             dropout_R = np.log(self.dropout_prob) + np.log(1 - self.dropout_direction_prob) + \
-                            np.log(betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R))
+                        np.log(betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R))
 
             dropout_A = np.log(self.dropout_prob) + np.log(self.dropout_direction_prob) + \
-                            np.log(betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A))
+                        np.log(betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A))
             result = logsumexp([result_no_dropout, dropout_R, dropout_A])
         else:
             raise ValueError('[MutationFilter.single_read_llh] Invalid genotype.')
@@ -291,15 +303,12 @@ class MutationFilter:
         llh_HA = self.k_mut_llh(ref, alt, 'H', 'A')
         assert (llh_RH[-1] == llh_HA[0])  # both should be llh of all H
 
-        joint_R = llh_RH[:1] + comp_priors[
-            'R']  # llh zero out of n cells with genotype R are mutated given the data + prior of genotype RR
+        joint_R = llh_RH[:1] + comp_priors['R']  # llh zero out of n cells with genotype R are mutated given the data + prior of genotype RR
         joint_H = llh_HA[:1] + comp_priors['H']
         joint_A = llh_HA[-1:] + comp_priors['A']  # log likelihood, that all the cells are mutated + prior genotype A
-        joint_RH = llh_RH[1:] + comp_priors[
-            'RH']  # llh that 1 or more cells with genotype R are mutated given the data + prior of having 1 or more cells with genotype R having a mutation
+        joint_RH = llh_RH[1:] + comp_priors['RH']  # llh that 1 or more cells with genotype R are mutated given the data + prior of having 1 or more cells with genotype R having a mutation
         joint_HA = llh_HA[1:] + comp_priors['HA']
-        joint_HR = np.flip(llh_RH)[1:] + comp_priors[
-            'HR']  # llh k cells genotype H -> R  + prior that a mutation affects k cells for genotype H->R
+        joint_HR = np.flip(llh_RH)[1:] + comp_priors['HR']  # llh k cells genotype H -> R  + prior that a mutation affects k cells for genotype H->R
         joint_AH = np.flip(llh_HA)[1:] + comp_priors['AH']
 
         joint = np.array([
@@ -458,12 +467,8 @@ class MutationFilter:
         beta_h = overdispersion_h - alpha_h
 
         for k, n in zip(k_obs, n_obs):
-            log_no_dropout, log_dropout_R, log_dropout_A = calculate_heterozygous_log_likelihoods(k, n,
-                                                                                                  dropout_prob,
-                                                                                                  dropout_direction_prob,
-                                                                                                  alpha_h, beta_h,
-                                                                                                  error_rate,
-                                                                                                  overdispersion)
+            log_no_dropout, log_dropout_R, log_dropout_A = calculate_heterozygous_log_likelihoods(
+                k, n, dropout_prob, dropout_direction_prob, alpha_h, beta_h, error_rate, overdispersion)
 
             # Combine probabilities
             log_likelihood += logsumexp([log_no_dropout, log_dropout_R, log_dropout_A])
@@ -487,35 +492,12 @@ class MutationFilter:
 
         total = alt + ref
         ind_nonzero = np.where(total != 0)[0]
-        # ind_nonzero = np.where(total >= 10)[0]
-        # vaf = alt[ind_nonzero] / total[ind_nonzero]
-        # alt_norm = vaf * np.mean(total[ind_nonzero]) # having a constant coverage makes it easier to fit the parameters
-        # total_norm = np.ones(len(ind_nonzero)) * np.mean(total[ind_nonzero])
         genotypes_nonzero = genotypes[ind_nonzero]
         alt_norm = alt[ind_nonzero]
         total_norm = total[ind_nonzero]
 
         def objective(params):
             return self.total_log_posterior(params, alt_norm, total_norm, genotypes_nonzero)
-
-        # indices = np.where(genotypes == "H")[0]
-        # if len(indices) != 0:
-        #     plt.title("Heterozygous SNVs")
-        #     plt.hist((alt / (alt + ref))[indices], bins=50)
-        #     plt.show()
-        #
-        # indices = np.where(genotypes == "R")[0]
-        #
-        # if len(indices) != 0:
-        #     plt.title("Reference SNVs")
-        #     plt.hist((alt / (alt + ref))[indices], bins=50)
-        #     plt.show()
-        #
-        # indices = np.where(genotypes == "A")[0]
-        # if len(indices) != 0:
-        #     plt.title("Alternative SNVs")
-        #     plt.hist((alt / (alt + ref))[indices], bins=50)
-        #     plt.show()
 
         result = minimize(
             objective,
@@ -524,8 +506,6 @@ class MutationFilter:
             bounds=bounds,
             options={"maxiter": max_iterations, "ftol": tolerance}
         )
-
-        # result = differential_evolution(objective, bounds, maxiter=max_iterations, tol=tolerance)
 
         if not result.success:
             print(f"Optimization failed: {result.message}")
@@ -567,8 +547,7 @@ class MutationFilter:
         global_params = self.fit_parameters(
             all_ref_counts, all_alt_counts, all_genotypes,
             initial_params=[0.2, 0.5, 10, 0.05, 6]
-            # [0.2, 0.5, 10, 0.05, 2, 2]  # Initial values dropout_probs, dropout_direction_probs,
-            # overdispersions, error_rates, alpha_hs, beta_hs
+            # Initial values dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h
         )
 
         print(f"Global parameters: {global_params}")
@@ -585,34 +564,13 @@ class MutationFilter:
             ref_het = ref[indices, snv]
             alt_het = alt[indices, snv]
 
-            # total_nonzero = np.where((alt_het + ref_het) != 0)[0]
-            #
-            # if len(total_nonzero) != 0:
-            #     plt.title("Heterozygous SNVs")
-            #     plt.hist(alt_het[total_nonzero]/ (alt_het[total_nonzero]+ ref_het[total_nonzero]), bins=50)
-            #     plt.show()
-
-            # indices = np.where(inferred_genotypes[:, snv] == "R")[0]
-            #
-            # if len(indices) != 0:
-            #     plt.title("Reference SNVs")
-            #     plt.hist((alt[:, snv] / (alt[:, snv] + ref[:, snv]))[indices], bins=50)
-            #     plt.show()
-            #
-            # indices = np.where(inferred_genotypes[:, snv] == "A")[0]
-            # if len(indices) != 0:
-            #     plt.title("Alternative SNVs")
-            #     plt.hist((alt[:, snv] / (alt[:, snv] + ref[:, snv]))[indices], bins=50)
-            #     plt.show()
-
             total_reads = ref_het + alt_het
 
-            # Skip completely uncovered sites (total_reads == 0)
-            informative = total_reads > 10
+            informative = total_reads > 10  # Only use SNVs with more than 10 reads
             alt_het = alt_het[informative]
             total_reads = total_reads[informative]
 
-            if len(total_reads) > 5:
+            if len(total_reads) > 5:  # Fit individual parameters if there are enough informative heterozygous cells
                 individual_params = self.fit_parameters_individual(
                     alt_het, total_reads, overdispersion, error_rate,
                     initial_params=[0.2, 0.5, 6]

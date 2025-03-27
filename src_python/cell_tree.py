@@ -13,7 +13,7 @@ config = load_config_and_set_random_seed()
 
 
 class CellTree(PruneTree):
-    def __init__(self, n_cells=3, n_mut=0, reversible_mut=False):
+    def __init__(self, n_cells=3, n_mut=0, flipped_mutation_direction=False):
         """
         [Arguments]
             reversible_mut: a boolean value indicating whether the opposite direction should be considered.
@@ -25,7 +25,7 @@ class CellTree(PruneTree):
         super().__init__(2 * n_cells - 1)
         self.n_cells = n_cells
         self.n_mut = n_mut
-        self.reversible = reversible_mut
+        self.flipped_mutation_direction = flipped_mutation_direction
         self.llr = np.empty((self.n_vtx, self.n_mut))
         self.loc_joint_1 = None
         self.loc_joint_2 = None
@@ -118,7 +118,7 @@ class CellTree(PruneTree):
 
         # adjust tree size if needed
         if llh_1.shape[0] != self.n_cells:
-            self.__init__(*llh_1.shape, self.reversible)
+            self.__init__(*llh_1.shape, self.flipped_mutation_direction)
             warnings.warn(
                 "Reinitialized cell tree since the number of cells does not match the row count of the llh matrix.")
         elif llh_1.shape[1] != self.n_mut:
@@ -135,6 +135,9 @@ class CellTree(PruneTree):
         self.update_all()
 
     def fit_mutation_tree(self, mt):
+        """
+        Fits the cell tree to a given mutation tree.
+        """
         assert (self.n_cells == mt.n_cells)
 
         # most recent common ancestor of cells below a mutation node
@@ -158,6 +161,9 @@ class CellTree(PruneTree):
             mutation = mvtx
 
     def update_llr(self):
+        """
+        Updates the log-likelihood ratios between the two genotypes.
+        """
         for rt in self.roots:
             for vtx in self.rdfs_experimental(rt):
                 if self.isleaf(vtx):  # nothing to be done for leaves
@@ -166,9 +172,11 @@ class CellTree(PruneTree):
                 self.llr[vtx, :] = self.llr[self.children(vtx), :].sum(axis=0)
 
     def update_mut_loc(self):
-
+        """
+        Updates the optimal mutation locations and the joint likelihood of the tree.
+        """
         # if mutation directions are unknown, test both directions
-        if self.reversible:
+        if self.flipped_mutation_direction:
             locs_neg = self.llr.argmin(axis=0)
             locs_pos = self.llr.argmax(axis=0)
             llhs_neg = self.loc_joint_2 - self.llr[locs_neg, np.arange(self.llr.shape[1])]
@@ -189,6 +197,9 @@ class CellTree(PruneTree):
         self.joint = loc_joint.sum()
 
     def update_all(self):
+        """
+        Updates the log-likelihood ratios, the optimal mutation locations, and the joint likelihood of the tree.
+        """
         self.update_llr()
         self.update_mut_loc()
 
@@ -204,7 +215,7 @@ class CellTree(PruneTree):
 
     def greedy_insert_experimental(self):
         """
-        Inserts a subtree at its optimal location. Generally a bit faster than greed_insert
+        Inserts a subtree at its optimal location. Generally a bit faster than greedy_insert
         """
 
         def search_insertion_loc(target):
@@ -248,7 +259,7 @@ class CellTree(PruneTree):
 
             # print(best_targets, best_joint)
             return np.random.choice(
-                best_targets), best_joint  # choosing random optimal attachment point with equal likelihood np.random.choice(best_targets)
+                best_targets), best_joint
 
         for anchor in self.pruned_roots():
             subroot = self.children(anchor)[0]
@@ -298,6 +309,9 @@ class CellTree(PruneTree):
             self.update_all()
 
     def exhaustive_optimize(self, leaf_only=False):
+        """
+        Loops through every node and finds the optimal attachment point of the respective subtree.
+        """
         self.update_all()
 
         sr_candidates = list(range(self.n_cells)) if leaf_only else list(range(self.n_vtx))
@@ -315,7 +329,9 @@ class CellTree(PruneTree):
         self.update_all()
 
     def to_graphviz(self, filename=None, engine="dot", leaf_shape="circle", internal_shape="circle", gene_names=None):
-        """ Returns a graphviz Digraph object corresponding to the tree """
+        """
+        Returns a graphviz Digraph object corresponding to the tree
+        """
         dgraph = graphviz.Digraph(filename=filename, engine=engine)
 
         mutations = [[] for _ in range(self.n_vtx)]

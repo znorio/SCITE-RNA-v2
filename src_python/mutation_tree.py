@@ -13,6 +13,9 @@ config = load_config_and_set_random_seed()
 
 
 class MutationTree(PruneTree):
+    """
+    This class provides methods for tree manipulation, visualization and optimization of mutation trees.
+    """
     def __init__(self, n_mut=2, n_cells=0):
         if n_mut < 2:
             warnings.warn('Mutation tree too small, nothing to explore.', RuntimeWarning)
@@ -25,6 +28,13 @@ class MutationTree(PruneTree):
 
         self.reroot(self.wt)
         self.random_mutation_tree()
+
+        self.llr = np.empty((self.n_cells, self.n_vtx))
+        self.cumul_llr = np.empty_like(self.llr)
+        self.loc_joint_1 = None
+        self.loc_joint_2 = None
+        self.joint = None
+
         # self.use_parent_vec([
         #     2, 2, 51, 2, 2, 2, 2, 5, 5, 7, 6, 10, 6, 11, 11, 8, 2, 7, 2, 13, 9, 20, 2, 18,
         #     21, 9, 17, 18, 6, 2, 29, 4, 11, 51, 27, 51, 14, 0, 32, 31, 30, 25, 30, 9, 36, 5,
@@ -44,7 +54,9 @@ class MutationTree(PruneTree):
         self.cell_loc = np.ones(n_cells, dtype=int) * -1
 
     def random_mutation_clone_tree(self, num_clones):
-        # generates a mutation tree with roughly equally sized clones.
+        """
+        Generates a mutation tree with roughly equally sized clones.
+        """
         random_numbers = np.unique([np.random.randint(1, num_clones) for _ in range(self.n_mut)], return_counts=True)[1]
         muts = list(range(self.n_mut))
         chosen_muts = np.random.choice(muts, random_numbers[0], replace=False)
@@ -67,6 +79,9 @@ class MutationTree(PruneTree):
         self.cell_loc = [np.random.choice(potential_branch_points) for _ in range(self.n_cells)]
 
     def random_mutation_tree(self):
+        """
+        Generates a random mutation tree
+        """
         # Randomly choose one mutation to have self.wt as its parent
         root_assigned = np.random.randint(0, self.n_mut - 1)
         self.assign_parent(root_assigned, self.wt)
@@ -82,14 +97,14 @@ class MutationTree(PruneTree):
             self.assign_parent(vtx, parent)
 
     def fit_llh(self, llh_1, llh_2):
-        '''
+        """
         Gets ready to run optimization using provided log-likelihoods.
         The two genotypes involved in the mutation, gt1 and gt2, are not required for optimization.
 
         [Arguments]
             llh1: 2D array in which entry [i,j] is the log-likelihood of cell i having gt1 at locus j
             llh2: 2D array in which entry [i,j] is the log-likelihood of cell i having gt2 at locus j
-        '''
+        """
         assert (llh_1.shape == llh_2.shape)
 
         if llh_1.shape[1] != self.n_mut:
@@ -97,10 +112,8 @@ class MutationTree(PruneTree):
         elif llh_1.shape[0] != self.n_cells:
             self.n_cells = llh_1.shape[0]
 
-        self.llr = np.empty((self.n_cells, self.n_vtx))
         self.llr[:, :self.n_mut] = llh_2 - llh_1
         self.llr[:, self.n_mut] = 0  # stands for wildtype
-        self.cumul_llr = np.empty_like(self.llr)
 
         # joint likelihood of each locus when all cells have genotype 1 or 2
         self.loc_joint_1 = llh_1.sum(axis=0)
@@ -109,6 +122,9 @@ class MutationTree(PruneTree):
         self.update_all()
 
     def fit_cell_tree(self, ct):
+        """
+        Fits the mutation tree to the given cell tree.
+        """
         assert (self.n_mut == ct.n_mut)
         assert (len(ct.roots) == 1)
 
@@ -132,6 +148,9 @@ class MutationTree(PruneTree):
         self.flipped[:-1] = ct.flipped
 
     def update_cumul_llr(self):
+        """
+        Updates the cumulative log-likelihood ratio between the two genotypes
+        """
         for rt in self.roots:
             for vtx in self.dfs_experimental(rt):
                 llr_summand = -self.llr[:, vtx] if self.flipped[vtx] else self.llr[:, vtx]
@@ -141,30 +160,31 @@ class MutationTree(PruneTree):
                     self.cumul_llr[:, vtx] = self.cumul_llr[:, self.parent(vtx)] + llr_summand
 
     def update_cell_loc(self):
+        """
+        Updates the optimal cell location in the mutation tree and the joint likelihood of the tree.
+        """
         self.cell_loc = self.cumul_llr.argmax(axis=1)
         wt_llh = np.where(self.flipped[:-1], self.loc_joint_2,
                           self.loc_joint_1).sum()  # as filpped isn't updated this could be made a constant
         self.joint = self.cumul_llr.max(axis=1).sum() + wt_llh
 
     def update_all(self):
+        """
+        Updates the cumulative log-likelihood ratio and the optimal cell location in the mutation tree.
+        """
         self.update_cumul_llr()
         self.update_cell_loc()
 
-    def reduced_update_insert(self, node, target, cumul_llr):
-        reduced_dfs = [node] + [v for v in self.dfs_experimental(target)]
-        for vtx in reduced_dfs:
-            llr_summand = -self.llr[:, vtx] if self.flipped[vtx] else self.llr[:, vtx]
-            cumul_llr[:, vtx] = cumul_llr[:, self.parent(target)] + llr_summand
-        wt_llh = np.where(self.flipped[:-1], self.loc_joint_2, self.loc_joint_1).sum()
-        joint = self.cumul_llr.max(axis=1).sum() + wt_llh
-        return joint
-
     def greedy_attach(self):
+        """
+        Attaches the pruned subtrees to the optimal location in the main tree.
+        """
         for subroot in self.pruned_roots():
             main_tree_max = self.cumul_llr[:, list(self.dfs_experimental(self.main_root))].max(axis=1)
             subtree_max = self.cumul_llr[:, list(self.dfs_experimental(subroot))].max(axis=1)
 
             best_llr = -np.inf
+            best_loc = None
             best_locs = []
             for vtx in self.dfs_experimental(self.main_root):
                 # calculate the llr of the tree with reattached subtree at the vtx
@@ -180,9 +200,13 @@ class MutationTree(PruneTree):
             self.update_all()
 
     def greedy_attach_node(self):
+        """
+        Inserts the pruned mutation node in the optimal location of the main tree.
+        """
         for subroot in self.pruned_roots():
             best_llr_append = -np.inf
             best_llr_insert = -np.inf
+            best_loc = None
             best_targets = []
 
             # Append the pruned mutation to some other mutation
@@ -218,7 +242,6 @@ class MutationTree(PruneTree):
                         best_inserts.append(child)
                     if total_llr > best_llr_insert:
                         best_llr_insert = total_llr
-                        best_child = child
                         best_inserts = [child]
 
             if best_llr_append > best_llr_insert:
@@ -228,15 +251,18 @@ class MutationTree(PruneTree):
 
             self.update_all()
 
-    def exhaustive_optimize(self, loop_count=1, prune_single_mutations=True):
-
+    def exhaustive_optimize(self, prune_single_mutations=True):
+        """
+        Optimizes the mutation tree exhaustively by iterating though all nodes and pruning and reattaching the
+        respective subtrees and individual mutation nodes.
+        """
         mut_random_order = list(range(self.n_mut))
         np.random.shuffle(mut_random_order)
         if prune_single_mutations:  # prune single mutations and attach/insert them at their optimal location
             for subroot in mut_random_order:
 
-                if len(self._clist[
-                           subroot]) > 1:  # reconstructing the original subtree gets very complex if more than 1 child is appended to a parent
+                if len(self._clist[subroot]) > 1:  # reconstructing the original subtree would be more complex if more
+                    # than 1 child is appended to a parent
                     continue
 
                 self.prune_node(subroot)
@@ -252,6 +278,9 @@ class MutationTree(PruneTree):
             self.greedy_attach()
 
     def to_graphviz(self, filename=None, engine='dot'):
+        """
+        Generates a graphviz representation of the mutation tree.
+        """
         dgraph = graphviz.Digraph(filename=filename, engine=engine)
 
         dgraph.node(str(self.wt), label='wt', shape='rectangle', color='gray')

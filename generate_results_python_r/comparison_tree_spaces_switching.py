@@ -13,7 +13,7 @@ import json
 from src_python.noise_mutation_filter import MutationFilter
 from src_python.cell_tree import CellTree
 from src_python.utils import load_config_and_set_random_seed
-from src_python.generate_results import generate_sciterna_results
+from src_python.generate_results import generate_sciterna_simulation_results
 
 config = load_config_and_set_random_seed()
 
@@ -21,10 +21,10 @@ config = load_config_and_set_random_seed()
 def run_sciterna_tree_inference(spaces, num_cells_list, num_mut_list, n_tests, flipped, compare_cpp, num_rounds):
     for space in spaces:
         for n_cells, n_mut in zip(num_cells_list, num_mut_list):
-            path = f'../data/simulated_data/{n_cells}c{n_mut}mc'
+            path = f'../data/simulated_data/{n_cells}c{n_mut}m'
             path_results = os.path.join(path, f'sciterna_tree_space_comparison{compare_cpp}_{"_".join(space)}')
-            generate_sciterna_results(path=path, n_tests=n_tests, pathout=path_results, tree_space=space,
-                                      reverse_mutations=flipped, n_keep=n_mut, n_rounds=num_rounds)
+            generate_sciterna_simulation_results(path=path, pathout=path_results, n_tests=n_tests, tree_space=space,
+                                                 flipped_mutation_direction=flipped, n_keep=n_mut, n_rounds=num_rounds)
 
 
 def plot_results(num_cells_list, num_mut_list, optimal_tree_llh):
@@ -140,7 +140,7 @@ if generate_results:
     run_sciterna_tree_inference(tree_spaces, n_cells_list, n_mut_list, num_tests, flipped_mutation_direction, cpp,
                                 n_rounds)
 
-load_and_plot_results(n_cells_list, n_mut_list, tree_spaces, num_tests, cpp)
+# load_and_plot_results(n_cells_list, n_mut_list, tree_spaces, num_tests, cpp)
 
 #
 # if generate_results:
