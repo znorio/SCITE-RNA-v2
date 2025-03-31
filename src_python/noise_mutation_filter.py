@@ -303,12 +303,15 @@ class MutationFilter:
         llh_HA = self.k_mut_llh(ref, alt, 'H', 'A')
         assert (llh_RH[-1] == llh_HA[0])  # both should be llh of all H
 
-        joint_R = llh_RH[:1] + comp_priors['R']  # llh zero out of n cells with genotype R are mutated given the data + prior of genotype RR
+        joint_R = llh_RH[:1] + comp_priors[
+            'R']  # llh zero out of n cells with genotype R are mutated given the data + prior of genotype RR
         joint_H = llh_HA[:1] + comp_priors['H']
         joint_A = llh_HA[-1:] + comp_priors['A']  # log likelihood, that all the cells are mutated + prior genotype A
-        joint_RH = llh_RH[1:] + comp_priors['RH']  # llh that 1 or more cells with genotype R are mutated given the data + prior of having 1 or more cells with genotype R having a mutation
+        joint_RH = llh_RH[1:] + comp_priors[
+            'RH']  # llh that 1 or more cells with genotype R are mutated given the data + prior of having 1 or more cells with genotype R having a mutation
         joint_HA = llh_HA[1:] + comp_priors['HA']
-        joint_HR = np.flip(llh_RH)[1:] + comp_priors['HR']  # llh k cells genotype H -> R  + prior that a mutation affects k cells for genotype H->R
+        joint_HR = np.flip(llh_RH)[1:] + comp_priors[
+            'HR']  # llh k cells genotype H -> R  + prior that a mutation affects k cells for genotype H->R
         joint_AH = np.flip(llh_HA)[1:] + comp_priors['AH']
 
         joint = np.array([
@@ -410,8 +413,9 @@ class MutationFilter:
         llh_mat_2 = np.empty((n_cells, n_mut))
         total = ref + alt
 
-        assert n_mut == len(dropout_probs) and n_mut == len(dropout_direction_probs)
-        assert n_mut == len(alphas_h) and n_mut == len(betas_h)
+        if individual:
+            assert n_mut == len(dropout_probs) and n_mut == len(dropout_direction_probs)
+            assert n_mut == len(alphas_h) and n_mut == len(betas_h)
 
         for i in range(n_cells):
             for j in range(n_mut):
