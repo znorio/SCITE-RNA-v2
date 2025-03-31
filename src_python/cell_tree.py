@@ -125,6 +125,7 @@ class CellTree(PruneTree):
             self.n_mut = llh_1.shape[1]
 
         # data to be used directly in optimization
+        self.llr = np.empty((self.n_vtx, self.n_mut))
         self.llr[:self.n_cells, :] = llh_2 - llh_1
 
         # joint likelihood of each locus when all cells have genotype 1 or 2
