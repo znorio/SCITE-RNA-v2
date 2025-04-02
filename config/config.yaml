@@ -3,6 +3,9 @@ overdispersion: 10 # overdispersion reflecting the uncertainty of f for the homo
 overdispersion_h: 6 # overdispersion reflecting the uncertainty of the read counts in the heterozygous case
 dropout_alpha: 2 # the dropout probability for each SNV is assumed to be a sample from this beta distribution
 dropout_beta: 8
+dropout_dir: 0.5  # the dropout direction decides how frequently the reference or alternative allele is dropped out. A
+                  # value of 0.5 means that the dropout is independent of the allele. A larger value means that the
+                  # reference allele is more likely to be dropped out.
 dropout_dir_alpha: 4 # the dropout direction parameters are drawn from a beta distribution with these parameters
 dropout_dir_beta: 4
 genotype_freq: # prior of the genotype frequencies

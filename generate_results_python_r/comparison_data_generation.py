@@ -4,7 +4,7 @@ Tree inference is run as well. However, for large datasets you might want to use
 generate_results_cpp/comparison_num_clones.cpp for tree inference as it is faster.
 """
 
-from src_python.data_generator import DataGenerator
+from src_python.data_generator_simple import DataGenerator
 from src_python.mutation_tree import MutationTree
 from src_python.utils import load_config_and_set_random_seed
 from src_python.generate_results import generate_sciterna_simulation_results
@@ -79,7 +79,7 @@ tree_space = ["c", "m"]
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
         data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
-        # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone)
+        generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone)
         path_results = os.path.join(data_path, f'sciterna')
         generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
                                              tree_space=tree_space,
