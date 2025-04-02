@@ -5,7 +5,7 @@ from tqdm import tqdm
 import json
 
 from src_python.swap_optimizer import SwapOptimizer
-from src_python.noise_mutation_filter import MutationFilter
+from src_python.noise_mutation_filter_simple import MutationFilter
 from src_python.utils import load_config_and_set_random_seed, create_genotype_matrix, create_mutation_matrix
 
 config = load_config_and_set_random_seed()
@@ -33,7 +33,7 @@ def create_directories(pathout):
     os.makedirs(os.path.join(pathout, "sciterna_mut_indicator"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_complete_mut_indicator"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_individual_dropout_probs"), exist_ok=True)
-    os.makedirs(os.path.join(pathout, "sciterna_individual_dropout_directions"), exist_ok=True)
+    # os.makedirs(os.path.join(pathout, "sciterna_individual_dropout_directions"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_individual_overdispersions_H"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_global_parameters"), exist_ok=True)
 
@@ -65,7 +65,7 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
         params = mf.update_parameters(np.array(ref), np.array(alt), np.array(genotype))
 
         (dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h,
-         individual_dropout_probs, individual_dropout_direction_probs, individual_overdispersions_h) = params
+         individual_dropout_probs, individual_overdispersions_h) = params
 
         np.savetxt(
             os.path.join(pathout, "sciterna_selected_loci", f"sciterna_selected_loci_{r}r{i}.txt"),
@@ -103,11 +103,11 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
                          f"sciterna_individual_dropout_probs_{r}r{i}.txt"),
             individual_dropout_probs
         )
-        np.savetxt(
-            os.path.join(pathout, "sciterna_individual_dropout_directions",
-                         f"sciterna_individual_dropout_directions_{r}r{i}.txt"),
-            individual_dropout_direction_probs
-        )
+        # np.savetxt(
+        #     os.path.join(pathout, "sciterna_individual_dropout_directions",
+        #                  f"sciterna_individual_dropout_directions_{r}r{i}.txt"),
+        #     individual_dropout_direction_probs
+        # )
         np.savetxt(
             os.path.join(pathout, "sciterna_individual_overdispersions_H",
                          f"sciterna_individual_overdispersions_H_{r}r{i}.txt"),
@@ -241,7 +241,7 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
                     json.dump(b_selected_genes, file)
 
                 # TODO To be able to update the individual dropout probabilities, dropout direction probabilities and
-                # overdispersions, the process_rounds function needs to be be able to dtermine the genotype matrix.
+                # overdispersions, the process_rounds function needs to be be able to determine the genotype matrix.
                 # even for SNVs not selected in the bootstrap sample.
                 # process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, b_selected, b_gt1, b_gt2,
                 #                b_not_selected_genotypes)
