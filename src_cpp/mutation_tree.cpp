@@ -14,7 +14,7 @@ Defines the mutation tree and how it is optimized.
 //#include <Eigen/Dense>
 
 #include "mutation_tree.h"
-#include "config.h"
+#include "utils.h"
 
 // initialize mutation tree
 MutationTree::MutationTree(int n_mut, int n_cells)

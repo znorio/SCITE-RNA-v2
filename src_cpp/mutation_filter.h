@@ -1,53 +1,85 @@
 #include <unordered_map>
 #include <iostream>
 #include <vector>
+#include <map>
 
 #ifndef SCITE_RNA_CPP_MUTATION_FILTER_H
 #define SCITE_RNA_CPP_MUTATION_FILTER_H
 
 class MutationFilter {
 private:
-    double f_;
     int n_cells = 1;
     int n_loci = 1;
-    int omega_;
-    double h_factor_;
+    double error_rate;
+    double overdispersion_homozygous;
+    std::map<std::string, double> genotype_freq_;
     double mut_freq_;
-    int min_grp_size_;
-    double alpha_R = 0.5;
-    double beta_R = 0.5;
-    double alpha_A = 0.5;
-    double beta_A = 0.5;
-    double alpha_H = 0.5;
-    double beta_H = 0.5;
-    std::unordered_map<char, double> genotype_freq_;
-    std::unordered_map<std::string, double> mut_type_prior;
+    double dropout_alpha;
+    double dropout_beta;
+    double dropout_direction_prob;
+    double overdispersion_heterozygous;
+    std::map<std::string, double> mut_type_prior;
+    double alpha_R;
+    double beta_R;
+    double alpha_A;
+    double beta_A;
+    double alpha_H;
+    double beta_H;
+    double dropout_prob;
 
 public:
-    // mutation filter functions
-    explicit MutationFilter(double f = 0.95, int omega = 100, double h_factor = 0.5,
-                   const std::unordered_map<char, double>& genotype_freq = get_genotype_freq(),
-                   double mut_freq = 0.5, int min_grp_size = 1);
-    void set_betabinom();
-    void set_mut_type_prior();
-    double single_read_llh(int n_ref, int n_alt, char genotype) const;
-    std::vector<double> k_mut_llh(std::vector<int>& ref, std::vector<int>& alt, char gt1, char gt2) const;
+    explicit MutationFilter(double error_rate = 0.05, double overdispersion = 10,
+                   const std::map<std::string, double>& genotype_freq = {{"R", 1.0/3}, {"H", 1.0/3}, {"A", 1.0/3}},
+                   double mut_freq_ = 0.5, double dropout_alpha = 2, double dropout_beta = 8,
+                   double dropout_direction_prob = 0.5, double overdispersion_h = 6);
+
+    void set_mut_type_prior(const std::map<std::string, double>& genotype_freq, double mut_freq);
+    double single_read_llh_with_dropout(int n_alt, int n_total, char genotype) const;
+    double single_read_llh_with_individual_dropout(int n_alt, int n_total, char genotype,
+                                                   double dropout_prob, double alpha_h, double beta_h) const;
+    std::vector<double> k_mut_llh(const std::vector<int>& ref, const std::vector<int>& alt,
+                                  char gt1, char gt2) const;
     std::vector<double> single_locus_posteriors(std::vector<int> ref, std::vector<int> alt,
                                                 const std::unordered_map<std::string, std::vector<double>>& comp_priors) const;
-    std::vector<std::vector<double>> mut_type_posteriors(std::vector<std::vector<int>>& ref,
-                                                         std::vector<std::vector<int>>& alt);
+    std::vector<std::vector<double>> mut_type_posteriors(const std::vector<std::vector<int>>& ref,
+                                                         const std::vector<std::vector<int>>& alt);
     std::tuple<std::vector<int>, std::vector<char>, std::vector<char>, std::vector<char>> filter_mutations(
-                                    std::vector<std::vector<int>>& ref,
-                                    std::vector<std::vector<int>>& alt,
-                                    const std::string& method = "highest_post",
-                                    double t = 0.0,
-                                    int n_exp = 0,
-                                    bool reversible = true, int n_test = 0);
+            const std::vector<std::vector<int>>& ref,
+            const std::vector<std::vector<int>>& alt,
+            const std::string& method = "highest_post", double t = 0.0, int n_exp = 0);
+//    std::tuple<std::vector<size_t>, std::vector<char>, std::vector<char>, std::vector<char>> filter_mutations(
+//            const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
+//            const std::string& method = "highest_post", double t = 0.0, int n_exp = 0) const;
     std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> get_llh_mat(
-                const std::vector<std::vector<int>>& ref,
-                const std::vector<std::vector<int>>& alt,
-                const std::vector<char>& gt1,
-                const std::vector<char>& gt2) const;
+            const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
+            const std::vector<char>& gt1, const std::vector<char>& gt2, bool individual,
+            const std::vector<double>& dropout_probs, const std::vector<double>& overdispersions_h);
+
+    double compute_log_prior(
+            double dropout, double dropout_direction, double overdispersion,
+            double error_r, double overdispersion_h,
+            bool global_opt, double min_value=2, double shape=2, double alpha_parameters=2) const;
+
+    double total_log_posterior(const std::vector<double>& params, const std::vector<int>& k_obs,
+                               const std::vector<int>& n_obs, const std::vector<char>& genotypes) const;
+    double total_log_posterior_individual(const std::vector<double>& params,
+                                          const std::vector<int>& k_obs,
+                                          const std::vector<int>& n_obs,
+                                          double overdispersion,
+                                          double errorRate,
+                                          double dropoutDirectionProb) const;
+    std::vector<double> fit_parameters(const std::vector<int>& ref, const std::vector<int>& alt,
+                                       const std::vector<char>& genotypes, std::vector<double> initial_params = {},
+                                       int max_iterations = 50, double tolerance = 1e-5);
+    std::vector<double> fit_parameters_individual(const std::vector<int>& alt_het, const std::vector<int>& total_reads,
+                                                  double overdispersion, double error_rate, double dropout_direction,
+                                                  std::vector<double> initial_params = {}, int max_iterations = 50,
+                                                  double tolerance = 1e-5);
+    std::tuple<double, double, double, double, double, std::vector<double>, std::vector<double>> update_parameters(
+            const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
+            const std::vector<std::vector<char>>& inferred_genotypes);
+
+
 
     // helper functions
     static double betaln(double x, double y);
@@ -64,6 +96,19 @@ public:
     static std::vector<double> add_vectors(const std::vector<double>& a, const std::vector<double>& b);
     static std::vector<double> add_scalar_to_vector(double scalar, const std::vector<double>& vec);
     static std::unordered_map<char, double> get_genotype_freq();
+
+    [[nodiscard]] static std::tuple<double, double, double>
+    calculate_heterozygous_log_likelihoods(int k, int n, double dropout_prob, double dropout_direction_prob,
+                                           double alpha_h, double beta_h, double error_rate, double overdispersion) ;
+
+    [[nodiscard]] static double
+    total_log_likelihood(const std::vector<double> &params, const std::vector<int> &k_obs,
+                         const std::vector<int> &n_obs,
+                         const std::vector<char> &genotypes) ;
+
+    static double beta_logpdf(double x, double alpha, double beta);
+
+    static double gamma_logpdf(double x, double shape, double scale, double loc);
 };
 
 #endif //SCITE_RNA_CPP_MUTATION_FILTER_H

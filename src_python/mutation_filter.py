@@ -128,7 +128,7 @@ def total_log_likelihood(params, k_obs, n_obs, genotypes):
 
 class MutationFilter:
     def __init__(self, error_rate=0.05, overdispersion=10, genotype_freq=None, mut_freq=0.5,
-                 dropout_alpha=2, dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4, overdispersion_h=6):
+                 dropout_alpha=2, dropout_beta=8, dropout_direction_prob=0.5, overdispersion_h=6):
         """
        Filter mutations in single-cell RNA sequencing data and calculate the posterior probability of different
        mutation types given the observed alternative and reference read counts.
@@ -140,14 +140,13 @@ class MutationFilter:
            mut_freq (float): The mutation frequency.
            dropout_alpha (float): Alpha parameter for dropout probability.
            dropout_beta (float): Beta parameter for dropout probability.
-           dropout_dir_alpha (float): Alpha parameter for dropout direction probability.
-           dropout_dir_beta (float): Beta parameter for dropout direction probability.
+           dropout_direction_prob (float): # Frequency, that the reference allele is dropped out instead of the alternative in the heterozygous case.
            overdispersion_h (float): The overdispersion parameter for heterozygous genotypes.
        """
 
         self.mut_type_prior = {s: np.nan for s in ['R', 'H', 'A', 'RH', 'HR', 'AH', 'HA']}
         if genotype_freq is None:
-            genotype_freq = {'R': 1 / 4, 'H': 1 / 2, 'A': 1 / 4}
+            genotype_freq = {'R': 1 / 3, 'H': 1 / 3, 'A': 1 / 3}
         self.genotype_freq = genotype_freq
         self.alpha_R = error_rate * overdispersion
         self.beta_R = overdispersion - self.alpha_R
@@ -158,8 +157,10 @@ class MutationFilter:
 
         self.set_mut_type_prior(genotype_freq, mut_freq)
         self.dropout_prob = dropout_alpha / (dropout_alpha + dropout_beta)
-        self.dropout_direction_prob = dropout_dir_alpha / (dropout_dir_alpha + dropout_dir_beta)
+        self.dropout_direction_prob = dropout_direction_prob
         self.overdispersion_H = overdispersion_h
+        self.overdispersion = overdispersion
+        self.error_rate = error_rate
 
     def set_mut_type_prior(self, genotype_freq, mut_freq):
         """
@@ -211,7 +212,7 @@ class MutationFilter:
 
         return result
 
-    def single_read_llh_with_individual_dropout(self, n_alt, n_total, genotype, dropout_prob, dropout_direction_prob,
+    def single_read_llh_with_individual_dropout(self, n_alt, n_total, genotype, dropout_prob,
                                                 alpha_h, beta_h):
         """
         [Arguments]
@@ -229,10 +230,10 @@ class MutationFilter:
         elif genotype == 'H':
             result_no_dropout = np.log(1 - dropout_prob) + \
                                 np.log(betabinom_pmf(n_alt, n_total, alpha_h, beta_h))
-            dropout_R = np.log(dropout_prob) + np.log(1 - dropout_direction_prob) + \
+            dropout_R = np.log(dropout_prob) + np.log(1 - self.dropout_direction_prob) + \
                         np.log(betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R))
 
-            dropout_A = np.log(dropout_prob) + np.log(dropout_direction_prob) + \
+            dropout_A = np.log(dropout_prob) + np.log(self.dropout_direction_prob) + \
                         np.log(betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A))
             result = logsumexp([result_no_dropout, dropout_R, dropout_A])
         else:
@@ -325,8 +326,7 @@ class MutationFilter:
         ])
 
         posteriors = lognormalize(joint)  # Bayes' theorem
-        # plt.hist(alt/(ref+alt))
-        # plt.show()
+
         return posteriors
 
     def mut_type_posteriors(self, ref, alt):
@@ -399,8 +399,8 @@ class MutationFilter:
 
         return selected, gt1_inferred, gt2_inferred, gt_not_selected
 
-    def get_llh_mat(self, ref, alt, gt1, gt2, individual=False, dropout_probs=None, dropout_direction_probs=None,
-                    alphas_h=None, betas_h=None):
+    def get_llh_mat(self, ref, alt, gt1, gt2, individual=False, dropout_probs=None,
+                    overdispersions_h=None):
         """
         [Arguments]
             individual: Use an individual dropout likelihood per SNV
@@ -414,40 +414,51 @@ class MutationFilter:
         total = ref + alt
 
         if individual:
-            assert n_mut == len(dropout_probs) and n_mut == len(dropout_direction_probs)
+            alphas_h = np.array(overdispersions_h) * 0.5
+            betas_h = np.array(overdispersions_h) * 0.5
             assert n_mut == len(alphas_h) and n_mut == len(betas_h)
 
         for i in range(n_cells):
             for j in range(n_mut):
                 if not individual:
-                    llh_mat_1[i, j] = self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt1[j])
-                    llh_mat_2[i, j] = self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt2[j])
+                    llh_mat_1[i, j] = (self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt1[j]) +
+                                       self.mut_type_prior[gt1[j]])
+                    llh_mat_2[i, j] = (self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt2[j]) +
+                                       self.mut_type_prior[gt2[j]])
                 else:
-                    llh_mat_1[i, j] = self.single_read_llh_with_individual_dropout(alt[i, j], total[i, j], gt1[j],
+                    llh_mat_1[i, j] = (self.single_read_llh_with_individual_dropout(alt[i, j], total[i, j], gt1[j],
                                                                                    dropout_probs[j],
-                                                                                   dropout_direction_probs[j],
-                                                                                   alphas_h[j], betas_h[j])
-                    llh_mat_2[i, j] = self.single_read_llh_with_individual_dropout(alt[i, j], total[i, j], gt2[j],
+                                                                                   alphas_h[j], betas_h[j]) +
+                                       self.mut_type_prior[gt1[j]])
+                    llh_mat_2[i, j] = (self.single_read_llh_with_individual_dropout(alt[i, j], total[i, j], gt2[j],
                                                                                    dropout_probs[j],
-                                                                                   dropout_direction_probs[j],
-                                                                                   alphas_h[j], betas_h[j])
+                                                                                   alphas_h[j], betas_h[j]) +
+                                       self.mut_type_prior[gt2[j]])
 
         return llh_mat_1, llh_mat_2
 
-    def compute_log_prior(self, dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h):
-        sigma_od = 1
-        scale_od = 10 * np.exp(sigma_od ** 2)
-        min_value = 2.5  # Shift
-        shape = 2
-        scale_overdispersion = (self.overdispersion_H - min_value) / shape  # TODO mode / (shape - 1) or mean / shape
-        # TODO in global opt mode, in individual mean?
+    def compute_log_prior(self, dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h,
+                          global_opt=False, min_value=2, shape=2, alpha_parameters=2):
+
+        alpha_dropout_prob = alpha_parameters
+        beta_dropout_prob = 1 / self.dropout_prob
+        alpha_dropout_direction_prob = alpha_parameters
+        beta_dropout_direction_prob = 1 / self.dropout_direction_prob
+        alpha_error_rate = alpha_parameters
+        beta_error_rate = 1 / self.error_rate
+
+        divisor = shape # for individual parameter optimization use mean
+        if global_opt: # for global parameter optimization use mode
+            divisor = shape - 1
+        scale_overdispersion_h = (self.overdispersion_H - min_value) / divisor
+        scale_overdispersion = (self.overdispersion - min_value) / divisor
 
         return (
-                beta.logpdf(dropout_prob, 3, 9) +  # max at 0.2
-                beta.logpdf(dropout_direction_prob, 2, 2) +
-                lognorm.logpdf(overdispersion, s=sigma_od, scale=scale_od) +
-                beta.logpdf(error_rate, 1.5, 12) +  # max at 0.05
-                gamma.logpdf(overdispersion_h, shape, loc=min_value, scale=scale_overdispersion)
+                beta.logpdf(dropout_prob, alpha_dropout_prob, beta_dropout_prob) +  # max at 0.2
+                beta.logpdf(dropout_direction_prob, alpha_dropout_direction_prob, beta_dropout_direction_prob) +
+                gamma.logpdf(overdispersion, shape, loc=min_value, scale=scale_overdispersion)+
+                beta.logpdf(error_rate, alpha_error_rate, beta_error_rate) +
+                gamma.logpdf(overdispersion_h, shape, loc=min_value, scale=scale_overdispersion_h)
         )
 
     def total_log_posterior(self, params, k_obs, n_obs, genotypes):
@@ -458,12 +469,12 @@ class MutationFilter:
 
         # Compute log-priors (additive in log-space)
         log_prior = self.compute_log_prior(dropout_prob, dropout_direction_prob, overdispersion, error_rate,
-                                           overdispersion_h)
+                                           overdispersion_h, global_opt=True)
 
-        return -log_likelihood - log_prior  # Negative because we're minimizing
+        return -(log_prior)  # Negative because we're minimizing
 
-    def total_log_posterior_individual(self, params, k_obs, n_obs, overdispersion, error_rate):
-        dropout_prob, dropout_direction_prob, overdispersion_h = params
+    def total_log_posterior_individual(self, params, k_obs, n_obs, overdispersion, error_rate, dropout_direction_prob):
+        dropout_prob, overdispersion_h = params
 
         log_likelihood = 0
 
@@ -479,7 +490,7 @@ class MutationFilter:
 
         # Compute log-priors (additive in log-space)
         log_prior = self.compute_log_prior(dropout_prob, dropout_direction_prob, overdispersion, error_rate,
-                                           overdispersion_h)
+                                           overdispersion_h, global_opt=False)
 
         return -(log_likelihood + log_prior)  # Negative because we're minimizing
 
@@ -489,7 +500,7 @@ class MutationFilter:
         bounds = [
             (0.01, 0.99),  # dropout_prob heterozygous
             (0.01, 0.99),  # dropout_direction_prob heterozygous
-            (0.1, 100),  # overdispersion for homozygous
+            (2.5, 100),  # overdispersion for homozygous
             (0.001, 0.1),  # error_rate
             (2.5, 50),  # overdispersion_h for heterozygous
         ]
@@ -515,20 +526,20 @@ class MutationFilter:
             print(f"Optimization failed: {result.message}")
 
         print("optimized: ", self.total_log_posterior(result.x, alt_norm, total_norm, genotypes_nonzero))
-        print("ground truth: ", self.total_log_posterior([0.2, 0.5, 10, 0.05, 4], alt_norm, total_norm,
+        print("ground truth: ", self.total_log_posterior(initial_params, alt_norm, total_norm,
                                                          genotypes_nonzero))
         return result.x
 
-    def fit_parameters_individual(self, alt_het, total_reads, overdispersions, error_rates, initial_params=None,
-                                  max_iterations=50, tolerance=1e-5):
+    def fit_parameters_individual(self, alt_het, total_reads, overdispersions, error_rates, dropout_direction,
+                                  initial_params=None, max_iterations=50, tolerance=1e-5):
         bounds = [
             (0.01, 0.99),  # dropout_prob heterozygous
-            (0.01, 0.99),  # dropout_direction_prob heterozygous
             (2.5, 50),  # overdispersion_h for heterozygous
         ]
 
         def objective(params):
-            return self.total_log_posterior_individual(params, alt_het, total_reads, overdispersions, error_rates)
+            return self.total_log_posterior_individual(params, alt_het, total_reads, overdispersions, error_rates,
+                                                       dropout_direction)
 
         result = minimize(
             objective,
@@ -550,7 +561,7 @@ class MutationFilter:
         # Fit only error_rate and overdispersion using all SNVs
         global_params = self.fit_parameters(
             all_ref_counts, all_alt_counts, all_genotypes,
-            initial_params=[0.2, 0.5, 10, 0.05, 6]
+            initial_params=[self.dropout_prob, self.dropout_direction_prob, self.overdispersion, self.error_rate, self.overdispersion_H]
             # Initial values dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h
         )
 
@@ -577,17 +588,17 @@ class MutationFilter:
             if len(total_reads) > 5:  # Fit individual parameters if there are enough informative heterozygous cells
                 individual_params = self.fit_parameters_individual(
                     alt_het, total_reads, overdispersion, error_rate,
-                    initial_params=[0.2, 0.5, 6]
+                    dropout_direction=dropout_direction_prob,
+                    initial_params=[self.dropout_prob, self.overdispersion_H]
                     # Initial values dropout_probs, dropout_direction_probs, overdispersions_hs
                 )
             else:
-                individual_params = 0.2, 0.5, 6
+                individual_params = self.dropout_prob, self.overdispersion_H
 
-            posterior_dropout_prob, posterior_dropout_direction_prob, posterior_overdispersion_hs = individual_params
+            posterior_dropout_prob, posterior_overdispersion_hs = individual_params
 
             individual_dropout_probs.append(posterior_dropout_prob)
-            individual_dropout_direction_probs.append(posterior_dropout_direction_prob)
             individual_overdispersions_h.append(posterior_overdispersion_hs)
 
         return dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h, \
-            individual_dropout_probs, individual_dropout_direction_probs, individual_overdispersions_h
+            individual_dropout_probs, individual_overdispersions_h

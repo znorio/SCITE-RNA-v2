@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 3.27)
 project(SCITE-RNA)
 
+#set(CMAKE_TOOLCHAIN_FILE "C:/Users/Norio/.vcpkg-clion/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 include_directories(src_cpp)
+#include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/yixuan-LBFGSpp-9db7a6d/include")
+#include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/eigen3")
+include_directories("/cluster/work/bewi/members/znorio/data/yixuan-LBFGSpp-9db7a6d/include")
+include_directories("/cluster/work/bewi/members/znorio/data/eigen3")
+
 
 add_executable(SCITE-RNA
         src_cpp/cell_tree.cpp
@@ -15,8 +21,10 @@ add_executable(SCITE-RNA
         src_cpp/swap_optimizer.h
         src_cpp/mutation_filter.cpp
         src_cpp/mutation_filter.h
-        src_cpp/config.cpp
-        src_cpp/config.h
+        src_cpp/generate_results.cpp
+        src_cpp/generate_results.h
+        src_cpp/utils.cpp
+        src_cpp/utils.h
 #        generate_results_cpp/comparison_num_clones.cpp
 #        generate_results_cpp/run_sciterna.cpp
 #        generate_results_cpp/MM.cpp
