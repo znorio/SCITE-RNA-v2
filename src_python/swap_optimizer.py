@@ -13,7 +13,7 @@ config = load_config_and_set_random_seed()
 
 
 class SwapOptimizer:
-    def __init__(self, sig_digits=10, spaces=None, flipped_mutation_direction=True):
+    def __init__(self, sig_digits=9, spaces=None, flipped_mutation_direction=True):
         """
         [Arguments]
             spaces: spaces that will be searched and the order of the search

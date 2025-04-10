@@ -37,15 +37,14 @@ class DataGenerator:
         coverage_sample – Array of coverage values to sample from.
         dropout_alpha – Alpha parameter of the beta distribution the dropout probability is sampled from.
         dropout_beta – Beta parameter of the beta distribution the dropout probability is sampled from.
-        dropout_dir_alpha – Alpha parameter of the beta distribution the dropout direction probability is sampled from.
-        dropout_dir_beta – Beta parameter of the beta distribution the dropout direction probability is sampled from.
+        dropout_dir – Dropout direction probability.
         overdispersion_h – Overdispersion parameter for the read counts in the heterozygous case.
     """
 
     def __init__(self, n_cells, n_mut,
                  mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
                  coverage_method="zinb", coverage_mean=60, coverage_sample=None, dropout_alpha=2,
-                 dropout_beta=8, dropout_dir_alpha=4, dropout_dir_beta=4, overdispersion_h=6):
+                 dropout_beta=8, dropout_dir=0.5, overdispersion_h=6):
 
         self.coverage = None
         self.ct = CellTree(n_cells=n_cells, n_mut=n_mut)
@@ -65,8 +64,7 @@ class DataGenerator:
 
         self.dropout_alpha = dropout_alpha
         self.dropout_beta = dropout_beta
-        self.dropout_dir_alpha = dropout_dir_alpha
-        self.dropout_dir_beta = dropout_dir_beta
+        self.dropout_dir = dropout_dir
         self.overdispersion_h = overdispersion_h
 
         # Set the beta-binomial parameters
@@ -217,8 +215,7 @@ class DataGenerator:
         for j in range(self.n_mut):
             # Sample dropout probabilities from beta distributions for each SNV
             dropout_prob = np.random.beta(self.dropout_alpha, self.dropout_beta)
-            dropout_direction = np.random.beta(self.dropout_dir_alpha,
-                                               self.dropout_dir_beta)
+            dropout_direction = self.dropout_dir #
 
             all_dropout_probs.append(dropout_prob)
             all_dropout_directions.append(dropout_direction)

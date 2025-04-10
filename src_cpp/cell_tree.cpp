@@ -12,7 +12,7 @@ Defines cell lineage trees and how they are optimized.
 #include <limits>
 
 #include "cell_tree.h"
-#include "config.h"
+#include "utils.h"
 
 // CELL TREE FUNCTIONS
 

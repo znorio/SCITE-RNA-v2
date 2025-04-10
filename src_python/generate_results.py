@@ -5,7 +5,7 @@ from tqdm import tqdm
 import json
 
 from src_python.swap_optimizer import SwapOptimizer
-from src_python.noise_mutation_filter_simple import MutationFilter
+from src_python.mutation_filter import MutationFilter
 from src_python.utils import load_config_and_set_random_seed, create_genotype_matrix, create_mutation_matrix
 
 config = load_config_and_set_random_seed()
@@ -33,7 +33,6 @@ def create_directories(pathout):
     os.makedirs(os.path.join(pathout, "sciterna_mut_indicator"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_complete_mut_indicator"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_individual_dropout_probs"), exist_ok=True)
-    # os.makedirs(os.path.join(pathout, "sciterna_individual_dropout_directions"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_individual_overdispersions_H"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_global_parameters"), exist_ok=True)
 
@@ -41,17 +40,13 @@ def create_directories(pathout):
 def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, selected, gt1, gt2, not_selected_genotypes):
     individual_dropout_probs = (np.ones(n_snvs, dtype=float) * config["dropout_alpha"] /
                                 (config["dropout_alpha"] + config["dropout_beta"]))
-    individual_dropout_direction_probs = np.ones(n_snvs, dtype=float) * config["dropout_dir_alpha"] / (
-            config["dropout_dir_alpha"] + config["dropout_dir_beta"])
-    alpha_h = beta_h = 0.5 * config["overdispersion_h"]
-    individual_alphas_h = np.ones(n_snvs, dtype=float) * alpha_h
-    individual_betas_h = np.ones(n_snvs, dtype=float) * beta_h
+
+    individual_overdispersions_h = np.ones(n_snvs, dtype=float) * config["overdispersion_h"]
 
     for r in range(n_rounds):
         llh_1, llh_2 = mf.get_llh_mat(ref[:, selected], alt[:, selected], gt1, gt2, individual=True,
                                       dropout_probs=individual_dropout_probs,
-                                      dropout_direction_probs=individual_dropout_direction_probs,
-                                      alphas_h=individual_alphas_h, betas_h=individual_betas_h)
+                                      overdispersions_h=individual_overdispersions_h)
         optimizer.fit_llh(llh_1, llh_2)
         optimizer.optimize()
 
@@ -103,11 +98,6 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
                          f"sciterna_individual_dropout_probs_{r}r{i}.txt"),
             individual_dropout_probs
         )
-        # np.savetxt(
-        #     os.path.join(pathout, "sciterna_individual_dropout_directions",
-        #                  f"sciterna_individual_dropout_directions_{r}r{i}.txt"),
-        #     individual_dropout_direction_probs
-        # )
         np.savetxt(
             os.path.join(pathout, "sciterna_individual_overdispersions_H",
                          f"sciterna_individual_overdispersions_H_{r}r{i}.txt"),
@@ -151,7 +141,7 @@ def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./c
         mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
                             genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
                             dropout_alpha=config["dropout_alpha"], dropout_beta=config["dropout_beta"],
-                            dropout_dir_alpha=config["dropout_dir_alpha"], dropout_dir_beta=config["dropout_dir_beta"],
+                            dropout_direction_prob=config["dropout_direction"],
                             overdispersion_h=config["overdispersion_h"])
 
         selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method="first_k", n_exp=n_keep)

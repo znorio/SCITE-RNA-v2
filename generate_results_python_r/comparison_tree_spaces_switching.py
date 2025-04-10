@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 
-from src_python.noise_mutation_filter import MutationFilter
+from src_python.mutation_filter import MutationFilter
 from src_python.cell_tree import CellTree
 from src_python.utils import load_config_and_set_random_seed
 from src_python.generate_results import generate_sciterna_simulation_results
@@ -87,6 +87,7 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
         file_path = rf"../data/results/figures/optimal_tree_llh_comparison_{n_cells}c{n_mut}m.json"
         if not os.path.exists(file_path):
             os.makedirs(r"../data/results/figures", exist_ok=True)
+            optimal_tree_llh = {}
             for space in spaces:
                 optimal_tree_llh["_".join(space)] = {}
                 path = f"../data/simulated_data/{n_cells}c{n_mut}m"
@@ -95,8 +96,7 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
                 mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
                                     genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
                                     dropout_alpha=config["dropout_alpha"], dropout_beta=config["dropout_beta"],
-                                    dropout_dir_alpha=config["dropout_dir_alpha"],
-                                    dropout_dir_beta=config["dropout_dir_beta"],
+                                    dropout_direction_prob=config["dropout_direction"],
                                     overdispersion_h=config["overdispersion_h"])
 
                 for r in range(n_rounds):
@@ -151,7 +151,7 @@ n_mut_list = [50, 100, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 
-generate_results = True  # set to True to rerun the SCITE-RNA tree inference
+generate_results = False  # set to True to rerun the SCITE-RNA tree inference
 flipped_mutation_direction = False  # flip mutations or not (change root genotype)
 cpp = "_cpp"
 
