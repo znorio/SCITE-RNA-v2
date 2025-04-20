@@ -478,7 +478,7 @@ std::vector<double> MutationFilter::fit_parameters(const std::vector<int>& ref,
             double val = filter.total_log_posterior(params, alt, total, genotypes);
 
             // Use numerical gradient (finite difference)
-            const double eps = 1e-6;
+            const double eps = 1e-7;
             grad.resize(x.size());
             for (int i = 0; i < x.size(); ++i) {
                 VectorXd x_eps = x;
@@ -504,7 +504,7 @@ std::vector<double> MutationFilter::fit_parameters(const std::vector<int>& ref,
     LBFGSBParam<double> param;
     param.epsilon = tolerance;
     param.max_iterations = max_iterations;
-    param.delta = 1e-5;
+    param.delta = 1e-4;
 
     // Run optimizer
     LBFGSBSolver<double> solver(param);
@@ -588,7 +588,7 @@ std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<
                                                                overdispersion_, error_rate_, dropout_direction_);
 
             // Numerical gradient using finite differences
-            const double eps = 1e-6;
+            const double eps = 1e-7;
             grad.resize(x.size());
             for (int i = 0; i < x.size(); ++i) {
                 Eigen::VectorXd x_eps = x;
@@ -615,7 +615,7 @@ std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<
     LBFGSpp::LBFGSBParam<double> param;
     param.epsilon = tolerance;
     param.max_iterations = max_iterations;
-    param.delta = 1e-5;
+    param.delta = 1e-4;
 
     LBFGSpp::LBFGSBSolver<double> solver(param);
     Objective obj(*this, alt_het, total_reads, overdispersion, error_r, dropout_direction);
