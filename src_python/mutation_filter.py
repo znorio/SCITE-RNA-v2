@@ -420,6 +420,12 @@ class MutationFilter:
 
         for i in range(n_cells):
             for j in range(n_mut):
+                if total[i,j] == 0:
+                    # if there are no reads, the likelihood of both genotypes is the same, to avoid systematically
+                    # favoring one genotype if we have no data to support it.
+                    llh_mat_1[i, j] = (self.mut_type_prior[gt1[j]] + self.mut_type_prior[gt2[j]])/2
+                    llh_mat_2[i, j] = (self.mut_type_prior[gt1[j]] + self.mut_type_prior[gt2[j]])/2
+                    continue
                 if not individual:
                     llh_mat_1[i, j] = (self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt1[j]) +
                                        self.mut_type_prior[gt1[j]])
@@ -471,7 +477,7 @@ class MutationFilter:
         log_prior = self.compute_log_prior(dropout_prob, dropout_direction_prob, overdispersion, error_rate,
                                            overdispersion_h, global_opt=True)
 
-        return -(log_prior)  # Negative because we're minimizing
+        return -(log_likelihood + log_prior)  # Negative because we're minimizing
 
     def total_log_posterior_individual(self, params, k_obs, n_obs, overdispersion, error_rate, dropout_direction_prob):
         dropout_prob, overdispersion_h = params

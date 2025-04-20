@@ -41,7 +41,7 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
     os.makedirs(os.path.join(path, "dropout_directions"), exist_ok=True)
     os.makedirs(os.path.join(path, "overdispersions_H"), exist_ok=True)
 
-    generator = DataGenerator(n_cells, n_mut)
+    generator = DataGenerator(n_cells, n_mut, coverage_method="zinb")
 
     for i in tqdm(range(size)):
         ref, alt, dropout_probs, dropout_directions, overdispersions_H = generator.generate_reads(new_tree=True,
@@ -78,10 +78,10 @@ tree_space = ["c", "m"]
 
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
-        data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
-        generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone)
-        # path_results = os.path.join(data_path, 'sciterna')
-        # generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
-        #                                      tree_space=tree_space,
-        #                                      flipped_mutation_direction=flipped_mutation_direction,
-        #                                      n_keep=num_mut, n_rounds=n_rounds)
+        data_path = f'../data/simulated_data_geom/{num_cells}c{num_mut}m{clone}'
+        # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone)
+        path_results = os.path.join(data_path, 'sciterna')
+        generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
+                                             tree_space=tree_space,
+                                             flipped_mutation_direction=flipped_mutation_direction,
+                                             n_keep=num_mut, n_rounds=n_rounds)

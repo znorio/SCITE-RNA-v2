@@ -35,6 +35,8 @@ def create_directories(pathout):
     os.makedirs(os.path.join(pathout, "sciterna_individual_dropout_probs"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_individual_overdispersions_H"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_global_parameters"), exist_ok=True)
+    os.makedirs(os.path.join(pathout, "sciterna_flipped"), exist_ok=True)
+    os.makedirs(os.path.join(pathout, "sciterna_mutation_location"), exist_ok=True)
 
 
 def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, selected, gt1, gt2, not_selected_genotypes):
@@ -106,6 +108,14 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
         np.savetxt(
             os.path.join(pathout, "sciterna_global_parameters", f"sciterna_global_parameters_{r}r{i}.txt"),
             [dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h]
+        )
+        np.savetxt(
+            os.path.join(pathout, "sciterna_flipped", f"sciterna_flipped_{r}r{i}.txt"),
+            flipped,
+        )
+        np.savetxt(
+            os.path.join(pathout, "sciterna_mutation_location", f"sciterna_mutation_location_{r}r{i}.txt"),
+            optimizer.ct.mut_loc,
         )
 
 

@@ -6,6 +6,59 @@ and creating genotype and mutation matrices for tree learning algorithms.
 import numpy as np
 import os
 import yaml
+from scipy.spatial.distance import pdist, squareform
+
+
+def leaf_dist_mat(ct, unrooted=False):
+    ''' Distance matrix for all leaves in a cell lineage tree '''
+    result = - np.ones((ct.n_cells, ct.n_vtx), dtype=int)
+    np.fill_diagonal(result, 0)
+
+    for vtx in ct.rdfs_experimental(ct.main_root):
+        if ct.isleaf(vtx):
+            continue
+
+        dist_growth = 1 if unrooted and vtx == ct.main_root else 2
+
+        children = ct.children(vtx)
+        for child in children:
+            for leaf in ct.leaves(child):
+                result[leaf, vtx] = result[leaf, child] + 1
+
+        if len(children) < 2:
+            continue
+
+        for leaf1 in ct.leaves(children[0]):
+            for leaf2 in ct.leaves(children[1]):
+                dist = result[leaf1, children[0]] + result[leaf2, children[1]] + dist_growth
+                result[leaf1, leaf2] = dist
+                result[leaf2, leaf1] = dist
+
+    return result[:, :ct.n_cells]
+
+
+def path_len_dist(ct1, ct2, unrooted=False):
+    '''
+    MSE between the distance matrices of two cell/mutation trees
+    The MSE (excluding the diagonal), only distances between leaf cells
+    '''
+
+    dist_mat1, dist_mat2 = leaf_dist_mat(ct1, unrooted), leaf_dist_mat(ct2, unrooted)
+    denominator = (dist_mat1.size - dist_mat1.shape[0])
+    return np.sum((dist_mat1 - dist_mat2)**2) / denominator
+
+def mut_count_distance(genotype_matrix1, genotype_matrix2):
+    # Compute the pairwise Hamming distances
+    hamming_distances = pdist(genotype_matrix1, metric='hamming')
+    distance_matrix1 = squareform(hamming_distances)
+    distance_matrix1 *= genotype_matrix1.shape[1]
+
+    hamming_distances = pdist(genotype_matrix2, metric='hamming')
+    distance_matrix2 = squareform(hamming_distances)
+    distance_matrix2 *=  genotype_matrix2.shape[1]
+
+    denominator = (distance_matrix1.size - distance_matrix1.shape[0])
+    return np.sum((distance_matrix1 - distance_matrix2)**2) / denominator
 
 
 def load_config_and_set_random_seed():

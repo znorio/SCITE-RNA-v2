@@ -14,8 +14,8 @@ or in the mutation tree space (m,c).
 int main() {
     int n_tests = 100; //number of runs
     int n_rounds = 3; //number of optimization rounds
-    std::vector<int> n_cells_list = {500, 500, 100};
-    std::vector<int> n_mut_list = {100, 500, 500};
+    std::vector<int> n_cells_list = {50, 100, 100};
+    std::vector<int> n_mut_list = {100, 100, 50};
     std::vector<std::vector<std::string>> tree_spaces = {{"m"}, {"c"}, {"c", "m"}, {"m", "c"}}; // {"m"}, {"c"}, {"c", "m"},  {"m", "c"}
     bool flipped_mutation_direction = false;
     bool save_runtimes = true;
@@ -24,8 +24,8 @@ int main() {
         for (int i = 0; i < n_cells_list.size(); ++i) {
             int n_cells = n_cells_list[i];
             int n_mut = n_mut_list[i];
-//            std::string path = "../data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
-            std::string path = "/cluster/work/bewi/members/znorio/data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
+            std::string path = "../data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
+//            std::string path = "/cluster/work/bewi/members/znorio/data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
             std::string path_results = path + "/sciterna_tree_space_comparison_cpp_";
 
             for (auto it = space.begin(); it != space.end(); ++it) {

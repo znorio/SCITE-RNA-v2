@@ -69,7 +69,9 @@ void create_directories(const std::string& pathout) {
             "sciterna_complete_mut_indicator",
             "sciterna_individual_dropout_probs",
             "sciterna_individual_overdispersions_H",
-            "sciterna_global_parameters"
+            "sciterna_global_parameters",
+            "sciterna_flipped",
+            "sciterna_mutation_location",
     };
 
     for (const auto& d : dirs) {
@@ -143,6 +145,8 @@ void process_rounds(
         save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", overdispersion_h_round);
         save_double_vector_to_file(pathout + "/sciterna_global_parameters/sciterna_global_parameters_" + std::to_string(r) + "r" +
         std::to_string(i) + ".txt", {dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h});
+        save_vector_to_file(pathout + "/sciterna_flipped/sciterna_flipped_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", std::vector<int>(flipped.begin(), flipped.end()));
+        save_vector_to_file(pathout + "/sciterna_mutation_location/sciterna_mutation_location_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.mut_loc);
     }
 }
 
