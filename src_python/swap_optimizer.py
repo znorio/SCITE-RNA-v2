@@ -48,7 +48,7 @@ class SwapOptimizer:
         mean_abs = np.sum(np.abs(llh_1 + llh_2)) / 2  # mean abs value when attaching mutations randomly
         self.n_decimals = int(self.sig_digits - np.log10(mean_abs))
 
-    def optimize(self, max_loops=100):
+    def optimize(self, max_loops=100, reshuffle_nodes=True):
         current_space = 0
         converged = [space not in self.spaces for space in ['c', 'm']]  # choose the spaces to be optimized
         if self.spaces[0] == 'c':  # choose the starting search space
@@ -75,7 +75,7 @@ class SwapOptimizer:
 
             else:  # i.e. current_space == 1:
                 print('Optimizing mutation tree ...')
-                self.mt.exhaustive_optimize()  # loop_count=loop_count)
+                self.mt.exhaustive_optimize(prune_single_mutations=reshuffle_nodes)  # loop_count=loop_count)
                 self.ct.fit_mutation_tree(self.mt)
                 self.ct.update_all()
 

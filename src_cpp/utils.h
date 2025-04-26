@@ -23,6 +23,7 @@ std::vector<std::vector<char>> create_genotype_matrix(
 void save_char_matrix_to_file(const std::string& filepath, const std::vector<std::vector<char>>& matrix);
 void save_matrix_to_file(const std::string& filepath, const std::vector<std::vector<int>>& matrix);
 void save_vector_to_file(const std::string& filepath, const std::vector<int>& vector);
+void save_char_vector_to_file(const std::string& filepath, const std::vector<char>& vector);
 
 std::vector<std::vector<int>> load_txt(const std::string& filename);
 std::vector<std::vector<int>> create_mutation_matrix(
@@ -31,6 +32,8 @@ std::vector<std::vector<int>> create_mutation_matrix(
         CellTree& ct);
 void save_double_vector_to_file(const std::string& filepath, const std::vector<double>& vector);
 std::vector<std::vector<int>> slice_columns(const std::vector<std::vector<int>>& matrix, const std::vector<int>& indices);
+std::vector<std::vector<char>> slice_columns_char(const std::vector<std::vector<char>>& matrix, const std::vector<int>& indices);
+std::vector<std::vector<int>> read_csv(const std::string& filename);
 void loadGenotypes(const std::string& filename, std::vector<char>& gt1, std::vector<char>& gt2);
 std::vector<int> loadSelectedVector(const std::string& filename);
 

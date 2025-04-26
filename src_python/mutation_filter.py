@@ -4,6 +4,7 @@ and can filter SNVs based on this posterior.
 """
 
 import numpy as np
+import os
 from numba import njit
 import math
 from scipy.special import loggamma, logsumexp
@@ -55,7 +56,7 @@ def log_binomial_coefficient(n, k):
 
 # custom betabinom_pmf function
 @njit
-def betabinom_pmf(k, n, a, b):
+def log_betabinom_pmf(k, n, a, b):
     if n < 0 or k < 0 or k > n or a <= 0 or b <= 0:
         return 0.0
 
@@ -64,7 +65,7 @@ def betabinom_pmf(k, n, a, b):
     num = betaln(k + a, n - k + b)
     denom = betaln(a, b)
 
-    return np.exp(num - denom + log_binom_coef)
+    return (num - denom + log_binom_coef)
 
 
 def calculate_heterozygous_log_likelihoods(k, n, dropout_prob, dropout_direction_prob, alpha_h, beta_h,
@@ -72,19 +73,17 @@ def calculate_heterozygous_log_likelihoods(k, n, dropout_prob, dropout_direction
     """
     Calculates the log-likelihood of observing k alternative reads with n coverage for a heterozygous locus.
     """
-    log_no_dropout = np.log(1 - dropout_prob) + np.log(betabinom_pmf(k, n, alpha_h, beta_h))
+    log_no_dropout = np.log(1 - dropout_prob) + log_betabinom_pmf(k, n, alpha_h, beta_h)
 
     # Dropout to "R"
     alpha_R = error_rate * overdispersion
     beta_R = overdispersion - alpha_R
-    log_dropout_R = np.log(dropout_prob) + np.log(1 - dropout_direction_prob) + np.log(
-        betabinom_pmf(k, n, alpha_R, beta_R))
+    log_dropout_R = np.log(dropout_prob) + np.log(1 - dropout_direction_prob) + log_betabinom_pmf(k, n, alpha_R, beta_R)
 
     # Dropout to "A"
     alpha_A = (1 - error_rate) * overdispersion
     beta_A = overdispersion - alpha_A
-    log_dropout_A = np.log(dropout_prob) + np.log(dropout_direction_prob) + np.log(
-        betabinom_pmf(k, n, alpha_A, beta_A))
+    log_dropout_A = np.log(dropout_prob) + np.log(dropout_direction_prob) + log_betabinom_pmf(k, n, alpha_A, beta_A)
 
     return log_no_dropout, log_dropout_R, log_dropout_A
 
@@ -104,7 +103,7 @@ def total_log_likelihood(params, k_obs, n_obs, genotypes):
         if genotype == "R":
             alpha_R = error_rate * overdispersion
             beta_R = overdispersion - alpha_R
-            log_likelihood += np.log(betabinom_pmf(k, n, alpha_R, beta_R))
+            log_likelihood += log_betabinom_pmf(k, n, alpha_R, beta_R)
 
         elif genotype == "H":
 
@@ -118,7 +117,7 @@ def total_log_likelihood(params, k_obs, n_obs, genotypes):
 
             alpha_A = (1 - error_rate) * overdispersion
             beta_A = overdispersion - alpha_A
-            log_likelihood += np.log(betabinom_pmf(k, n, alpha_A, beta_A))
+            log_likelihood += log_betabinom_pmf(k, n, alpha_A, beta_A)
 
         else:
             raise ValueError(f"Unexpected genotype: {genotype}")
@@ -195,17 +194,17 @@ class MutationFilter:
             the log-likelihood of observing n_ref, n_alt, given genotype
         """
         if genotype == 'R':
-            result = np.log(betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R))
+            result = log_betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R)
         elif genotype == 'A':
-            result = np.log(betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A))
+            result = log_betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A)
         elif genotype == 'H':
             result_no_dropout = np.log(1 - self.dropout_prob) + \
-                                np.log(betabinom_pmf(n_alt, n_total, self.alpha_H, self.beta_H))
+                                log_betabinom_pmf(n_alt, n_total, self.alpha_H, self.beta_H)
             dropout_R = np.log(self.dropout_prob) + np.log(1 - self.dropout_direction_prob) + \
-                        np.log(betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R))
+                        log_betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R)
 
             dropout_A = np.log(self.dropout_prob) + np.log(self.dropout_direction_prob) + \
-                        np.log(betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A))
+                        log_betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A)
             result = logsumexp([result_no_dropout, dropout_R, dropout_A])
         else:
             raise ValueError('[MutationFilter.single_read_llh] Invalid genotype.')
@@ -224,17 +223,17 @@ class MutationFilter:
             the log-likelihood of observing n_ref, n_alt, given genotype
         """
         if genotype == 'R':
-            result = np.log(betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R))
+            result = log_betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R)
         elif genotype == 'A':
-            result = np.log(betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A))
+            result = log_betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A)
         elif genotype == 'H':
             result_no_dropout = np.log(1 - dropout_prob) + \
-                                np.log(betabinom_pmf(n_alt, n_total, alpha_h, beta_h))
+                                log_betabinom_pmf(n_alt, n_total, alpha_h, beta_h)
             dropout_R = np.log(dropout_prob) + np.log(1 - self.dropout_direction_prob) + \
-                        np.log(betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R))
+                        log_betabinom_pmf(n_alt, n_total, self.alpha_R, self.beta_R)
 
             dropout_A = np.log(dropout_prob) + np.log(self.dropout_direction_prob) + \
-                        np.log(betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A))
+                        log_betabinom_pmf(n_alt, n_total, self.alpha_A, self.beta_A)
             result = logsumexp([result_no_dropout, dropout_R, dropout_A])
         else:
             raise ValueError('[MutationFilter.single_read_llh] Invalid genotype.')
@@ -418,25 +417,27 @@ class MutationFilter:
             betas_h = np.array(overdispersions_h) * 0.5
             assert n_mut == len(alphas_h) and n_mut == len(betas_h)
 
+        imputed_coverage = np.mean(total) / 3
         for i in range(n_cells):
             for j in range(n_mut):
-                if total[i,j] == 0:
-                    # if there are no reads, the likelihood of both genotypes is the same, to avoid systematically
-                    # favoring one genotype if we have no data to support it.
-                    llh_mat_1[i, j] = (self.mut_type_prior[gt1[j]] + self.mut_type_prior[gt2[j]])/2
-                    llh_mat_2[i, j] = (self.mut_type_prior[gt1[j]] + self.mut_type_prior[gt2[j]])/2
-                    continue
+                k = alt[i, j]
+                n = total[i, j]
+                if n == 0:
+                    vafs = [alt[l][j] / total[l][j] for l in range(n_cells) if total[l][j] > 0]
+                    median_vaf = np.median(vafs)
+                    k = np.round(median_vaf * imputed_coverage)
+                    n = np.round(imputed_coverage)
                 if not individual:
-                    llh_mat_1[i, j] = (self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt1[j]) +
+                    llh_mat_1[i, j] = (self.single_read_llh_with_dropout(k, n, gt1[j]) +
                                        self.mut_type_prior[gt1[j]])
-                    llh_mat_2[i, j] = (self.single_read_llh_with_dropout(alt[i, j], total[i, j], gt2[j]) +
+                    llh_mat_2[i, j] = (self.single_read_llh_with_dropout(k, n, gt2[j]) +
                                        self.mut_type_prior[gt2[j]])
                 else:
-                    llh_mat_1[i, j] = (self.single_read_llh_with_individual_dropout(alt[i, j], total[i, j], gt1[j],
+                    llh_mat_1[i, j] = (self.single_read_llh_with_individual_dropout(k, n, gt1[j],
                                                                                    dropout_probs[j],
                                                                                    alphas_h[j], betas_h[j]) +
                                        self.mut_type_prior[gt1[j]])
-                    llh_mat_2[i, j] = (self.single_read_llh_with_individual_dropout(alt[i, j], total[i, j], gt2[j],
+                    llh_mat_2[i, j] = (self.single_read_llh_with_individual_dropout(k, n, gt2[j],
                                                                                    dropout_probs[j],
                                                                                    alphas_h[j], betas_h[j]) +
                                        self.mut_type_prior[gt2[j]])
@@ -531,9 +532,6 @@ class MutationFilter:
         if not result.success:
             print(f"Optimization failed: {result.message}")
 
-        print("optimized: ", self.total_log_posterior(result.x, alt_norm, total_norm, genotypes_nonzero))
-        print("ground truth: ", self.total_log_posterior(initial_params, alt_norm, total_norm,
-                                                         genotypes_nonzero))
         return result.x
 
     def fit_parameters_individual(self, alt_het, total_reads, overdispersions, error_rates, dropout_direction,
@@ -559,7 +557,10 @@ class MutationFilter:
             print(f"Optimization failed: {result.message}")
         return result.x
 
-    def update_parameters(self, ref, alt, inferred_genotypes):
+    def update_parameters(self, ref, alt, inferred_genotypes, test, path_gt):
+        # overdispersions_h_gt = np.loadtxt(os.path.join(path_gt, "..", "overdispersions_H", f"overdispersions_H_{test}.txt"))
+        # dropouts_gt = np.loadtxt(os.path.join(path_gt, "..", "dropout_probs", f"dropout_probs_{test}.txt"))
+
         all_ref_counts = ref.flatten()
         all_alt_counts = alt.flatten()
         all_genotypes = inferred_genotypes.flatten()
@@ -602,6 +603,7 @@ class MutationFilter:
                 individual_params = self.dropout_prob, self.overdispersion_H
 
             posterior_dropout_prob, posterior_overdispersion_hs = individual_params
+            # posterior_dropout_prob, posterior_overdispersion_hs = dropouts_gt[snv], overdispersions_h_gt[snv]
 
             individual_dropout_probs.append(posterior_dropout_prob)
             individual_overdispersions_h.append(posterior_overdispersion_hs)

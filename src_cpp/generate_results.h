@@ -23,7 +23,10 @@ void process_rounds(
         std::vector<int> selected,
         const std::vector<char>& gt1,
         const std::vector<char>& gt2,
-        const std::vector<char>& not_selected_genotypes
+        const std::vector<char>& not_selected_genotypes,
+        int max_loops,
+        bool insert_nodes,
+        bool bootstrap = false
 );
 void generate_sciterna_simulation_results(const std::string& path,
                                           const std::string& pathout,
@@ -31,7 +34,20 @@ void generate_sciterna_simulation_results(const std::string& path,
                                           const std::vector<std::string>& tree_space,
                                           bool flipped_mutation_direction,
                                           int n_keep,
-                                          int n_rounds,
-                                          bool save_runtimes);
+                                          int n_rounds);
+
+void generate_sciterna_results(
+        const std::string& path,
+        std::string pathout,
+        int n_bootstrap,
+        bool use_bootstrap,
+        const std::vector<std::string>& tree_space,
+        bool flipped_mutation_direction,
+        int n_keep,
+        double posterior_threshold,
+        int n_rounds,
+        bool only_preprocessing,
+        const std::string& method,
+        bool insert_nodes);
 
 #endif //SCITE_RNA_GENERATE_RESULTS_H
