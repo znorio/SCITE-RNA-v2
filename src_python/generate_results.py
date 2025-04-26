@@ -39,7 +39,8 @@ def create_directories(pathout):
     os.makedirs(os.path.join(pathout, "sciterna_mutation_location"), exist_ok=True)
 
 
-def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, selected, gt1, gt2, not_selected_genotypes):
+def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, selected, gt1, gt2, not_selected_genotypes,
+                   reshuffle_nodes=False):
     individual_dropout_probs = (np.ones(n_snvs, dtype=float) * config["dropout_alpha"] /
                                 (config["dropout_alpha"] + config["dropout_beta"]))
 
@@ -50,7 +51,7 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
                                       dropout_probs=individual_dropout_probs,
                                       overdispersions_h=individual_overdispersions_h)
         optimizer.fit_llh(llh_1, llh_2)
-        optimizer.optimize()
+        optimizer.optimize(reshuffle_nodes=reshuffle_nodes)
 
         flipped = optimizer.ct.flipped
         mutation_matrix = create_mutation_matrix(optimizer.ct.parent_vec, optimizer.ct.mut_loc, optimizer.ct)
@@ -59,7 +60,7 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
         for n, sel in enumerate(selected):
             complete_mut_indicator[:, sel] = mutation_matrix[:, n]
 
-        params = mf.update_parameters(np.array(ref), np.array(alt), np.array(genotype))
+        params = mf.update_parameters(np.array(ref[:, selected]), np.array(alt[:, selected]), np.array(genotype[:, selected]), i, pathout)
 
         (dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h,
          individual_dropout_probs, individual_overdispersions_h) = params
@@ -148,12 +149,12 @@ def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./c
 
         n_cells, n_snvs = alt.shape
 
+
         mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
                             genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
                             dropout_alpha=config["dropout_alpha"], dropout_beta=config["dropout_beta"],
                             dropout_direction_prob=config["dropout_direction"],
                             overdispersion_h=config["overdispersion_h"])
-
         selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method="first_k", n_exp=n_keep)
         process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, selected, gt1, gt2,
                        not_selected_genotypes)
@@ -163,8 +164,8 @@ def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./c
 
 def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_data/results",
                               n_bootstrap=100, use_bootstrap=True, tree_space=None,
-                              flipped_mutation_direction=True, n_keep=50, n_rounds=3,
-                              only_preprocessing=False):
+                              flipped_mutation_direction=True, n_keep=50, posterior_cutoff=0.5, n_rounds=3,
+                              only_preprocessing=False, method="threshold", reshuffle_nodes=False):
     """
     Runs SCITE-RNA on the data in the input path and saves the results in the output path.
 
@@ -188,8 +189,7 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
     mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
                         genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
                         dropout_alpha=config["dropout_alpha"], dropout_beta=config["dropout_beta"],
-                        dropout_dir_alpha=config["dropout_dir_alpha"],
-                        dropout_dir_beta=config["dropout_dir_beta"],
+                        dropout_direction_prob=config["dropout_direction"],
                         overdispersion_h=config["overdispersion_h"])
 
     n_cells, n_snvs = ref.shape
@@ -197,7 +197,7 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
     np.random.seed(config["random_seed"])
 
     print("Preprocessing data...")
-    selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method="first_k", n_exp=n_keep)
+    selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method=method, t=posterior_cutoff, n_exp=n_keep)
 
     if use_bootstrap:
         indices = np.random.choice(len(selected), (n_bootstrap, len(selected)), replace=True)
@@ -206,19 +206,20 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
         gt1 = np.array(gt1)[indices]
         gt2 = np.array(gt2)[indices]
         not_selected_genotypes = np.array(not_selected_genotypes)
-        b = "bootstrap_"
+        b = "_bootstrap"
     else:
         b = ""
 
-    selected_genes = np.array(reference.columns)[selected]
+    selected_positions = np.array(reference.columns)[selected]
 
+    pathout = pathout + b
     os.makedirs(pathout, exist_ok=True)
-    np.savetxt(os.path.join(pathout, f"{b}selected.txt"), selected, fmt='%d', delimiter=',')
-    np.savetxt(os.path.join(pathout, f"{b}gt1.txt"), gt1, fmt='%s', delimiter=',')
-    np.savetxt(os.path.join(pathout, f"{b}gt2.txt"), gt2, fmt='%s', delimiter=',')
-    np.savetxt(os.path.join(pathout, f"{b}not_selected_genotypes.txt"), not_selected_genotypes, fmt='%s',
+    np.savetxt(os.path.join(pathout, "selected.txt"), selected, fmt='%d', delimiter=',')
+    np.savetxt(os.path.join(pathout, "gt1.txt"), gt1, fmt='%s', delimiter=',')
+    np.savetxt(os.path.join(pathout, "gt2.txt"), gt2, fmt='%s', delimiter=',')
+    np.savetxt(os.path.join(pathout, "not_selected_genotypes.txt"), not_selected_genotypes, fmt='%s',
                delimiter=',')
-    np.savetxt(os.path.join(pathout, f"{b}selected_genes.txt"), selected_genes, fmt='%s', delimiter=',')
+    np.savetxt(os.path.join(pathout, "selected_chromosome_positions.txt"), selected_positions, fmt='%s', delimiter=',')
 
     if not only_preprocessing:
         optimizer = SwapOptimizer(spaces=tree_space, flipped_mutation_direction=flipped_mutation_direction)
@@ -232,7 +233,6 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
             for i in tqdm(range(0, n_bootstrap)):
                 b_selected = selected[i]
                 b_gt1, b_gt2 = gt1[i], gt2[i]
-                # b_not_selected_genotypes = not_selected_genotypes[i]
 
                 b_selected_loci = reference.columns[b_selected]
                 b_selected_genes = convert_location_to_gene(b_selected_loci)
@@ -240,18 +240,14 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
                 with open(os.path.join(pathout, "sciterna_selected_genes", f"selected_genes_{i}.json"), 'w') as file:
                     json.dump(b_selected_genes, file)
 
-                # TODO To be able to update the individual dropout probabilities, dropout direction probabilities and
-                # overdispersions, the process_rounds function needs to be be able to determine the genotype matrix.
-                # even for SNVs not selected in the bootstrap sample.
-                # process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, b_selected, b_gt1, b_gt2,
-                #                b_not_selected_genotypes)
+                process_rounds(mf, ref, alt, len(b_selected), n_rounds, optimizer, pathout, i, b_selected, b_gt1, b_gt2, not_selected_genotypes)
 
         else:
-            selected_genes = convert_location_to_gene(selected)
-            with open(os.path.join(pathout, "sciterna_selected_genes", f"selected_genes.json"), 'w') as file:
-                json.dump(selected_genes, file)
+            selected_genes = convert_location_to_gene(selected_positions)
+            with open(os.path.join(pathout, f"selected_genes.json"), 'w') as f:
+                json.dump(selected_genes, f)
 
-            process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, "", selected, gt1, gt2,
-                           not_selected_genotypes)
+            process_rounds(mf, ref, alt, len(selected), n_rounds, optimizer, pathout, "", selected, gt1, gt2,
+                           not_selected_genotypes, reshuffle_nodes)
 
     print("Done.")

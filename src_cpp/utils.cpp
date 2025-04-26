@@ -128,6 +128,22 @@ std::vector<std::vector<int>> slice_columns(const std::vector<std::vector<int>>&
     return sliced_matrix;
 }
 
+// using indices to extract columns of matrix
+std::vector<std::vector<char>> slice_columns_char(const std::vector<std::vector<char>>& matrix, const std::vector<int>& indices) {
+    std::vector<std::vector<char>> sliced_matrix;
+    size_t num_rows = matrix.size();
+
+    for (size_t i = 0; i < num_rows; ++i) {
+        std::vector<char> row;
+        for (int idx : indices) {
+            row.push_back(matrix[i][idx]);
+        }
+        sliced_matrix.push_back(row);
+    }
+
+    return sliced_matrix;
+}
+
 void save_matrix_to_file(const std::string& filepath, const std::vector<std::vector<int>>& matrix) {
     std::ofstream file(filepath);
     for (const auto& row : matrix) {
@@ -139,12 +155,21 @@ void save_matrix_to_file(const std::string& filepath, const std::vector<std::vec
     }
 }
 
-
 void save_vector_to_file(const std::string& filepath, const std::vector<int>& vector) {
     std::ofstream file(filepath);
     for (size_t i = 0; i < vector.size(); ++i) {
         file << vector[i];
         if (i < vector.size() - 1) file << "\n";
+    }
+}
+
+void save_char_vector_to_file(const std::string& filepath, const std::vector<char>& vector) {
+    std::ofstream file(filepath);
+    for (size_t i = 0; i < vector.size(); ++i) {
+        file << vector[i];
+        if (i < vector.size() - 1) {
+            file << "\n";
+        }
     }
 }
 
@@ -250,10 +275,50 @@ std::vector<int> loadSelectedVector(const std::string& filename) {
     return data;
 }
 
-// load genotypes, which is used if the mutation filtering step was done beforehand
+std::vector<std::vector<int>> read_csv(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + filename);
+    }
+
+    std::vector<std::vector<int>> data;
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::stringstream lineStream(line);
+        std::string cell;
+        std::vector<int> row;
+        bool has_valid_value = false;
+
+        while (std::getline(lineStream, cell, ',')) {
+            if (cell.empty()) {
+                // Handle empty cell by adding 0
+                row.push_back(0);
+            } else {
+                try {
+                    row.push_back(std::stoi(cell));
+                    has_valid_value = true;
+                } catch (const std::invalid_argument&) {
+
+                } catch (const std::out_of_range&) {
+                    row.push_back(0);
+                    has_valid_value = true;
+                }
+            }
+        }
+
+        if (has_valid_value) {
+            data.push_back(row);
+        }
+    }
+
+    file.close();
+    return data;
+}
+
+
 void loadGenotypes(const std::string& filename, std::vector<char>& gt1, std::vector<char>& gt2) {
     std::ifstream file(filename);
-
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file " + filename);
     }

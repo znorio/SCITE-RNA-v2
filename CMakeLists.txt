@@ -27,7 +27,7 @@ add_executable(SCITE-RNA
         src_cpp/utils.h
 #        generate_results_cpp/comparison_num_clones.cpp
 #        generate_results_cpp/run_sciterna.cpp
-#        generate_results_cpp/MM.cpp
-        generate_results_cpp/comparison_tree_spaces_switching.cpp
-
+#        generate_results_cpp/real_data_processing.cpp
+        generate_results_cpp/space_switching_comparison.cpp
+        #        generate_results_cpp/comparison_tree_spaces_switching.cpp
 )

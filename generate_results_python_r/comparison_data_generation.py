@@ -78,7 +78,7 @@ tree_space = ["c", "m"]
 
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
-        data_path = f'../data/simulated_data_geom/{num_cells}c{num_mut}m{clone}'
+        data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
         # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone)
         path_results = os.path.join(data_path, 'sciterna')
         generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,

@@ -8,7 +8,6 @@
 #include <iostream>
 #include <fstream>
 #include "generate_results.h"
-#include <string>
 #include <algorithm>
 
 #include <mutation_filter.h>
@@ -91,8 +90,10 @@ void process_rounds(
         std::vector<int> selected,
         const std::vector<char>& gt1,
         const std::vector<char>& gt2,
-        const std::vector<char>& not_selected_genotypes
-) {
+        const std::vector<char>& not_selected_genotypes,
+        int max_loops = 100,
+        bool insert_nodes = true,
+        bool bootstrap) {
     load_config("../config/config.yaml");
 
     double dropout_alpha = std::stod(config_variables["dropout_alpha"]);
@@ -114,7 +115,7 @@ void process_rounds(
 
 
         optimizer.fit_llh(llh_1, llh_2);
-        optimizer.optimize();
+        optimizer.optimize(max_loops, insert_nodes);
 
         const auto& flipped = optimizer.ct.flipped;
         auto mutation_matrix = create_mutation_matrix(optimizer.ct.parent_vector_ct, optimizer.ct.mut_loc, optimizer.ct);
@@ -127,7 +128,8 @@ void process_rounds(
             }
         }
 
-        auto params = mf.update_parameters(ref, alt, genotype);
+        auto params = mf.update_parameters(slice_columns(ref, selected), slice_columns(alt, selected), slice_columns_char(genotype, selected));
+//        auto params = mf.update_parameters(ref, alt, genotype);
         auto [dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h,
                 individual_dropouts, individual_overdispersions] = params;
 
@@ -135,14 +137,29 @@ void process_rounds(
         dropout_probs_round = individual_dropouts;
         overdispersion_h_round = individual_overdispersions;
 
+        std::vector<double> reordered_dropouts(individual_dropouts.size() + not_selected_genotypes.size(), 0.0);
+        std::vector<double> reordered_overdispersions(individual_overdispersions.size() + not_selected_genotypes.size(), 0.0);
+
+        if (bootstrap) {
+            reordered_dropouts = individual_dropouts;
+            reordered_overdispersions = individual_overdispersions;
+        }
+
+        else {
+            for (size_t idx = 0; idx < not_selected_genotypes.size(); ++idx) {
+                reordered_dropouts[idx] = individual_dropouts[idx];
+                reordered_overdispersions[idx] = individual_overdispersions[idx];
+            }
+        }
+
         save_vector_to_file(pathout + "/sciterna_selected_loci/sciterna_selected_loci_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", selected);
         save_char_matrix_to_file(pathout + "/sciterna_inferred_mut_types/sciterna_inferred_mut_types_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", {gt1, gt2});
         save_vector_to_file(pathout + "/sciterna_parent_vec/sciterna_parent_vec_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.parent_vector_ct);
         save_matrix_to_file(pathout + "/sciterna_mut_indicator/sciterna_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", mutation_matrix);
         save_char_matrix_to_file(pathout + "/sciterna_genotype/sciterna_genotype_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", genotype);
         save_matrix_to_file(pathout + "/sciterna_complete_mut_indicator/sciterna_complete_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", complete_mut_indicator);
-        save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", dropout_probs_round);
-        save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", overdispersion_h_round);
+        save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", reordered_dropouts);
+        save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", reordered_overdispersions);
         save_double_vector_to_file(pathout + "/sciterna_global_parameters/sciterna_global_parameters_" + std::to_string(r) + "r" +
         std::to_string(i) + ".txt", {dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h});
         save_vector_to_file(pathout + "/sciterna_flipped/sciterna_flipped_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", std::vector<int>(flipped.begin(), flipped.end()));
@@ -158,8 +175,7 @@ void generate_sciterna_simulation_results(
         const std::vector<std::string>& tree_space = {"c", "m"},
         bool flipped_mutation_direction = true,
         int n_keep = 50,
-        int n_rounds = 3,
-        bool save_runtimes = true) {
+        int n_rounds = 3) {
 
     load_config("../config/config.yaml");
 
@@ -187,7 +203,7 @@ void generate_sciterna_simulation_results(
         MutationFilter mf(std::stod(config_variables["error_rate"]), std::stod(config_variables["overdispersion"]),
                           genotype_freq, std::stod(config_variables["mut_freq"]),
                           std::stod(config_variables["dropout_alpha"]), std::stod(config_variables["dropout_beta"]),
-                          std::stod(config_variables["dropout_direction"]), std::stod(config_variables["overdispersion_h"]));;
+                          std::stod(config_variables["dropout_direction"]), std::stod(config_variables["overdispersion_h"]));
 
         auto [selected, gt1, gt2, not_selected_genotypes] = mf.filter_mutations(ref, alt, "first_k", 0.5, n_keep);
         process_rounds(mf, optimizer, ref, alt, n_snvs, n_rounds, pathout, i, selected, gt1, gt2, not_selected_genotypes);
@@ -198,5 +214,85 @@ void generate_sciterna_simulation_results(
     }
 
     save_double_vector_to_file(pathout + "/sciterna_runtimes.txt", runtimes);
+    std::cout << "Done." << std::endl;
+}
+
+
+void generate_sciterna_results(
+        const std::string& path = "./comparison_data/",
+        std::string pathout = "./comparison_data/results",
+        int n_bootstrap = 100,
+        bool use_bootstrap = true,
+        const std::vector<std::string>& tree_space = {"c", "m"},
+        bool flipped_mutation_direction = true,
+        int n_keep = 50,
+        double posterior_threshold = 0.9,
+        int n_rounds = 3,
+        bool only_preprocessing = false,
+        const std::string& method = "threshold",
+        bool insert_nodes = true) {
+
+    load_config("../config/config.yaml");
+
+    std::vector<std::vector<int>> ref = read_csv(path + "/ref.csv");
+    std::vector<std::vector<int>> alt = read_csv(path + "/alt.csv");
+
+    int n_cells = ref.size();
+//    int n_snvs = ref[0].size();
+
+    std::map<std::string, double> genotype_freq = {
+            {"A", std::stod(config_variables["genotype_freq.  A"])},
+            {"H", std::stod(config_variables["genotype_freq.  H"])},
+            {"R", std::stod(config_variables["genotype_freq.  R"])},
+    };
+
+    MutationFilter mf(std::stod(config_variables["error_rate"]), std::stod(config_variables["overdispersion"]),
+                      genotype_freq, std::stod(config_variables["mut_freq"]),
+                      std::stod(config_variables["dropout_alpha"]), std::stod(config_variables["dropout_beta"]),
+                      std::stod(config_variables["dropout_direction"]), std::stod(config_variables["overdispersion_h"]));
+
+    std::cout << "Preprocessing data..." << std::endl;
+    auto [selected, gt1, gt2, not_selected_genotypes] = mf.filter_mutations(ref, alt, method, posterior_threshold, n_keep);
+
+    std::string b = use_bootstrap ? "_bootstrap" : "";
+    pathout = pathout + b;
+    create_directories(pathout);
+
+    save_vector_to_file(pathout + "/" + "selected.txt", selected);
+    save_char_vector_to_file(pathout + "/" + "gt1.txt", gt1);
+    save_char_vector_to_file(pathout + "/" + "gt2.txt", gt2);
+    save_char_vector_to_file(pathout + "/" + "not_selected_genotypes.txt", not_selected_genotypes);
+
+    if (!only_preprocessing) {
+        SwapOptimizer optimizer(tree_space, flipped_mutation_direction, static_cast<int>(selected.size()), n_cells);
+
+        create_directories(pathout + "/sciterna_selected_genes");
+
+        std::cout << "Running inference on data in " << path << std::endl;
+
+        if (use_bootstrap) {
+            std::cout << "Running bootstrap..." << std::endl;
+            for (int i = 0; i < n_bootstrap; ++i) {
+                std::vector<int> b_selected;
+                std::vector<char> b_gt1, b_gt2;
+
+                static std::mt19937 rng(std::stoi(config_variables["random_seed"])); // Use a random seed
+
+                std::uniform_int_distribution<int> dist(0, static_cast<int>(selected.size() - 1));
+
+                for (int j = 0; j < selected.size(); ++j) {
+                    int index = dist(rng);
+                    b_selected.push_back(selected[index]);
+                    b_gt1.push_back(gt1[index]);
+                    b_gt2.push_back(gt2[index]);
+                }
+
+                process_rounds(mf, optimizer, ref, alt, static_cast<int>(b_selected.size()), n_rounds, pathout, i, b_selected, b_gt1, b_gt2, not_selected_genotypes, 100, insert_nodes, true);
+            }
+        } else {
+            process_rounds(mf, optimizer, ref, alt, static_cast<int>(selected.size()), n_rounds, pathout, 0, selected, gt1, gt2, not_selected_genotypes, 100, insert_nodes, true);
+        }
+    }
+
     std::cout << "Done." << std::endl;
 }

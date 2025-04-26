@@ -760,3 +760,13 @@ std::mt19937& CellTree::create_rng() {
     }());
     return rng;
 }
+
+std::vector<int> CellTree::leaves(int subroot) {
+    std::vector<int> leaf_vertices;
+    for (int vtx : dfs(subroot)) {
+        if (isLeaf(vtx)) {
+            leaf_vertices.push_back(vtx);
+        }
+    }
+    return leaf_vertices;
+}

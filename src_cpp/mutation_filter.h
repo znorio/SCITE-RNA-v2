@@ -53,7 +53,7 @@ public:
     std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> get_llh_mat(
             const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
             const std::vector<char>& gt1, const std::vector<char>& gt2, bool individual,
-            const std::vector<double>& dropout_probs, const std::vector<double>& overdispersions_h);
+            const std::vector<double>& dropout_probs = {}, const std::vector<double>& = {});
 
     double compute_log_prior(
             double dropout, double dropout_direction, double overdispersion,
@@ -85,7 +85,7 @@ public:
     static double betaln(double x, double y);
     static double factorial(int n);
     static double log_binomial_coefficient(int n, int k);
-    static double betabinom_pmf(int n_ref, int total_reads, double alpha, double beta);
+    static double log_betabinom_pmf(int n_ref, int total_reads, double alpha, double beta);
     static double logaddexp(double logx, double logy);
     static double logbinom(int n, int k);
     static double logsumexp(const std::vector<double>& v);

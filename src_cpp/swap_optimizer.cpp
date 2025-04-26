@@ -71,7 +71,9 @@ void SwapOptimizer::optimize(int max_loops, bool insert_nodes) {
 
         std::cout << ct.joint << " " << mt.joint << std::endl;
 
-        double current_joint = std::min(getCtJoint(), getMtJoint());
+        double current_joint = (spaces.size() == 1 && spaces[0] == "m") ? getMtJoint() :
+                               (spaces.size() == 1 && spaces[0] == "c") ? getCtJoint() :
+                               (getCtJoint()); // get the likelihood of the current space
 
         if (start_joint < current_joint) {
             converged[current_space] = false;
@@ -81,7 +83,10 @@ void SwapOptimizer::optimize(int max_loops, bool insert_nodes) {
             throw std::runtime_error("Observed decrease in joint likelihood.");
         }
 
-        start_joint = std::min(getCtJoint(), getMtJoint());
+        start_joint = (spaces.size() == 1 && spaces[0] == "m") ? getMtJoint() :
+                      (spaces.size() == 1 && spaces[0] == "c") ? getCtJoint() :
+                      (getCtJoint()); // get the starting likelihood of the next space
+
 
         if (std::find(spaces.begin(), spaces.end(), "c") != spaces.end() &&
             std::find(spaces.begin(), spaces.end(), "m") != spaces.end()) {
