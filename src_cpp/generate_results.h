@@ -26,7 +26,7 @@ void process_rounds(
         const std::vector<char>& not_selected_genotypes,
         int max_loops,
         bool insert_nodes,
-        bool bootstrap = false
+        bool bootstrap
 );
 void generate_sciterna_simulation_results(const std::string& path,
                                           const std::string& pathout,

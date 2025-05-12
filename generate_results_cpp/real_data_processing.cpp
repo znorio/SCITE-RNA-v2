@@ -70,21 +70,21 @@ Script used to run SCITE-RNA on the multiple myeloma dataset MM34.
 int main() {
 
     int bootstrap_samples = 1000;
-    bool use_bootstrap = true;
+    bool use_bootstrap = false;
     int n_snps = 3000;
     double posterior_threshold = 0.95;
     std::string method = "threshold";
     int n_rounds = 3;
-    std::string sample = "mm34";
+    std::string sample = "mm16";
     bool flipped_mutation_direction = true;
     bool only_preprocessing = false;
     std::vector<std::string> tree_space = {"c", "m"};
     bool reshuffle_nodes = false; // false makes optimization faster for large numbers of mutations
 
-//    std::string input_path = "../data/input_data/" + sample;
-    std::string input_path = "/cluster/work/bewi/members/znorio/data/input_data/" + sample;
-//    std::string output_path = "../data/results/" + sample + "/sciterna";
-    std::string output_path = "/cluster/work/bewi/members/znorio/data/results/" + sample + "/sciterna";
+    std::string input_path = "../data/input_data/" + sample;
+//    std::string input_path = "/cluster/work/bewi/members/znorio/data/input_data/" + sample;
+    std::string output_path = "../data/results/" + sample + "/sciterna";
+//    std::string output_path = "/cluster/work/bewi/members/znorio/data/results/" + sample + "/sciterna";
 
     generate_sciterna_results(input_path, output_path,
                             bootstrap_samples, use_bootstrap, tree_space,

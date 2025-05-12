@@ -16,22 +16,6 @@
 using namespace std;
 using namespace Eigen;
 
-// Vectorized mapping function
-float vectorizedMap(char x, const unordered_map<char, float>& mappingDict) {
-    return mappingDict.at(x);
-}
-
-// Function to write a vector of vectors to a file
-void writeToFile(const string& filename, const vector<vector<double>>& data) {
-    ofstream file(filename);
-    for (const auto& row : data) {
-        for (size_t i = 0; i < row.size(); ++i) {
-            file << row[i];
-            if (i < row.size() - 1) file << ",";
-        }
-        file << "\n";
-    }
-}
 
 // Template function to load data from a file into a vector
 template <typename T>
@@ -122,7 +106,7 @@ double path_len_dist(const CellTree& ct1, const CellTree& ct2, bool unrooted = f
 
     double denominator = static_cast<double>(dist_mat1.size()) - static_cast<double>(dist_mat1.rows());
     MatrixXi diff = dist_mat1 - dist_mat2;
-    double mse = diff.array().square().sum() / denominator;
+    double mse = diff.array().abs().sum() / denominator; // .square()
 
     return mse;
 }
@@ -165,7 +149,7 @@ double mut_count_distance(const vector<vector<double>>& genotype_matrix1, const 
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {  // Only upper triangle (excluding diagonal)
             double diff = distance_matrix1[i][j] - distance_matrix2[i][j];
-            sum_squared_diff += diff * diff;
+            sum_squared_diff += std::abs(diff); //diff * diff;
             ++count;
         }
     }
