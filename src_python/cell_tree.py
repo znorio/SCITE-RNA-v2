@@ -172,6 +172,69 @@ class CellTree(PruneTree):
                 # LLR at internal vertex is the sum of LLR of both children
                 self.llr[vtx, :] = self.llr[self.children(vtx), :].sum(axis=0)
 
+    def reduce_to_n_clones(self, matrix: np.ndarray, penalty_weight: float, n_clones: int):
+        n_rows, n_cols = matrix.shape
+
+        # Step 1: Initial assignments
+        argmax_indices = np.argmax(matrix, axis=0)
+        assignments = list(argmax_indices)
+
+        # Calculate initial index counts
+        index_counts = np.bincount(argmax_indices, minlength=n_rows)
+        non_zero_counts = np.nonzero(index_counts)[0]
+
+        while len(non_zero_counts) > n_clones:
+            # Sort by frequency (ascending) to prioritize rarest
+            rare_indices = non_zero_counts[np.argsort(index_counts[non_zero_counts])]
+
+            for rare_idx in rare_indices:
+                if len(non_zero_counts) <= n_clones:
+                    break
+
+                # Columns where rare_idx is currently assigned
+                affected_cols = np.where(np.array(assignments) == rare_idx)[0]
+
+                for col in affected_cols:
+                    original_val = matrix[rare_idx, col]
+
+                    # Candidates: shared rows (excluding the rare one)
+                    candidate_rows = non_zero_counts[non_zero_counts != rare_idx]
+                    candidate_values = matrix[candidate_rows, col]
+
+                    if len(candidate_rows) == 0:
+                        continue
+
+                    # Find the best replacement
+                    best_idx = np.argmax(candidate_values)
+                    best_row = candidate_rows[best_idx]
+                    best_val = candidate_values[best_idx]
+
+                    value_loss = original_val - best_val
+
+                    # Check if merging is allowed by penalty_weight
+                    if value_loss <= penalty_weight:
+                        assignments[col] = best_row
+                        index_counts[rare_idx] -= 1
+                        index_counts[best_row] += 1
+                        if index_counts[rare_idx] == 0:
+                            non_zero_counts = non_zero_counts[non_zero_counts != rare_idx]
+                    else:
+                        # Increase the number of allowed n_clones by one
+                        n_clones += 1
+                        break
+
+        return np.array(assignments)
+
+    def update_mut_loc_experimental(self, n_clones, penalty_weight = 10):
+        """
+        Updates the optimal mutation locations and the joint likelihood of the tree.
+        encourages clone formation
+        """
+        self.update_llr()
+
+        self.mut_loc = self.reduce_to_n_clones(self.llr, penalty_weight, n_clones)
+
+
     def update_mut_loc(self):
         """
         Updates the optimal mutation locations and the joint likelihood of the tree.
@@ -353,7 +416,7 @@ class CellTree(PruneTree):
             if self.isleaf(vtx):
                 dgraph.node(node_label, shape=leaf_shape)
             else:
-                dgraph.node(node_label, label="", shape=internal_shape, style="filled", color="gray")
+                dgraph.node(node_label, label=node_label, shape=internal_shape, style="filled", color="gray")
 
             if self.isroot(vtx):
                 # create a void node with an edge to the root

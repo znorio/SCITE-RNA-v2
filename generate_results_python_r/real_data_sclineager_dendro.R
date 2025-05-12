@@ -6,7 +6,7 @@ library(SClineager)
 base_path <- file.path("data")
 # base_dir <- file.path("/cluster/work/bewi/members/znorio/data")
 
-sample <- "mm34"
+sample <- "bc03"
 clones <- c(2,3,4,5)
 
 read.matrix <- function(path){

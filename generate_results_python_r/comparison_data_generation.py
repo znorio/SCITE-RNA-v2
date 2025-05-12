@@ -17,7 +17,7 @@ config = load_config_and_set_random_seed()
 
 
 def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./comparison_data/', random_seed=None,
-                             n_clones=None):
+                             n_clones=None, coverage_method="zinb"):
     if random_seed is not None:
         np.random.seed(random_seed)
 
@@ -40,8 +40,9 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
     os.makedirs(os.path.join(path, "dropout_probs"), exist_ok=True)
     os.makedirs(os.path.join(path, "dropout_directions"), exist_ok=True)
     os.makedirs(os.path.join(path, "overdispersions_H"), exist_ok=True)
+    os.makedirs(os.path.join(path, "mutation_location"), exist_ok=True)
 
-    generator = DataGenerator(n_cells, n_mut, coverage_method="zinb")
+    generator = DataGenerator(n_cells, n_mut, coverage_method=coverage_method)
 
     for i in tqdm(range(size)):
         ref, alt, dropout_probs, dropout_directions, overdispersions_H = generator.generate_reads(new_tree=True,
@@ -66,22 +67,25 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
         np.savetxt(os.path.join(path, f'dropout_probs/dropout_probs_{i}.txt'), dropout_probs)
         np.savetxt(os.path.join(path, f'dropout_directions/dropout_directions_{i}.txt'), dropout_directions)
         np.savetxt(os.path.join(path, f'overdispersions_H/overdispersions_H_{i}.txt'), overdispersions_H)
+        np.savetxt(os.path.join(path, f'mutation_location/mutation_location_{i}.txt'), generator.ct.mut_loc, fmt='%i')
+
 
 
 num_tests = 100  # Number of simulated samples
 n_rounds = 3  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
-n_cells_list = [50, 100, 100]
-n_mut_list = [100, 50, 100]
+n_cells_list = [50, 500]
+n_mut_list = [500, 50]
 clones = [5, 10, 20, ""]
 flipped_mutation_direction = True
 tree_space = ["c", "m"]
+coverage_method = "zinb"
 
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
         data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
-        # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone)
-        path_results = os.path.join(data_path, 'sciterna')
-        generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
-                                             tree_space=tree_space,
-                                             flipped_mutation_direction=flipped_mutation_direction,
-                                             n_keep=num_mut, n_rounds=n_rounds)
+        generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
+        # path_results = os.path.join(data_path, 'sciterna')
+        # generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
+        #                                      tree_space=tree_space,
+        #                                      flipped_mutation_direction=flipped_mutation_direction,
+        #                                      n_keep=num_mut, n_rounds=n_rounds)

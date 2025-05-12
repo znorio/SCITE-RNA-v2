@@ -2,14 +2,15 @@
 
 library(DENDRO)
 library(SClineager)
+library(cardelino)
 
 n_tests <- 100
-n_cells_list <- c(50, 100, 100)
-n_mut_list <- c(100, 50, 100)
+n_cells_list <- c(500, 50)
+n_mut_list <- c(50, 500)
 clones_list <- c(5, 10, 20, "")
 
-
-base_dir <- file.path("data", "simulated_data")
+base_dir <- file.path("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data", "simulated_data")
+# base_dir <- file.path("data", "simulated_data")
 # base_dir <- file.path("/cluster/work/bewi/members/znorio/data", "simulated_data")
 
 
@@ -19,11 +20,20 @@ read.matrix <- function(path){
   return(mat)
 }
 
+read.str.matrix <- function(path) {
+  mat <- as.matrix(read.table(path, header=FALSE, sep=" "))
+  mat[mat == "A"] <- 1
+  mat[mat == "H"] <- 0.5
+  mat[mat == "R"] <- 0
+  dimnames(mat) <- NULL
+  return(mat)
+}
+
 merge.to.parent <- function(merge.mat){
   n.leaves <- nrow(merge.mat) + 1
   result <- rep(-1, 2*n.leaves - 1)
 
-  for (i in 1:nrow(merge.mat)){
+  for (i in seq_len(nrow(merge.mat))){
     for (child in merge.mat[i,]){
       parent.id <- n.leaves + i - 1
       if (child < 0) result[-child] <- parent.id
@@ -35,7 +45,6 @@ merge.to.parent <- function(merge.mat){
 }
 
 generate.parent.vec <- function(base_path, n.tests=10, clones=5){
-  # dir.create(file.path(base_path, "sclineager_selected"), recursive = TRUE)
   dir.create(file.path(base_path, "sclineager", "sclineager_vaf"), recursive = TRUE)
   dir.create(file.path(base_path, "dendro", "dendro_parent_vec"), recursive = TRUE)
   dir.create(file.path(base_path, "dendro", "dendro_clones"), recursive = TRUE)
@@ -96,11 +105,11 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
 
     start_time_dendro <- Sys.time()
 
-    filtered = FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.01, cut.off.sd = 10)
-    dist = DENDRO.dist(filtered$X,filtered$N,filtered$Z,show.progress=FALSE)
+    filtered <- FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.01, cut.off.sd = 10)
+    dist <- DENDRO.dist(filtered$X, filtered$N, filtered$Z, show.progress=FALSE)
 
-    hc=hclust(dist,method='ward.D')
-    memb_pred=cutree(hc, k = clones)
+    hc <- hclust(dist, method='ward.D')
+    memb_pred <- cutree(hc, k = clones)
     cluster <- DENDRO.cluster(dist, plot=FALSE,type="phylogram")
     dendro_parent_vec <- merge.to.parent(cluster$merge)
 

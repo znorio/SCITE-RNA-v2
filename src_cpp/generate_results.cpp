@@ -93,7 +93,7 @@ void process_rounds(
         const std::vector<char>& not_selected_genotypes,
         int max_loops = 100,
         bool insert_nodes = true,
-        bool bootstrap) {
+        bool bootstrap = false) {
     load_config("../config/config.yaml");
 
     double dropout_alpha = std::stod(config_variables["dropout_alpha"]);
@@ -137,29 +137,14 @@ void process_rounds(
         dropout_probs_round = individual_dropouts;
         overdispersion_h_round = individual_overdispersions;
 
-        std::vector<double> reordered_dropouts(individual_dropouts.size() + not_selected_genotypes.size(), 0.0);
-        std::vector<double> reordered_overdispersions(individual_overdispersions.size() + not_selected_genotypes.size(), 0.0);
-
-        if (bootstrap) {
-            reordered_dropouts = individual_dropouts;
-            reordered_overdispersions = individual_overdispersions;
-        }
-
-        else {
-            for (size_t idx = 0; idx < not_selected_genotypes.size(); ++idx) {
-                reordered_dropouts[idx] = individual_dropouts[idx];
-                reordered_overdispersions[idx] = individual_overdispersions[idx];
-            }
-        }
-
         save_vector_to_file(pathout + "/sciterna_selected_loci/sciterna_selected_loci_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", selected);
         save_char_matrix_to_file(pathout + "/sciterna_inferred_mut_types/sciterna_inferred_mut_types_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", {gt1, gt2});
         save_vector_to_file(pathout + "/sciterna_parent_vec/sciterna_parent_vec_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.parent_vector_ct);
         save_matrix_to_file(pathout + "/sciterna_mut_indicator/sciterna_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", mutation_matrix);
         save_char_matrix_to_file(pathout + "/sciterna_genotype/sciterna_genotype_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", genotype);
         save_matrix_to_file(pathout + "/sciterna_complete_mut_indicator/sciterna_complete_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", complete_mut_indicator);
-        save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", reordered_dropouts);
-        save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", reordered_overdispersions);
+        save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_dropouts);
+        save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_overdispersions);
         save_double_vector_to_file(pathout + "/sciterna_global_parameters/sciterna_global_parameters_" + std::to_string(r) + "r" +
         std::to_string(i) + ".txt", {dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h});
         save_vector_to_file(pathout + "/sciterna_flipped/sciterna_flipped_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", std::vector<int>(flipped.begin(), flipped.end()));

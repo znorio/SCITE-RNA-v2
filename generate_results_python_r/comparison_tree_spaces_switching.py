@@ -45,7 +45,7 @@ def plot_results(num_cells_list, num_mut_list, optimal_tree_llh, n_rounds, title
         plot_boxplot(axes[1, s], relative_data, labels, n_cells, n_mut, f'{title} Predicted vs. Cell Tree')
 
     plt.tight_layout()
-    plt.savefig(f"../data/results/figures/space_switching_{n_cells}c{n_mut}_{title}.png")
+    plt.savefig(f"../data/results/figures/space_switching_{title}.png")
     plt.show()
 
 
@@ -200,7 +200,7 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
 num_tests = 100  # Number of simulated samples
 n_rounds = 3  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
 n_cells_list = [100, 500, 500]
-n_mut_list = [500, 100, 500]
+n_mut_list = [500, 500, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 

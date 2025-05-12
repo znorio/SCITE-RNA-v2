@@ -134,6 +134,9 @@ std::vector<double> MutationFilter::k_mut_llh(const std::vector<int>& ref, const
 // likelihood of a single locus given the data and priors
 std::vector<double> MutationFilter::single_locus_posteriors(std::vector<int> ref, std::vector<int> alt,
                                                             const std::unordered_map<std::string, std::vector<double>>& comp_priors) const {
+    if (ref.size() != alt.size() || ref.size() <= 10) {
+        throw std::invalid_argument("ref and alt must have the same size.");
+    }
     std::vector<double> llh_RH = k_mut_llh(ref, alt, 'R', 'H');
     std::vector<double> llh_HA = k_mut_llh(ref, alt, 'H', 'A');
     if (llh_RH.back() != llh_HA.front()) {
@@ -816,13 +819,6 @@ std::tuple<double, double, double, double, double, std::vector<double>, std::vec
                 informative.push_back(i);
             }
         }
-
-//        std::vector<int> alt_het_filtered;
-//        std::vector<int> total_reads_filtered;
-//        for (size_t idx : informative) {
-//            alt_het_filtered.push_back(alt_het[idx]);
-//            total_reads_filtered.push_back(total_reads[idx]);
-//        }
 
         std::vector<double> individual_params;
         if (informative.size() > 5) { // makes optimization faster to only fit if there is enough data
