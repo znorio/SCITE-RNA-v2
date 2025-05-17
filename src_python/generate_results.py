@@ -62,7 +62,7 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
 
         params = mf.update_parameters(np.array(ref[:, selected]), np.array(alt[:, selected]), np.array(genotype[:, selected]), i, pathout)
 
-        (dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h,
+        (dropout_prob, overdispersion, error_rate, overdispersion_h,
          individual_dropout_probs, individual_overdispersions_h) = params
 
         np.savetxt(
@@ -108,7 +108,7 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
         )
         np.savetxt(
             os.path.join(pathout, "sciterna_global_parameters", f"sciterna_global_parameters_{r}r{i}.txt"),
-            [dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h]
+            [dropout_prob, overdispersion, error_rate, overdispersion_h]
         )
         np.savetxt(
             os.path.join(pathout, "sciterna_flipped", f"sciterna_flipped_{r}r{i}.txt"),

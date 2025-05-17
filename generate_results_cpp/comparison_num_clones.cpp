@@ -16,8 +16,8 @@ Script used to run SCITE-RNA on simulated data with a variable number of cells, 
 int main() {
     int n_tests = 100; //number of runs
     int n_rounds = 3; //number of optimization rounds
-    std::vector<int> n_cells_list = {50, 500};
-    std::vector<int> n_mut_list = {500, 50};
+    std::vector<int> n_cells_list = {50};
+    std::vector<int> n_mut_list = {500};
     std::vector<std::string> tree_space = {"c", "m"};
     std::vector<std::string> clones = {"5", "10", "20", ""};
     bool flipped_mutation_direction = true;

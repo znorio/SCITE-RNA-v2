@@ -73,8 +73,8 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
 
 num_tests = 100  # Number of simulated samples
 n_rounds = 3  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
-n_cells_list = [50, 500]
-n_mut_list = [500, 50]
+n_cells_list = [50, 100]
+n_mut_list = [100, 50]
 clones = [5, 10, 20, ""]
 flipped_mutation_direction = True
 tree_space = ["c", "m"]
@@ -83,9 +83,9 @@ coverage_method = "zinb"
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
         data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
-        generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
-        # path_results = os.path.join(data_path, 'sciterna')
-        # generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
-        #                                      tree_space=tree_space,
-        #                                      flipped_mutation_direction=flipped_mutation_direction,
-        #                                      n_keep=num_mut, n_rounds=n_rounds)
+        # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
+        path_results = os.path.join(data_path, 'sciterna')
+        generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
+                                             tree_space=tree_space,
+                                             flipped_mutation_direction=flipped_mutation_direction,
+                                             n_keep=num_mut, n_rounds=n_rounds)

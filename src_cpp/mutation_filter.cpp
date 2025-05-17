@@ -132,7 +132,7 @@ std::vector<double> MutationFilter::k_mut_llh(const std::vector<int>& ref, const
 
 
 // likelihood of a single locus given the data and priors
-std::vector<double> MutationFilter::single_locus_posteriors(std::vector<int> ref, std::vector<int> alt,
+std::vector<double> MutationFilter::single_locus_posteriors(const std::vector<int>& ref, const std::vector<int>& alt,
                                                             const std::unordered_map<std::string, std::vector<double>>& comp_priors) const {
     if (ref.size() != alt.size() || ref.size() <= 10) {
         throw std::invalid_argument("ref and alt must have the same size.");
@@ -264,7 +264,8 @@ std::tuple<std::vector<int>, std::vector<char>, std::vector<char>, std::vector<c
 std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> MutationFilter::get_llh_mat(
         const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
         const std::vector<char>& gt1, const std::vector<char>& gt2, bool individual,
-        const std::vector<double>& dropout_probs, const std::vector<double>& overdispersions_h) {
+        const std::vector<double>& dropout_probs, const std::vector<double>& overdispersions_h,
+        double no_coverage_f) {
 
     n_loci = static_cast<int>(ref[0].size());
     n_cells = static_cast<int>(ref.size());
@@ -289,41 +290,48 @@ std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> Mu
         return acc + std::accumulate(row.begin(), row.end(), 0.0);
     });
 
-    double imputed_coverage = sum / (n_cells * n_loci * 3);
+    double imputed_coverage = sum / (n_cells * n_loci);
 
-    for (size_t i = 0; i < n_cells; ++i) {
-        for (size_t j = 0; j < n_loci; ++j) {
+    for (size_t j = 0; j < n_loci; ++j) {
+
+        // Calculate the median VAF for the current locus in order to impute missing values
+        std::vector<double> vafs;
+        for (int l = 0; l < n_cells; ++l) {
+            if (total[l][j] > 0) {
+                vafs.push_back(static_cast<double>(alt[l][j]) / total[l][j]);
+            }
+        }
+        std::sort(vafs.begin(), vafs.end());
+        double median_vaf;
+        int mid = vafs.size() / 2;
+        if (vafs.size() % 2 == 0) {
+            median_vaf = (vafs[mid - 1] + vafs[mid]) / 2.0;
+        } else {
+            median_vaf = vafs[mid];
+        }
+
+        for (size_t i = 0; i < n_cells; ++i) {
+
             int k = alt[i][j];
             int n = total[i][j];
-            if (n == 0) {
-                std::vector<double> vafs;
-                for (int l = 0; l < n_cells; ++l) {
-                    if (total[l][j] > 0) {
-                        vafs.push_back(static_cast<double>(alt[l][j]) / total[l][j]);
-                    }
-                }
-                std::sort(vafs.begin(), vafs.end());
-                double median_vaf;
-                int mid = vafs.size() / 2;
-                if (vafs.size() % 2 == 0) {
-                    median_vaf = (vafs[mid - 1] + vafs[mid]) / 2.0;
-                } else {
-                    median_vaf = vafs[mid];
-                }
+            double zero_coverage_factor = 1;
 
+            if (n == 0) {
+                // If we have no read counts for a cell, we slightly favor the most common genotype of the other cells
                 k = static_cast<int>(round(median_vaf * imputed_coverage));
                 n = static_cast<int>(round(imputed_coverage));
+                zero_coverage_factor = no_coverage_f;
             }
             if (!individual) {
-                llh_mat_1[i][j] = single_read_llh_with_dropout(k, n, gt1[j]) +
-                                  mut_type_prior.at(std::string(1, gt1[j]));
-                llh_mat_2[i][j] = single_read_llh_with_dropout(k, n, gt2[j]) +
-                                  mut_type_prior.at(std::string(1, gt2[j]));
+                llh_mat_1[i][j] = (single_read_llh_with_dropout(k, n, gt1[j]) +
+                                  mut_type_prior.at(std::string(1, gt1[j]))) / zero_coverage_factor;
+                llh_mat_2[i][j] = (single_read_llh_with_dropout(k, n, gt2[j]) +
+                                  mut_type_prior.at(std::string(1, gt2[j]))) / zero_coverage_factor;
             } else {
-                llh_mat_1[i][j] = single_read_llh_with_individual_dropout(k, n, gt1[j], dropout_probs[j], alphas_h[j], betas_h[j]) +
-                                  mut_type_prior.at(std::string(1, gt1[j]));
-                llh_mat_2[i][j] = single_read_llh_with_individual_dropout(k, n, gt2[j], dropout_probs[j], alphas_h[j], betas_h[j]) +
-                                  mut_type_prior.at(std::string(1, gt2[j]));
+                llh_mat_1[i][j] = (single_read_llh_with_individual_dropout(k, n, gt1[j], dropout_probs[j], alphas_h[j], betas_h[j]) +
+                                  mut_type_prior.at(std::string(1, gt1[j]))) / zero_coverage_factor;
+                llh_mat_2[i][j] = (single_read_llh_with_individual_dropout(k, n, gt2[j], dropout_probs[j], alphas_h[j], betas_h[j]) +
+                                  mut_type_prior.at(std::string(1, gt2[j]))) / zero_coverage_factor;
             }
 //            if (!individual) {
 //                llh_mat_1[i][j] = single_read_llh_with_dropout(alt[i][j], total[i][j], gt1[j]) +
@@ -347,7 +355,7 @@ std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> Mu
 std::tuple<double, double, double> MutationFilter::calculate_heterozygous_log_likelihoods(int k,
                                                                                           int n,
                                                                                           double dropout_prob,
-                                                                                          double dropout_direction_prob,
+                                                                                          double dropout_direction,
                                                                                           double alpha_h,
                                                                                           double beta_h,
                                                                                           double error_rate,
@@ -357,12 +365,12 @@ std::tuple<double, double, double> MutationFilter::calculate_heterozygous_log_li
     // Dropout to "R"
     double alpha_R = error_rate * overdispersion;
     double beta_R = overdispersion - alpha_R;
-    double log_dropout_R = std::log(dropout_prob) + std::log(1 - dropout_direction_prob) + log_betabinom_pmf(k, n, alpha_R, beta_R);
+    double log_dropout_R = std::log(dropout_prob) + std::log(1 - dropout_direction) + log_betabinom_pmf(k, n, alpha_R, beta_R);
 
     // Dropout to "A"
     double alpha_A = (1 - error_rate) * overdispersion;
     double beta_A = overdispersion - alpha_A;
-    double log_dropout_A = std::log(dropout_prob) + std::log(dropout_direction_prob) + log_betabinom_pmf(k, n, alpha_A, beta_A);
+    double log_dropout_A = std::log(dropout_prob) + std::log(dropout_direction) + log_betabinom_pmf(k, n, alpha_A, beta_A);
 
     return std::make_tuple(log_no_dropout, log_dropout_R, log_dropout_A);
 }
@@ -371,12 +379,11 @@ std::tuple<double, double, double> MutationFilter::calculate_heterozygous_log_li
 double MutationFilter::total_log_likelihood(const std::vector<double>& params,
                                             const std::vector<int>& k_obs,
                                             const std::vector<int>& n_obs,
-                                            const std::vector<char>& genotypes) {
-    double dropout_prob = params[0];
-    double dropout_direction_prob = params[1];
-    double overdispersion = params[2];
-    double error_rate = params[3];
-    double overdispersion_h = params[4];
+                                            const std::vector<char>& genotypes) const {
+    double dropout_probability = params[0];
+    double overdispersion = params[1];
+    double error = params[2];
+    double overdispersion_h = params[3];
     double log_likelihood = 0.0;
 
     double alpha_h = 0.5 * overdispersion_h;
@@ -388,18 +395,18 @@ double MutationFilter::total_log_likelihood(const std::vector<double>& params,
         char genotype = genotypes[i];
 
         if (genotype == 'R') {
-            double alpha_R = error_rate * overdispersion;
-            double beta_R = overdispersion - alpha_R;
-            log_likelihood += log_betabinom_pmf(k, n, alpha_R, beta_R);
+            double alphaR = error * overdispersion;
+            double betaR = overdispersion - alphaR;
+            log_likelihood += log_betabinom_pmf(k, n, alphaR, betaR);
         } else if (genotype == 'H') {
             auto [log_no_dropout, log_dropout_R, log_dropout_A] = calculate_heterozygous_log_likelihoods(
-                    k, n, dropout_prob, dropout_direction_prob, alpha_h, beta_h, error_rate, overdispersion);
+                    k, n, dropout_probability, dropout_direction_prob, alpha_h, beta_h, error, overdispersion);
 
             log_likelihood += logsumexp({log_no_dropout, log_dropout_R, log_dropout_A});
         } else if (genotype == 'A') {
-            double alpha_A = (1 - error_rate) * overdispersion;
-            double beta_A = overdispersion - alpha_A;
-            log_likelihood += log_betabinom_pmf(k, n, alpha_A, beta_A);
+            double alphaA = (1 - error) * overdispersion;
+            double betaA = overdispersion - alphaA;
+            log_likelihood += log_betabinom_pmf(k, n, alphaA, betaA);
         } else {
             throw std::invalid_argument("Unexpected genotype: " + std::string(1, genotype));
         }
@@ -410,15 +417,12 @@ double MutationFilter::total_log_likelihood(const std::vector<double>& params,
 
 // Function to compute the log-prior
 double MutationFilter::compute_log_prior(
-        double dropout, double dropout_direction, double overdispersion,
+        double dropout, double overdispersion,
         double error_r, double overdispersion_h,
         bool global_opt, double min_value, double shape, double alpha_parameters) const{
     // Compute Beta parameters using prior means
     double alpha_dropout_prob = alpha_parameters;
     double beta_dropout_prob = 1.0 / this->dropout_prob;
-
-    double alpha_dropout_direction_prob = alpha_parameters;
-    double beta_dropout_direction_prob = 1.0 / this->dropout_direction_prob;
 
     double alpha_error_rate = alpha_parameters;
     double beta_error_rate = 1.0 / this->error_rate;
@@ -433,7 +437,6 @@ double MutationFilter::compute_log_prior(
     // Compute log-prior
     double log_prior = 0.0;
     log_prior += beta_logpdf(dropout, alpha_dropout_prob, beta_dropout_prob);
-    log_prior += beta_logpdf(dropout_direction, alpha_dropout_direction_prob, beta_dropout_direction_prob);
     log_prior += gamma_logpdf(overdispersion, shape, scale_overdispersion, min_value);
     log_prior += beta_logpdf(error_r, alpha_error_rate, beta_error_rate);
     log_prior += gamma_logpdf(overdispersion_h, shape, scale_overdispersion_h, min_value);
@@ -445,16 +448,15 @@ double MutationFilter::compute_log_prior(
 double MutationFilter::total_log_posterior(const std::vector<double>& params, const std::vector<int>& k_obs,
                                            const std::vector<int>& n_obs, const std::vector<char>& genotypes) const {
     double dropout = params[0];
-    double dropout_direction = params[1];
-    double overdispersion = params[2];
-    double error_r = params[3];
-    double overdispersion_h = params[4];
+    double overdispersion = params[1];
+    double error_r = params[2];
+    double overdispersion_h = params[3];
 
     // Compute log-likelihood (same logic as before)
     double log_likelihood = total_log_likelihood(params, k_obs, n_obs, genotypes);
 
     // Compute log-priors (additive in log-space)
-    double log_prior = compute_log_prior(dropout, dropout_direction, overdispersion, error_r, overdispersion_h, true);
+    double log_prior = compute_log_prior(dropout, overdispersion, error_r, overdispersion_h, true);
 
     return -(log_likelihood + log_prior);  // Negative because we're minimizing
 }
@@ -521,9 +523,9 @@ std::vector<double> MutationFilter::fit_parameters(const std::vector<int>& ref,
     VectorXd x = Map<VectorXd>(initial_params.data(), initial_params.size());
 
     // Set bounds
-    VectorXd lb(5), ub(5);
-    lb << 0.01, 0.01, 1.0, 0.001, 2.5;
-    ub << 0.99, 0.99, 100.0, 0.1, 50.0;
+    VectorXd lb(4), ub(4);
+    lb << 0.01, 1.0, 0.001, 2.5; // Lower bounds dropout, overdispersion, error rate, overdispersion_h
+    ub << 0.99, 100.0, 0.1, 50.0;
 
     // Optimization config
     LBFGSBParam<double> param;
@@ -536,13 +538,7 @@ std::vector<double> MutationFilter::fit_parameters(const std::vector<int>& ref,
     Objective obj(*this, alt_norm, total_norm, genotypes_nonzero);
 
     double fx;
-    int niter = solver.minimize(obj, x, fx, lb, ub);
-
-//    std::cout << niter << " iterations" << std::endl;
-//    std::cout << "Optimized: " << fx << std::endl;
-//
-//    std::vector<double> ground_truth = {0.2, 0.5, 10, 0.05, 4};
-//    std::cout << "Ground truth: " << total_log_posterior(ground_truth, alt_norm, total_norm, genotypes_nonzero) << std::endl;
+    solver.minimize(obj, x, fx, lb, ub);
 
     return std::vector<double>(x.data(), x.data() + x.size());
 }
@@ -573,7 +569,7 @@ double MutationFilter::total_log_posterior_individual(const std::vector<double>&
     }
 
     // Compute log-priors (additive in log-space)
-    double log_prior = compute_log_prior(dropoutProb, dropoutDirectionProb, overdispersion, errorRate, overdispersionH, false);
+    double log_prior = compute_log_prior(dropoutProb, overdispersion, errorRate, overdispersionH, false);
 
     return -(log_likelihood + log_prior);  // Negative because we're minimizing
 }
@@ -679,89 +675,7 @@ std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<
 }
 
 
-//std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<int>& alt_het,
-//                                                              const std::vector<int>& total_reads,
-//                                                              double overdispersion,
-//                                                              double error_r,
-//                                                              double dropout_direction,
-//                                                              std::vector<double> initial_params,
-//                                                              int max_iterations,
-//                                                              double tolerance){
-//    // Nested functor class must not use `this` directly in constructor
-//    struct Objective
-//    {
-//        const MutationFilter& filter;
-//        const std::vector<int>& alt_het;
-//        const std::vector<int>& total_reads;
-//        double overdispersion_;
-//        double error_rate_;
-//        double dropout_direction_;
-//
-//        Objective(const MutationFilter& f,
-//                  const std::vector<int>& a,
-//                  const std::vector<int>& t,
-//                  double od,
-//                  double er,
-//                  double dd)
-//                : filter(f), alt_het(a), total_reads(t),
-//                  overdispersion_(od), error_rate_(er), dropout_direction_(dd) {}
-//
-//        double operator()(const Eigen::VectorXd& x, Eigen::VectorXd& grad)
-//        {
-//            std::vector<double> params(x.data(), x.data() + x.size());
-//            double val = filter.total_log_posterior_individual(params, alt_het, total_reads,
-//                                                               overdispersion_, error_rate_, dropout_direction_);
-//
-//            // Numerical gradient using finite differences
-//            const double eps = 1e-7;
-//            grad.resize(x.size());
-//            for (int i = 0; i < x.size(); ++i) {
-//                Eigen::VectorXd x_eps = x;
-//                x_eps[i] += eps;
-//
-//                std::vector<double> params_eps(x_eps.data(), x_eps.data() + x_eps.size());
-//                double val_eps = filter.total_log_posterior_individual(params_eps, alt_het, total_reads,
-//                                                                       overdispersion_, error_rate_, dropout_direction_);
-//
-//                grad[i] = (val_eps - val) / eps;
-//            }
-//
-//            return val;
-//        }
-//    };
-//
-//    Eigen::VectorXd x = Eigen::Map<Eigen::VectorXd>(initial_params.data(), initial_params.size());
-//
-//    // Bounds: [dropout_prob, overdispersion_h]
-//    Eigen::VectorXd lb(2), ub(2);
-//    lb << 0.01, 2.5;
-//    ub << 0.99, 50.0;
-//
-//    LBFGSpp::LBFGSBParam<double> param;
-//    param.epsilon = tolerance;
-//    param.max_iterations = max_iterations;
-//    param.delta = 1e-2;             // step-size threshold
-//    param.max_iterations = max_iterations;
-//    param.max_linesearch = 500;
-//    param.min_step = 1e-6;
-//    param.max_step = 1.0;
-//
-//    LBFGSpp::LBFGSBSolver<double> solver(param);
-//    Objective obj(*this, alt_het, total_reads, overdispersion, error_r, dropout_direction);
-//
-//    double fx;
-//    int niter = solver.minimize(obj, x, fx, lb, ub);
-//
-//    if (niter <= 0)
-//    {
-//        std::cerr << "Optimization failed." << std::endl;
-//    }
-//
-//    return std::vector<double>(x.data(), x.data() + x.size());
-//}
-
-
-std::tuple<double, double, double, double, double, std::vector<double>, std::vector<double>> MutationFilter::update_parameters(
+std::tuple<double, double, double, double, std::vector<double>, std::vector<double>> MutationFilter::update_parameters(
         const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
         const std::vector<std::vector<char>>& inferred_genotypes) {
 
@@ -776,7 +690,7 @@ std::tuple<double, double, double, double, double, std::vector<double>, std::vec
     }
 
     // Fit only error_rate and overdispersion using all SNVs
-    std::vector<double> global_params = fit_parameters(all_ref_counts, all_alt_counts, all_genotypes, {0.2, 0.5, 10, 0.05, 6});
+    std::vector<double> global_params = fit_parameters(all_ref_counts, all_alt_counts, all_genotypes, {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous});
 
     std::cout << "Global parameters: ";
     for (double param : global_params) {
@@ -785,10 +699,9 @@ std::tuple<double, double, double, double, double, std::vector<double>, std::vec
     std::cout << std::endl;
 
     double dropout = global_params[0];
-    double dropout_direction = global_params[1];
-    double overdispersion = global_params[2];
-    double error_r = global_params[3];
-    double overdispersion_h = global_params[4];
+    double overdispersion = global_params[1];
+    double error_r = global_params[2];
+    double overdispersion_h = global_params[3];
 
     std::vector<double> individual_dropout_probs;
     std::vector<double> individual_overdispersions_h;
@@ -824,7 +737,7 @@ std::tuple<double, double, double, double, double, std::vector<double>, std::vec
         if (informative.size() > 5) { // makes optimization faster to only fit if there is enough data
             // Fit individual parameters
             individual_params = fit_parameters_individual(alt_het, total_reads, overdispersion,
-                                                          error_r, dropout_direction, {dropout_prob, overdispersion_heterozygous});
+                                                          error_r, dropout_direction_prob, {dropout_prob, overdispersion_heterozygous});
         }
         else {
             individual_params = {dropout_prob, overdispersion_heterozygous};
@@ -836,7 +749,7 @@ std::tuple<double, double, double, double, double, std::vector<double>, std::vec
         individual_dropout_probs.push_back(posterior_dropout_prob);
         individual_overdispersions_h.push_back(posterior_overdispersion_h);
     }
-    return {dropout, dropout_direction, overdispersion, error_r, overdispersion_h, individual_dropout_probs, individual_overdispersions_h};
+    return {dropout, overdispersion, error_r, overdispersion_h, individual_dropout_probs, individual_overdispersions_h};
 }
 
 
@@ -874,18 +787,6 @@ double MutationFilter::log_betabinom_pmf(int k, int n, double a, double b) {
     return (num - denom + log_binom_coef);
 }
 
-// logaddexp if two scalars
-double MutationFilter::logaddexp(double logx, double logy) {
-    if (logx == -std::numeric_limits<double>::infinity()) {
-        return logy;
-    } else if (logy == -std::numeric_limits<double>::infinity()) {
-        return logx;
-    } else if (logx > logy) {
-        return logx + std::log1p(std::exp(logy - logx));
-    } else {
-        return logy + std::log1p(std::exp(logx - logy));
-    }
-}
 
 // Function to compute the log-PDF of a beta distribution
 double MutationFilter::beta_logpdf(double x, double alpha, double beta) {
@@ -980,15 +881,15 @@ std::vector<double> MutationFilter::add_scalar_to_vector(double scalar, const st
     return result;
 }
 
-// get genotype frequencies from config file
-std::unordered_map<char, double> MutationFilter::get_genotype_freq() {
-    std::unordered_map<char, double> genotype_freq;
-    for (const auto& [key, value] : config_variables) {
-        // Check if the key starts with "genotype_freq."
-        if (key.rfind("genotype_freq.", 0) == 0) {
-            char genotype = key.back(); // Extract the last character as the genotype
-            genotype_freq[genotype] = std::stod(value);
-        }
-    }
-    return genotype_freq;
-}
+//// get genotype frequencies from config file
+//std::unordered_map<char, double> MutationFilter::get_genotype_freq() {
+//    std::unordered_map<char, double> genotype_freq;
+//    for (const auto& [key, value] : config_variables) {
+//        // Check if the key starts with "genotype_freq."
+//        if (key.rfind("genotype_freq.", 0) == 0) {
+//            char genotype = key.back(); // Extract the last character as the genotype
+//            genotype_freq[genotype] = std::stod(value);
+//        }
+//    }
+//    return genotype_freq;
+//}
