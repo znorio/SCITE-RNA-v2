@@ -5,8 +5,8 @@ library(SClineager)
 library(cardelino)
 
 n_tests <- 100
-n_cells_list <- c(500, 50)
-n_mut_list <- c(50, 500)
+n_cells_list <- c(50)
+n_mut_list <- c(500)
 clones_list <- c(5, 10, 20, "")
 
 base_dir <- file.path("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data", "simulated_data")
@@ -67,41 +67,41 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
     clones <- nrow(unique_rows) # actual number of clones
     cat(" Actual number of clones: ", clones)
 
-    # start_time_sclineager <- Sys.time()
-    #
-    # keep <- apply(mutations_mat, 1, function(x) max(x, na.rm = T) -
-    #                min(x, na.rm = T) > 0.01)
-    # keep_numeric <- as.numeric(keep)
-    # write.table(keep_numeric, file = file.path(base_path, sprintf("sclineager/sclineager_selected/sclineager_selected_%d.txt", i)),
-    #             row.names = FALSE, col.names = FALSE)
-    # mutations_mat_sclineager <- mutations_mat[keep, ]
-    # coverage_sclineager <- coverage[keep, ]
-    #
-    # res_scl <-
-    #   sclineager_internal(
-    #     mutations_mat = mutations_mat_sclineager,
-    #     coverage_mat = coverage_sclineager,
-    #     max_iter = 2000,
-    #     vaf_offset = 0.01,
-    #     dfreedom = ncol(mutations_mat),
-    #     psi = diag(10, ncol(mutations_mat)),
-    #     save = F
-    #   )
-    #
-    # # Cluster the genotype matrix into k=clones
-    # dist_scl <- dist(t(res_scl[["genotype_mat"]])) # use same method for DENDRO and SClineager
-    # hc_scl <- hclust(dist_scl, method='ward.D')
-    # memb_pred_scl <- cutree(hc_scl, k = clones)
-    # cluster_scl <- DENDRO.cluster(dist_scl, plot=FALSE, type="phylogram")
-    # parent_vec_scl <- merge.to.parent(cluster_scl$merge)
-    #
-    # end_time_sclineager <- Sys.time()
-    # runtime_sclineager <- end_time_sclineager - start_time_sclineager
-    # sclineager_runtimes <- c(sclineager_runtimes, runtime_sclineager)
-    #
-    # write.table(t(res_scl[["genotype_mat"]]), file = file.path(base_path, sprintf("sclineager/sclineager_vaf/sclineager_vaf_%d.txt", i)), row.names = FALSE, col.names = FALSE)
-    # write.table(parent_vec_scl, file.path(base_path, sprintf("sclineager/sclineager_parent_vec/sclineager_parent_vec_%d.txt", i)), row.names=FALSE, col.names=FALSE)
-    # write.table(memb_pred_scl, file.path(base_path, sprintf("sclineager/sclineager_clones/sclineager_clones_%d.txt", i)), row.names=FALSE, col.names=FALSE)
+    start_time_sclineager <- Sys.time()
+
+    keep <- apply(mutations_mat, 1, function(x) max(x, na.rm = T) -
+                   min(x, na.rm = T) > 0.01)
+    keep_numeric <- as.numeric(keep)
+    write.table(keep_numeric, file = file.path(base_path, sprintf("sclineager/sclineager_selected/sclineager_selected_%d.txt", i)),
+                row.names = FALSE, col.names = FALSE)
+    mutations_mat_sclineager <- mutations_mat[keep, ]
+    coverage_sclineager <- coverage[keep, ]
+
+    res_scl <-
+      sclineager_internal(
+        mutations_mat = mutations_mat_sclineager,
+        coverage_mat = coverage_sclineager,
+        max_iter = 200,
+        vaf_offset = 0.01,
+        dfreedom = ncol(mutations_mat),
+        psi = diag(10, ncol(mutations_mat)),
+        save = F
+      )
+
+    # Cluster the genotype matrix into k=clones
+    dist_scl <- dist(t(res_scl[["genotype_mat"]])) # use same method for DENDRO and SClineager
+    hc_scl <- hclust(dist_scl, method='ward.D')
+    memb_pred_scl <- cutree(hc_scl, k = clones)
+    cluster_scl <- DENDRO.cluster(dist_scl, plot=FALSE, type="phylogram")
+    parent_vec_scl <- merge.to.parent(cluster_scl$merge)
+
+    end_time_sclineager <- Sys.time()
+    runtime_sclineager <- end_time_sclineager - start_time_sclineager
+    sclineager_runtimes <- c(sclineager_runtimes, runtime_sclineager)
+
+    write.table(t(res_scl[["genotype_mat"]]), file = file.path(base_path, sprintf("sclineager/sclineager_vaf/sclineager_vaf_%d.txt", i)), row.names = FALSE, col.names = FALSE)
+    write.table(parent_vec_scl, file.path(base_path, sprintf("sclineager/sclineager_parent_vec/sclineager_parent_vec_%d.txt", i)), row.names=FALSE, col.names=FALSE)
+    write.table(memb_pred_scl, file.path(base_path, sprintf("sclineager/sclineager_clones/sclineager_clones_%d.txt", i)), row.names=FALSE, col.names=FALSE)
 
     start_time_dendro <- Sys.time()
 

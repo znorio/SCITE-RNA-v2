@@ -130,7 +130,7 @@ void process_rounds(
 
         auto params = mf.update_parameters(slice_columns(ref, selected), slice_columns(alt, selected), slice_columns_char(genotype, selected));
 //        auto params = mf.update_parameters(ref, alt, genotype);
-        auto [dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h,
+        auto [dropout_prob, overdispersion, error_rate, overdispersion_h,
                 individual_dropouts, individual_overdispersions] = params;
 
 
@@ -146,7 +146,7 @@ void process_rounds(
         save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_dropouts);
         save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_overdispersions);
         save_double_vector_to_file(pathout + "/sciterna_global_parameters/sciterna_global_parameters_" + std::to_string(r) + "r" +
-        std::to_string(i) + ".txt", {dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h});
+        std::to_string(i) + ".txt", {dropout_prob, overdispersion, error_rate, overdispersion_h});
         save_vector_to_file(pathout + "/sciterna_flipped/sciterna_flipped_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", std::vector<int>(flipped.begin(), flipped.end()));
         save_vector_to_file(pathout + "/sciterna_mutation_location/sciterna_mutation_location_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.mut_loc);
     }

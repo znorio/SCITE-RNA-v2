@@ -34,12 +34,12 @@ public:
                    double dropout_direction_prob = 0.5, double overdispersion_h = 6);
 
     void set_mut_type_prior(const std::map<std::string, double>& genotype_freq, double mut_freq);
-    double single_read_llh_with_dropout(int n_alt, int n_total, char genotype) const;
-    double single_read_llh_with_individual_dropout(int n_alt, int n_total, char genotype,
+    [[nodiscard]] double single_read_llh_with_dropout(int n_alt, int n_total, char genotype) const;
+    [[nodiscard]] double single_read_llh_with_individual_dropout(int n_alt, int n_total, char genotype,
                                                    double dropout_prob, double alpha_h, double beta_h) const;
-    std::vector<double> k_mut_llh(const std::vector<int>& ref, const std::vector<int>& alt,
+    [[nodiscard]] std::vector<double> k_mut_llh(const std::vector<int>& ref, const std::vector<int>& alt,
                                   char gt1, char gt2) const;
-    std::vector<double> single_locus_posteriors(std::vector<int> ref, std::vector<int> alt,
+    [[nodiscard]] std::vector<double> single_locus_posteriors(const std::vector<int>& ref, const std::vector<int>& alt,
                                                 const std::unordered_map<std::string, std::vector<double>>& comp_priors) const;
     std::vector<std::vector<double>> mut_type_posteriors(const std::vector<std::vector<int>>& ref,
                                                          const std::vector<std::vector<int>>& alt);
@@ -53,16 +53,17 @@ public:
     std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> get_llh_mat(
             const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
             const std::vector<char>& gt1, const std::vector<char>& gt2, bool individual,
-            const std::vector<double>& dropout_probs = {}, const std::vector<double>& = {});
+            const std::vector<double>& dropout_probs = {}, const std::vector<double>& = {},
+            double no_coverage_f=1000);
 
-    double compute_log_prior(
-            double dropout, double dropout_direction, double overdispersion,
+    [[nodiscard]] double compute_log_prior(
+            double dropout, double overdispersion,
             double error_r, double overdispersion_h,
             bool global_opt, double min_value=2, double shape=2, double alpha_parameters=2) const;
 
-    double total_log_posterior(const std::vector<double>& params, const std::vector<int>& k_obs,
+    [[nodiscard]] double total_log_posterior(const std::vector<double>& params, const std::vector<int>& k_obs,
                                const std::vector<int>& n_obs, const std::vector<char>& genotypes) const;
-    double total_log_posterior_individual(const std::vector<double>& params,
+    [[nodiscard]] double total_log_posterior_individual(const std::vector<double>& params,
                                           const std::vector<int>& k_obs,
                                           const std::vector<int>& n_obs,
                                           double overdispersion,
@@ -75,7 +76,7 @@ public:
                                                   double overdispersion, double error_rate, double dropout_direction,
                                                   std::vector<double> initial_params = {}, int max_iterations = 50,
                                                   double tolerance = 1e-5);
-    std::tuple<double, double, double, double, double, std::vector<double>, std::vector<double>> update_parameters(
+    std::tuple<double, double, double, double, std::vector<double>, std::vector<double>> update_parameters(
             const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
             const std::vector<std::vector<char>>& inferred_genotypes);
 
@@ -101,10 +102,10 @@ public:
     calculate_heterozygous_log_likelihoods(int k, int n, double dropout_prob, double dropout_direction_prob,
                                            double alpha_h, double beta_h, double error_rate, double overdispersion) ;
 
-    [[nodiscard]] static double
-    total_log_likelihood(const std::vector<double> &params, const std::vector<int> &k_obs,
-                         const std::vector<int> &n_obs,
-                         const std::vector<char> &genotypes) ;
+    [[nodiscard]] double total_log_likelihood(const std::vector<double>& params,
+                                                const std::vector<int>& k_obs,
+                                                const std::vector<int>& n_obs,
+                                                const std::vector<char>& genotypes) const;
 
     static double beta_logpdf(double x, double alpha, double beta);
 
