@@ -82,6 +82,7 @@ class DataGenerator:
         return self.ct.n_mut
 
     def random_mut_type(self):
+        self.gt1 = np.random.choice(["R", "H", "A"], size=self.n_mut, replace=True, p=self.genotype_freq)
         mutated = np.random.choice(self.n_mut, size=round(self.n_mut * self.mut_prop), replace=False)
         for j in mutated:
             if self.gt1[j] == "H":

@@ -7,8 +7,8 @@ dropout_direction: 0.5  # the dropout direction decides how frequently the refer
                   # value of 0.5 means that the dropout is independent of the allele. A larger value means that the
                   # reference allele is more likely to be dropped out. (0.01, 0.99)
 genotype_freq: # prior of the genotype frequencies
-  R: 0.3
-  H: 0.4
-  A: 0.3
+  R: 0.33
+  H: 0.33
+  A: 0.33
 mut_freq: 0.5 # prior of frequency of mutated loci during the mutation selection step
 random_seed: 0 # random seed for reproducibility

@@ -48,6 +48,7 @@ void generate_sciterna_results(
         int n_rounds,
         bool only_preprocessing,
         const std::string& method,
-        bool insert_nodes);
+        bool insert_nodes,
+        bool load_from_file);
 
 #endif //SCITE_RNA_GENERATE_RESULTS_H
