@@ -233,8 +233,8 @@ std::vector<std::vector<double>> mapGenotype(
 int main() {
     unordered_map<char, float> mappingDict = {{'A', 1.0}, {'H', 0.5}, {'R', 0.0}};
 
-    vector<int> numCellsList = {100,500,500};
-    vector<int> numMutList = {500,100,500};
+    vector<int> numCellsList = {100, 500, 500};
+    vector<int> numMutList = {500, 100, 500};
     vector<vector<string>> spaces = {{"m"}, {"c"}, {"c", "m"}, {"m", "c"}};
     int nRounds = 3;
     int nTests = 100;

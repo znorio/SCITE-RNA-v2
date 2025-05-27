@@ -78,6 +78,29 @@ void create_directories(const std::string& pathout) {
     }
 }
 
+std::vector<int> load_selected(const std::string& path) {
+    std::vector<int> selected;
+    std::ifstream file(path);
+    int val;
+    while (file >> val) {
+        selected.push_back(val);
+    }
+    return selected;
+}
+
+
+std::vector<char> load_genotypes(const std::string& path) {
+    std::vector<char> genotypes;
+    std::ifstream file(path);
+    std::string line;
+    while (std::getline(file, line)) {
+        if (!line.empty()) {
+            genotypes.push_back(line[0]);  // Only take the first character
+        }
+    }
+    return genotypes;
+}
+
 void process_rounds(
         MutationFilter& mf,
         SwapOptimizer& optimizer,
@@ -94,6 +117,7 @@ void process_rounds(
         int max_loops = 100,
         bool insert_nodes = true,
         bool bootstrap = false) {
+
     load_config("../config/config.yaml");
 
     double dropout_alpha = std::stod(config_variables["dropout_alpha"]);
@@ -215,7 +239,8 @@ void generate_sciterna_results(
         int n_rounds = 3,
         bool only_preprocessing = false,
         const std::string& method = "threshold",
-        bool insert_nodes = true) {
+        bool insert_nodes = true,
+        bool load_from_file = true) {
 
     load_config("../config/config.yaml");
 
@@ -236,17 +261,30 @@ void generate_sciterna_results(
                       std::stod(config_variables["dropout_alpha"]), std::stod(config_variables["dropout_beta"]),
                       std::stod(config_variables["dropout_direction"]), std::stod(config_variables["overdispersion_h"]));
 
-    std::cout << "Preprocessing data..." << std::endl;
-    auto [selected, gt1, gt2, not_selected_genotypes] = mf.filter_mutations(ref, alt, method, posterior_threshold, n_keep);
+    std::vector<int> selected;
+    std::vector<char> gt1, gt2;
+    std::vector<char> not_selected_genotypes;
+
+    if (load_from_file) {
+        std::cout << "Loading selected mutations from file..." << std::endl;
+        selected = load_selected(pathout + "/selected_by_distribution.txt");
+        gt1 = load_genotypes(pathout + "/gt1_by_distribution.txt");
+        gt2 = load_genotypes(pathout + "/gt2_by_distribution.txt");
+        not_selected_genotypes = load_genotypes(pathout + "/not_selected_genotypes_by_distribution.txt");
+    } else {
+        std::cout << "Preprocessing data..." << std::endl;
+        std::tie(selected, gt1, gt2, not_selected_genotypes)  =
+                mf.filter_mutations(ref, alt, method, posterior_threshold, n_keep);
+
+        save_vector_to_file(pathout + "/" + "selected.txt", selected);
+        save_char_vector_to_file(pathout + "/" + "gt1.txt", gt1);
+        save_char_vector_to_file(pathout + "/" + "gt2.txt", gt2);
+        save_char_vector_to_file(pathout + "/" + "not_selected_genotypes.txt", not_selected_genotypes);
+    }
 
     std::string b = use_bootstrap ? "_bootstrap" : "";
     pathout = pathout + b;
     create_directories(pathout);
-
-    save_vector_to_file(pathout + "/" + "selected.txt", selected);
-    save_char_vector_to_file(pathout + "/" + "gt1.txt", gt1);
-    save_char_vector_to_file(pathout + "/" + "gt2.txt", gt2);
-    save_char_vector_to_file(pathout + "/" + "not_selected_genotypes.txt", not_selected_genotypes);
 
     if (!only_preprocessing) {
         SwapOptimizer optimizer(tree_space, flipped_mutation_direction, static_cast<int>(selected.size()), n_cells);

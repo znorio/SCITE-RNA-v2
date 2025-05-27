@@ -2,16 +2,15 @@
 
 library(DENDRO)
 library(SClineager)
-library(cardelino)
 
 n_tests <- 100
-n_cells_list <- c(50)
-n_mut_list <- c(500)
-clones_list <- c(5, 10, 20, "")
+n_cells_list <- c(200, 100)
+n_mut_list <- c(100, 200)
+clones_list <- c("")
 
-base_dir <- file.path("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data", "simulated_data")
+# base_dir <- file.path("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data", "simulated_data")
 # base_dir <- file.path("data", "simulated_data")
-# base_dir <- file.path("/cluster/work/bewi/members/znorio/data", "simulated_data")
+base_dir <- file.path("/cluster/work/bewi/members/znorio/data", "simulated_data")
 
 
 read.matrix <- function(path){
@@ -81,7 +80,7 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
       sclineager_internal(
         mutations_mat = mutations_mat_sclineager,
         coverage_mat = coverage_sclineager,
-        max_iter = 200,
+        max_iter = 2000,
         vaf_offset = 0.01,
         dfreedom = ncol(mutations_mat),
         psi = diag(10, ncol(mutations_mat)),
@@ -96,7 +95,7 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
     parent_vec_scl <- merge.to.parent(cluster_scl$merge)
 
     end_time_sclineager <- Sys.time()
-    runtime_sclineager <- end_time_sclineager - start_time_sclineager
+    runtime_sclineager <- as.numeric(difftime(end_time_sclineager, start_time_sclineager, units = "secs"))
     sclineager_runtimes <- c(sclineager_runtimes, runtime_sclineager)
 
     write.table(t(res_scl[["genotype_mat"]]), file = file.path(base_path, sprintf("sclineager/sclineager_vaf/sclineager_vaf_%d.txt", i)), row.names = FALSE, col.names = FALSE)
@@ -114,7 +113,7 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
     dendro_parent_vec <- merge.to.parent(cluster$merge)
 
     end_time_dendro <- Sys.time()
-    runtime_dendro <- end_time_dendro - start_time_dendro
+    runtime_dendro <- as.numeric(difftime(end_time_dendro, start_time_dendro, units = "secs"))
     dendro_runtimes <- c(dendro_runtimes, runtime_dendro)
 
     write.table(dendro_parent_vec, file.path(base_path, sprintf("dendro/dendro_parent_vec/dendro_parent_vec_%d.txt", i)), row.names=FALSE, col.names=FALSE)

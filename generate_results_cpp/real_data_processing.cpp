@@ -72,14 +72,15 @@ int main() {
     int bootstrap_samples = 1000;
     bool use_bootstrap = false;
     int n_snps = 3000;
-    double posterior_threshold = 0.95;
+    double posterior_threshold = 0.05;
     std::string method = "threshold";
     int n_rounds = 3;
-    std::string sample = "mm34";
+    std::string sample = "mm16";
     bool flipped_mutation_direction = true;
     bool only_preprocessing = false;
     std::vector<std::string> tree_space = {"c", "m"};
     bool reshuffle_nodes = false; // false makes optimization faster for large numbers of mutations
+    bool load_from_file = false;
 
     std::string input_path = "../data/input_data/" + sample;
 //    std::string input_path = "/cluster/work/bewi/members/znorio/data/input_data/" + sample;
@@ -89,7 +90,7 @@ int main() {
     generate_sciterna_results(input_path, output_path,
                             bootstrap_samples, use_bootstrap, tree_space,
                             flipped_mutation_direction, n_snps, posterior_threshold,
-                            n_rounds, only_preprocessing, method, reshuffle_nodes);
+                            n_rounds, only_preprocessing, method, reshuffle_nodes, load_from_file);
 
     return 0;
 }
