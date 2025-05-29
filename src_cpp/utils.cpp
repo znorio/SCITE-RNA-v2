@@ -235,10 +235,20 @@ std::vector<std::vector<char>> create_genotype_matrix(
     }
 
     // Assign genotypes for not selected loci
-    for (size_t n = 0; n < not_selected.size(); ++n) {
-        int locus = not_selected[n];
-        for (int i = 0; i < n_cells; ++i) {
-            genotype_matrix[i][locus] = not_selected_genotypes[n];
+    if (not_selected_genotypes.size() != not_selected.size()) {
+        for (size_t n = 0; n < not_selected.size(); ++n) {
+            int locus = not_selected[n];
+            for (int i = 0; i < n_cells; ++i) {
+                genotype_matrix[i][locus] = 'X';
+            }
+        }
+    }
+    else {
+        for (size_t n = 0; n < not_selected.size(); ++n) {
+            int locus = not_selected[n];
+            for (int i = 0; i < n_cells; ++i) {
+                genotype_matrix[i][locus] = not_selected_genotypes[n];
+            }
         }
     }
 
