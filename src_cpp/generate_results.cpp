@@ -58,8 +58,22 @@ std::vector<std::vector<std::string>> convert_location_to_gene(const std::vector
     return loc_to_gene;
 }
 
-void create_directories(const std::string& pathout) {
-    std::vector<std::string> dirs = {
+void create_directories(const std::string& pathout, bool reduced_ouput) {
+    std::vector<std::string> dirs = {};
+    if (reduced_ouput) {
+        dirs = {
+            "sciterna_selected_loci",
+            "sciterna_inferred_mut_types",
+            "sciterna_parent_vec",
+            "sciterna_individual_dropout_probs",
+            "sciterna_individual_overdispersions_H",
+            "sciterna_global_parameters",
+            "sciterna_flipped",
+            "sciterna_mutation_location"
+        };
+    }
+    else{
+        dirs = {
             "sciterna_selected_loci",
             "sciterna_inferred_mut_types",
             "sciterna_parent_vec",
@@ -71,7 +85,8 @@ void create_directories(const std::string& pathout) {
             "sciterna_global_parameters",
             "sciterna_flipped",
             "sciterna_mutation_location",
-    };
+        };
+    }
 
     for (const auto& d : dirs) {
         std::filesystem::create_directories(std::filesystem::path(pathout) / d);
@@ -116,7 +131,8 @@ void process_rounds(
         const std::vector<char>& not_selected_genotypes,
         int max_loops = 100,
         bool insert_nodes = true,
-        bool bootstrap = false) {
+        bool bootstrap = false,
+        bool reduced_output = false) {
 
     load_config("../config/config.yaml");
 
@@ -164,15 +180,18 @@ void process_rounds(
         save_vector_to_file(pathout + "/sciterna_selected_loci/sciterna_selected_loci_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", selected);
         save_char_matrix_to_file(pathout + "/sciterna_inferred_mut_types/sciterna_inferred_mut_types_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", {gt1, gt2});
         save_vector_to_file(pathout + "/sciterna_parent_vec/sciterna_parent_vec_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.parent_vector_ct);
-        save_matrix_to_file(pathout + "/sciterna_mut_indicator/sciterna_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", mutation_matrix);
-        save_char_matrix_to_file(pathout + "/sciterna_genotype/sciterna_genotype_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", genotype);
-        save_matrix_to_file(pathout + "/sciterna_complete_mut_indicator/sciterna_complete_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", complete_mut_indicator);
+        save_vector_to_file(pathout + "/sciterna_mutation_location/sciterna_mutation_location_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.mut_loc);
         save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_dropouts);
         save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_overdispersions);
         save_double_vector_to_file(pathout + "/sciterna_global_parameters/sciterna_global_parameters_" + std::to_string(r) + "r" +
         std::to_string(i) + ".txt", {dropout_prob, overdispersion, error_rate, overdispersion_h});
         save_vector_to_file(pathout + "/sciterna_flipped/sciterna_flipped_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", std::vector<int>(flipped.begin(), flipped.end()));
-        save_vector_to_file(pathout + "/sciterna_mutation_location/sciterna_mutation_location_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.mut_loc);
+
+        if (!reduced_output){
+            save_matrix_to_file(pathout + "/sciterna_mut_indicator/sciterna_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", mutation_matrix);
+            save_char_matrix_to_file(pathout + "/sciterna_genotype/sciterna_genotype_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", genotype);
+            save_matrix_to_file(pathout + "/sciterna_complete_mut_indicator/sciterna_complete_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", complete_mut_indicator);
+        }
     }
 }
 
@@ -188,7 +207,7 @@ void generate_sciterna_simulation_results(
 
     load_config("../config/config.yaml");
 
-    create_directories(pathout);
+    create_directories(pathout, false);
 
     std::cout << "Running inference on data in " << path << std::endl;
     std::vector<double> runtimes;
@@ -228,6 +247,8 @@ void generate_sciterna_simulation_results(
 
 
 void generate_sciterna_results(
+        const std::vector<std::vector<int>>& ref,
+        const std::vector<std::vector<int>>& alt,
         const std::string& path = "./comparison_data/",
         std::string pathout = "./comparison_data/results",
         int n_bootstrap = 100,
@@ -240,12 +261,10 @@ void generate_sciterna_results(
         bool only_preprocessing = false,
         const std::string& method = "threshold",
         bool insert_nodes = true,
-        bool load_from_file = true) {
+        bool load_from_file = true,
+        bool reduced_output = false) {
 
     load_config("../config/config.yaml");
-
-    std::vector<std::vector<int>> ref = read_csv(path + "/ref.csv");
-    std::vector<std::vector<int>> alt = read_csv(path + "/alt.csv");
 
     int n_cells = ref.size();
 //    int n_snvs = ref[0].size();
@@ -284,12 +303,12 @@ void generate_sciterna_results(
 
     std::string b = use_bootstrap ? "_bootstrap" : "";
     pathout = pathout + b;
-    create_directories(pathout);
+    create_directories(pathout, reduced_output);
 
     if (!only_preprocessing) {
         SwapOptimizer optimizer(tree_space, flipped_mutation_direction, static_cast<int>(selected.size()), n_cells);
 
-        create_directories(pathout + "/sciterna_selected_genes");
+        create_directories(pathout + "/sciterna_selected_genes", reduced_output);
 
         std::cout << "Running inference on data in " << path << std::endl;
 
@@ -310,12 +329,11 @@ void generate_sciterna_results(
                     b_gt2.push_back(gt2[index]);
                 }
 
-                process_rounds(mf, optimizer, ref, alt, static_cast<int>(b_selected.size()), n_rounds, pathout, i, b_selected, b_gt1, b_gt2, not_selected_genotypes, 100, insert_nodes, true);
+                process_rounds(mf, optimizer, ref, alt, static_cast<int>(b_selected.size()), n_rounds, pathout, i, b_selected, b_gt1, b_gt2, not_selected_genotypes, 100, insert_nodes, true, reduced_output);
             }
         } else {
-            process_rounds(mf, optimizer, ref, alt, static_cast<int>(selected.size()), n_rounds, pathout, 0, selected, gt1, gt2, not_selected_genotypes, 100, insert_nodes, true);
+            process_rounds(mf, optimizer, ref, alt, static_cast<int>(selected.size()), n_rounds, pathout, 0, selected, gt1, gt2, not_selected_genotypes, 100, insert_nodes, true, reduced_output);
         }
     }
-
     std::cout << "Done." << std::endl;
 }
