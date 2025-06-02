@@ -6,10 +6,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
 include_directories(src_cpp)
-#include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/yixuan-LBFGSpp-9db7a6d/include")
-#include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/eigen3")
-include_directories("/cluster/work/bewi/members/znorio/data/yixuan-LBFGSpp-9db7a6d/include")
-include_directories("/cluster/work/bewi/members/znorio/data/eigen3")
+include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/yixuan-LBFGSpp-9db7a6d/include")
+include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/eigen3")
+#include_directories("/cluster/work/bewi/members/znorio/data/yixuan-LBFGSpp-9db7a6d/include")
+#include_directories("/cluster/work/bewi/members/znorio/data/eigen3")
 
 
 add_executable(SCITE-RNA
@@ -26,8 +26,8 @@ add_executable(SCITE-RNA
         src_cpp/utils.cpp
         src_cpp/utils.h
 #        generate_results_cpp/comparison_num_clones.cpp
-#        generate_results_cpp/real_data_processing.cpp
-        generate_results_cpp/comparison_bootstrapping.cpp
+        generate_results_cpp/real_data_processing.cpp
+#        generate_results_cpp/comparison_bootstrapping.cpp
         #        generate_results_cpp/space_switching_results_postprocessing.cpp
 #        generate_results_cpp/comparison_tree_spaces_switching.cpp
 )

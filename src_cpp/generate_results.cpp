@@ -284,6 +284,9 @@ void generate_sciterna_results(
     std::vector<char> gt1, gt2;
     std::vector<char> not_selected_genotypes;
 
+    std::string b = use_bootstrap ? "_bootstrap" : "";
+    pathout = pathout + b;
+
     if (load_from_file) {
         std::cout << "Loading selected mutations from file..." << std::endl;
         selected = load_selected(pathout + "/selected_by_distribution.txt");
@@ -301,8 +304,6 @@ void generate_sciterna_results(
         save_char_vector_to_file(pathout + "/" + "not_selected_genotypes.txt", not_selected_genotypes);
     }
 
-    std::string b = use_bootstrap ? "_bootstrap" : "";
-    pathout = pathout + b;
     create_directories(pathout, reduced_output);
 
     if (!only_preprocessing) {
