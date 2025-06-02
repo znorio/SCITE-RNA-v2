@@ -120,6 +120,18 @@ class PruneTree:
             yield node
             stack.extend(self._clist[node][::-1])
 
+    def dfs_ordered(self, subroot):
+        """Traverse the subtree rooted at subroot in DFS order,
+        visiting children in ascending node ID order.
+        """
+        stack = [subroot]
+        while stack:
+            node = stack.pop()
+            yield node
+            # Sort children in reverse so smallest is on top of the stack
+            children_sorted = sorted(self._clist[node], reverse=True)
+            stack.extend(children_sorted)
+
     def rdfs(self, subroot):
         """ Traverse the subtree rooted at subroot, in reversed DFS order """
         for child in self._clist[subroot]:

@@ -22,7 +22,7 @@ int main() {
     double posterior_threshold = 0.05;
     std::string method = "threshold";
     int n_rounds = 3;
-    std::string sample = "mm16";
+    std::string sample = "bc03";
     bool flipped_mutation_direction = true;
     bool only_preprocessing = false;
     std::vector<std::string> tree_space = {"c", "m"};
