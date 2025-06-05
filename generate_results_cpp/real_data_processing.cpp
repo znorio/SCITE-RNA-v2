@@ -17,12 +17,12 @@ Script used to run SCITE-RNA on the multiple myeloma dataset MM34.
 
 int main() {
     int bootstrap_samples = 1000;
-    bool use_bootstrap = true;
+    bool use_bootstrap = false;
     int n_snps = 3000;
     double posterior_threshold = 0.05;
     std::string method = "threshold";
     int n_rounds = 3;
-    std::string sample = "bc03";
+    std::string sample = "mm34";
     bool flipped_mutation_direction = true;
     bool only_preprocessing = false;
     std::vector<std::string> tree_space = {"c", "m"};

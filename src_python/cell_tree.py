@@ -416,7 +416,7 @@ class CellTree(PruneTree):
             if self.isleaf(vtx):
                 dgraph.node(node_label, shape=leaf_shape)
             else:
-                dgraph.node(node_label, label=node_label, shape=internal_shape, style="filled", color="gray")
+                dgraph.node(node_label, label=node_label, shape=internal_shape, style="filled", color="lightgray")
 
             if self.isroot(vtx):
                 # create a void node with an edge to the root

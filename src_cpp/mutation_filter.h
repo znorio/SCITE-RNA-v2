@@ -80,7 +80,13 @@ public:
             const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
             const std::vector<std::vector<char>>& inferred_genotypes);
 
-
+    std::vector<double> fit_parameters_two_stage(
+            const std::vector<int>& ref,
+            const std::vector<int>& alt,
+            const std::vector<char>& genotypes,
+            std::vector<double> initial_params,
+            int max_iterations,
+            double tolerance);
 
     // helper functions
     static double betaln(double x, double y);
