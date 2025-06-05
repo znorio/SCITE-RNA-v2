@@ -29,8 +29,8 @@ int main() {
         for (int i = 0; i < n_cells_list.size(); ++i) {
             int n_cells = n_cells_list[i];
             int n_mut = n_mut_list[i];
-//            std::string path = "../data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m" + clone +"/";
-            std::string path = "/cluster/work/bewi/members/znorio/data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m" + clone +"/";
+            std::string path = "../data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m" + clone +"/";
+//            std::string path = "/cluster/work/bewi/members/znorio/data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m" + clone +"/";
             std::string pathout = path +  "sciterna/";
             generate_sciterna_simulation_results(path, pathout, n_tests, tree_space, flipped_mutation_direction, n_mut, n_rounds);
         }

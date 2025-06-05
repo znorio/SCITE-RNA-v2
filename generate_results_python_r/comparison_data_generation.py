@@ -83,9 +83,9 @@ coverage_method = "zinb"
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
         data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
-        generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
-        # path_results = os.path.join(data_path, 'sciterna')
-        # generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
-        #                                      tree_space=tree_space,
-        #                                      flipped_mutation_direction=flipped_mutation_direction,
-        #                                      n_keep=num_mut, n_rounds=n_rounds)
+        # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
+        path_results = os.path.join(data_path, 'sciterna')
+        generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
+                                             tree_space=tree_space,
+                                             flipped_mutation_direction=flipped_mutation_direction,
+                                             n_keep=num_mut, n_rounds=n_rounds)

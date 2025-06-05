@@ -455,7 +455,6 @@ class MutationFilter:
                 log_likelihood += log_betabinom_pmf(k, n, alpha_R, beta_R)
 
             elif genotype == "H":
-
                 log_no_dropout, log_dropout_R, log_dropout_A = calculate_heterozygous_log_likelihoods(
                     k, n, dropout_prob, self.dropout_direction_prob, alpha_h, beta_h, error_rate, overdispersion)
 
@@ -490,7 +489,7 @@ class MutationFilter:
 
         log_likelihood = 0
 
-        alpha_h = overdispersion_h * 0.5
+        alpha_h = overdispersion_h * dropout_direction_prob
         beta_h = overdispersion_h - alpha_h
 
         for k, n in zip(k_obs, n_obs):
@@ -538,6 +537,122 @@ class MutationFilter:
 
         return result.x
 
+    def fit_homozygous_parameters(self, ref, alt, genotypes, initial_params=None,
+                                  max_iterations=50, tolerance=1e-5):
+        bounds = [
+            (2.5, 100),  # overdispersion
+            (0.001, 0.1),  # error_rate
+        ]
+
+        total = alt + ref
+        ind_nonzero = np.where(total != 0)[0]
+        genotypes_nonzero = genotypes[ind_nonzero]
+        alt_nonzero = alt[ind_nonzero]
+        total_nonzero = total[ind_nonzero]
+
+        # Filter for homozygous genotypes
+        mask_hom = np.isin(genotypes_nonzero, ["R", "A"])
+        alt_hom = alt_nonzero[mask_hom]
+        total_hom = total_nonzero[mask_hom]
+        genotypes_hom = genotypes_nonzero[mask_hom]
+
+        def objective(params):
+            overdispersion, error_rate = params
+            log_likelihood = 0
+            for k, n, genotype in zip(alt_hom, total_hom, genotypes_hom):
+                if genotype == "R":
+                    alpha = error_rate * overdispersion
+                    beta = overdispersion - alpha
+                else:  # genotype == "A"
+                    alpha = (1 - error_rate) * overdispersion
+                    beta = overdispersion - alpha
+                log_likelihood += log_betabinom_pmf(k, n, alpha, beta)
+
+            log_prior = self.compute_log_prior(
+                dropout_prob=0.2,  # Placeholder, won't affect result
+                overdispersion=overdispersion,
+                error_rate=error_rate,
+                overdispersion_h=10.0,  # Placeholder
+                global_opt=True
+            )
+            return -(log_likelihood + log_prior)
+
+        result = minimize(
+            objective,
+            initial_params,
+            method="L-BFGS-B",
+            bounds=bounds,
+            options={"maxiter": max_iterations, "ftol": tolerance}
+        )
+
+        if not result.success:
+            print(f"Stage 1 optimization failed: {result.message}")
+
+        return result.x  # overdispersion, error_rate
+
+    def fit_heterozygous_parameters(self, ref, alt, genotypes, overdispersion, error_rate,
+                                    initial_params=None, dropout_direction_prob=0.5,
+                                    max_iterations=50, tolerance=1e-5):
+        bounds = [
+            (0.01, 0.99),  # dropout_prob
+            (2.5, 50),  # overdispersion_h
+        ]
+
+        total = alt + ref
+        ind_nonzero = np.where(total != 0)[0]
+        genotypes_nonzero = genotypes[ind_nonzero]
+        alt_nonzero = alt[ind_nonzero]
+        total_nonzero = total[ind_nonzero]
+
+        # Filter for heterozygous genotypes
+        mask_het = genotypes_nonzero == "H"
+        alt_het = alt_nonzero[mask_het]
+        total_het = total_nonzero[mask_het]
+
+        def objective(params):
+            return self.total_log_posterior_individual(
+                params=params,
+                k_obs=alt_het,
+                n_obs=total_het,
+                overdispersion=overdispersion,
+                error_rate=error_rate,
+                dropout_direction_prob=dropout_direction_prob
+            )
+
+        result = minimize(
+            objective,
+            initial_params,
+            method="L-BFGS-B",
+            bounds=bounds,
+            options={"maxiter": max_iterations, "ftol": tolerance}
+        )
+
+        if not result.success:
+            print(f"Stage 2 optimization failed: {result.message}")
+
+        return result.x  # dropout_prob, overdispersion_h
+
+    def fit_parameters_two_stage(self, ref, alt, genotypes,
+                                 initial_params_homozygous=None,
+                                 initial_params_heterozygous=None,
+                                 dropout_direction_prob=0.5,
+                                 max_iterations=50, tolerance=1e-5):
+        # Stage 1: Fit homozygous parameters
+        overdispersion, error_rate = self.fit_homozygous_parameters(
+            ref, alt, genotypes, initial_params=initial_params_homozygous,
+            max_iterations=max_iterations, tolerance=tolerance
+        )
+
+        # Stage 2: Fit heterozygous parameters
+        dropout_prob, overdispersion_h = self.fit_heterozygous_parameters(
+            ref, alt, genotypes, overdispersion, error_rate,
+            initial_params=initial_params_heterozygous,
+            dropout_direction_prob=dropout_direction_prob,
+            max_iterations=max_iterations, tolerance=tolerance
+        )
+
+        return dropout_prob, overdispersion, error_rate, overdispersion_h
+
     def fit_parameters_individual(self, alt_het, total_reads, overdispersions, error_rates, dropout_direction,
                                   initial_params=None, max_iterations=50, tolerance=1e-5):
         bounds = [
@@ -570,12 +685,17 @@ class MutationFilter:
         all_genotypes = inferred_genotypes.flatten()
 
         # Fit only error_rate and overdispersion using all SNVs
-        global_params = self.fit_parameters(
+        global_params = self.fit_parameters_two_stage(
             all_ref_counts, all_alt_counts, all_genotypes,
-            initial_params=[self.dropout_prob, self.overdispersion, self.error_rate, self.overdispersion_H]
+            initial_params_homozygous=[self.overdispersion, self.error_rate],
+            initial_params_heterozygous=[self.dropout_prob, self.overdispersion_H],
+            dropout_direction_prob=self.dropout_direction_prob,
+            max_iterations=50, tolerance=1e-5
             # Initial values dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h
         )
 
+        # print(self.fit_parameters(all_ref_counts, all_alt_counts, all_genotypes,
+        #                                     [self.dropout_prob, self.overdispersion, self.error_rate, self.overdispersion_H]))
         print(f"Global parameters: {global_params}")
 
         dropout_prob, overdispersion, error_rate, overdispersion_h = global_params
@@ -599,11 +719,12 @@ class MutationFilter:
                 individual_params = self.fit_parameters_individual(
                     alt_het, total_reads, overdispersion, error_rate,
                     dropout_direction=self.dropout_direction_prob,
-                    initial_params=[self.dropout_prob, self.overdispersion_H]
+                    # initial_params=[self.dropout_prob, self.overdispersion_H]
+                    initial_params=[dropout_prob, overdispersion_h],
                     # Initial values dropout_probs, dropout_direction_probs, overdispersions_hs
                 )
             else:
-                individual_params = self.dropout_prob, self.overdispersion_H
+                individual_params = dropout_prob, overdispersion_h
 
             posterior_dropout_prob, posterior_overdispersion_hs = individual_params
             # posterior_dropout_prob, posterior_overdispersion_hs = dropouts_gt[snv], overdispersions_h_gt[snv]

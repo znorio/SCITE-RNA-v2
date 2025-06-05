@@ -13,6 +13,8 @@ and can filter SNVs based on this posterior.
 #include <Eigen/Core>
 #include <limits>
 #include <LBFGSB.h>
+#include <iostream>
+#include <random>
 
 #include "mutation_filter.h"
 #include "utils.h"
@@ -543,6 +545,156 @@ std::vector<double> MutationFilter::fit_parameters(const std::vector<int>& ref,
     return std::vector<double>(x.data(), x.data() + x.size());
 }
 
+std::vector<double> MutationFilter::fit_parameters_two_stage(
+        const std::vector<int>& ref,
+        const std::vector<int>& alt,
+        const std::vector<char>& genotypes,
+        std::vector<double> initial_params,
+        int max_iterations,
+        double tolerance)
+{
+    std::vector<int> total(ref.size());
+    for (size_t i = 0; i < ref.size(); ++i)
+        total[i] = ref[i] + alt[i];
+
+    std::vector<int> alt_nonzero, total_nonzero;
+    std::vector<char> genotypes_nonzero;
+    for (size_t i = 0; i < total.size(); ++i) {
+        if (total[i] != 0) {
+            alt_nonzero.push_back(alt[i]);
+            total_nonzero.push_back(total[i]);
+            genotypes_nonzero.push_back(genotypes[i]);
+        }
+    }
+
+    // === Step 1: Optimize overdispersion and error_rate on homozygous genotypes ===
+    std::vector<int> alt_hom, total_hom;
+    std::vector<char> genotypes_hom;
+    for (size_t i = 0; i < genotypes_nonzero.size(); ++i) {
+        if (genotypes_nonzero[i] == 'R' || genotypes_nonzero[i] == 'A') {
+            alt_hom.push_back(alt_nonzero[i]);
+            total_hom.push_back(total_nonzero[i]);
+            genotypes_hom.push_back(genotypes_nonzero[i]);
+        }
+    }
+
+    struct HomozygousObjective {
+        const MutationFilter& filter;
+        const std::vector<int>& alt;
+        const std::vector<int>& total;
+        const std::vector<char>& genotypes;
+
+        HomozygousObjective(const MutationFilter& f,
+                            const std::vector<int>& a,
+                            const std::vector<int>& t,
+                            const std::vector<char>& g)
+                : filter(f), alt(a), total(t), genotypes(g) {}
+
+        double operator()(const Eigen::VectorXd& x, Eigen::VectorXd& grad) {
+            std::vector<double> params = {0.2, x[0], x[1], 10.0};  // dropout and od_h fixed
+
+            double fval = filter.total_log_posterior(params, alt, total, genotypes);
+
+            const double eps = 1e-7;
+            grad.resize(2);
+            for (int i = 0; i < 2; ++i) {
+                Eigen::VectorXd x_eps = x;
+                x_eps[i] += eps;
+                std::vector<double> params_eps = {0.2, x_eps[0], x_eps[1], 10.0};
+                double fval_eps = filter.total_log_posterior(params_eps, alt, total, genotypes);
+                grad[i] = (fval_eps - fval) / eps;
+            }
+
+            return fval;
+        }
+    };
+
+    Eigen::VectorXd x_hom(2);
+    x_hom << initial_params[1], initial_params[2];  // overdispersion, error_rate
+
+    Eigen::VectorXd lb_hom(2), ub_hom(2);
+    lb_hom << 1.0, 0.001;
+    ub_hom << 100.0, 0.1;
+
+    LBFGSBParam<double> param1;
+    param1.epsilon = tolerance;
+    param1.max_iterations = max_iterations;
+    param1.delta = 1e-4;
+
+    LBFGSBSolver<double> solver1(param1);
+    HomozygousObjective hom_obj(*this, alt_hom, total_hom, genotypes_hom);
+    double fx1;
+    solver1.minimize(hom_obj, x_hom, fx1, lb_hom, ub_hom);
+
+    double overdisp = x_hom[0];
+    double error_rate = x_hom[1];
+
+    // === Step 2: Optimize dropout_prob and overdispersion_h on heterozygous genotypes ===
+    std::vector<int> alt_het, total_het;
+    std::vector<char> genotypes_het;
+    for (size_t i = 0; i < genotypes_nonzero.size(); ++i) {
+        if (genotypes_nonzero[i] == 'H') {
+            alt_het.push_back(alt_nonzero[i]);
+            total_het.push_back(total_nonzero[i]);
+            genotypes_het.push_back(genotypes_nonzero[i]);
+        }
+    }
+
+    struct HeterozygousObjective {
+        const MutationFilter& filter;
+        const std::vector<int>& alt;
+        const std::vector<int>& total;
+        const std::vector<char>& genotypes;
+        double overdisp, error_rate;
+
+        HeterozygousObjective(const MutationFilter& f,
+                              const std::vector<int>& a,
+                              const std::vector<int>& t,
+                              const std::vector<char>& g,
+                              double od, double err)
+                : filter(f), alt(a), total(t), genotypes(g), overdisp(od), error_rate(err) {}
+
+        double operator()(const Eigen::VectorXd& x, Eigen::VectorXd& grad) {
+            std::vector<double> params = {x[0], overdisp, error_rate, x[1]};
+
+            double fval = filter.total_log_posterior(params, alt, total, genotypes);
+
+            const double eps = 1e-7;
+            grad.resize(2);
+            for (int i = 0; i < 2; ++i) {
+                Eigen::VectorXd x_eps = x;
+                x_eps[i] += eps;
+                std::vector<double> params_eps = {x_eps[0], overdisp, error_rate, x_eps[1]};
+                double fval_eps = filter.total_log_posterior(params_eps, alt, total, genotypes);
+                grad[i] = (fval_eps - fval) / eps;
+            }
+
+            return fval;
+        }
+    };
+
+    Eigen::VectorXd x_het(2);
+    x_het << initial_params[0], initial_params[3];  // dropout_prob, overdispersion_h
+
+    Eigen::VectorXd lb_het(2), ub_het(2);
+    lb_het << 0.01, 2.5;
+    ub_het << 0.99, 50.0;
+
+    LBFGSBParam<double> param2;
+    param2.epsilon = tolerance;
+    param2.max_iterations = max_iterations;
+    param2.delta = 1e-4;
+
+    LBFGSBSolver<double> solver2(param2);
+    HeterozygousObjective het_obj(*this, alt_het, total_het, genotypes_het, overdisp, error_rate);
+    double fx2;
+    solver2.minimize(het_obj, x_het, fx2, lb_het, ub_het);
+
+    // Return final parameters
+    return {x_het[0], overdisp, error_rate, x_het[1]};
+}
+
+
 double MutationFilter::total_log_posterior_individual(const std::vector<double>& params,
                                       const std::vector<int>& k_obs,
                                       const std::vector<int>& n_obs,
@@ -573,11 +725,6 @@ double MutationFilter::total_log_posterior_individual(const std::vector<double>&
 
     return -(log_likelihood + log_prior);  // Negative because we're minimizing
 }
-
-#include <iostream>
-#include <vector>
-#include <random>
-#include <limits>
 
 std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<int>& alt_het,
                                                               const std::vector<int>& total_reads,
@@ -689,8 +836,24 @@ std::tuple<double, double, double, double, std::vector<double>, std::vector<doub
         all_genotypes.insert(all_genotypes.end(), inferred_genotypes[i].begin(), inferred_genotypes[i].end());
     }
 
-    // Fit only error_rate and overdispersion using all SNVs
-    std::vector<double> global_params = fit_parameters(all_ref_counts, all_alt_counts, all_genotypes, {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous});
+    // Fit all global parameters at once
+//    std::vector<double> global_params = fit_parameters(all_ref_counts, all_alt_counts, all_genotypes, {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous});
+//
+//    std::cout << "Global parameters: ";
+//    for (double param : global_params) {
+//        std::cout << param << " ";
+//    }
+//    std::cout << std::endl;
+
+    // Fit global parameters in two stages, first overdispersion and error rate, then dropout and overdispersion_h
+    std::vector<double> global_params = fit_parameters_two_stage(
+            all_ref_counts,
+            all_alt_counts,
+            all_genotypes,
+            {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous},
+            50,
+            1e-5
+    );
 
     std::cout << "Global parameters: ";
     for (double param : global_params) {
@@ -740,7 +903,7 @@ std::tuple<double, double, double, double, std::vector<double>, std::vector<doub
                                                           error_r, dropout_direction_prob, {dropout_prob, overdispersion_heterozygous});
         }
         else {
-            individual_params = {dropout_prob, overdispersion_heterozygous};
+            individual_params = {dropout, overdispersion_h};
         }
 
         double posterior_dropout_prob = individual_params[0];
