@@ -13,17 +13,17 @@ with open('../config/config.yaml', 'r') as file:
 bootstrap_samples = 1000
 use_bootstrap = True
 n_snps = 300
-posterior_cutoff = 0.95
+posterior_cutoff = 0.05
 method= "threshold"  #"first_k" "threshold"
 n_rounds = 3
-sample = "mm34"
+sample = "mm16"
 flipped_mutation_direction = True
 only_preprocessing = False
 tree_space = ["c", "m"]
 reshuffle_nodes = False
 
 input_path = rf"../data/input_data/{sample}"
-output_path = rf"../data/results/{sample}/sciterna"
+output_path = rf"../data/results/{sample}/sciterna_test"
 
 generate_sciterna_results(path=input_path, pathout=output_path,
                           n_bootstrap=bootstrap_samples, use_bootstrap=use_bootstrap, tree_space=tree_space,

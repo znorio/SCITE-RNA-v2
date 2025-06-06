@@ -174,6 +174,7 @@ void process_rounds(
                 individual_dropouts, individual_overdispersions] = params;
 
 
+        mf.update_alpha_beta(error_rate, overdispersion);
         dropout_probs_round = individual_dropouts;
         overdispersion_h_round = individual_overdispersions;
 

@@ -88,6 +88,8 @@ public:
             int max_iterations,
             double tolerance);
 
+    void update_alpha_beta(double error_r, double overdispersion_hom);
+
     // helper functions
     static double betaln(double x, double y);
     static double factorial(int n);

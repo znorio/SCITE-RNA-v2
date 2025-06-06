@@ -65,6 +65,8 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
         (dropout_prob, overdispersion, error_rate, overdispersion_h,
          individual_dropout_probs, individual_overdispersions_h) = params
 
+        mf.update_alpha_beta(error_rate, overdispersion)
+
         np.savetxt(
             os.path.join(pathout, "sciterna_selected_loci", f"sciterna_selected_loci_{r}r{i}.txt"),
             selected,
