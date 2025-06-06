@@ -42,6 +42,14 @@ MutationFilter::MutationFilter(double error_rate, double overdispersion,
     dropout_prob = dropout_alpha / (dropout_alpha + dropout_beta);
 }
 
+void MutationFilter::update_alpha_beta(double error_r, double overdispersion_hom) {
+    alpha_R = error_r * overdispersion_hom;
+    beta_R = overdispersion_hom - alpha_R;
+
+    alpha_A = (1.0 - error_r) * overdispersion_hom;
+    beta_A = overdispersion_hom - alpha_A;
+}
+
 // set mutation type prior probabilities
 void MutationFilter::set_mut_type_prior(const std::map<std::string, double>& genotype_freq, double mut_freq) {
     mut_type_prior["R"] = std::log(genotype_freq.at("R") * (1 - mut_freq));
@@ -591,7 +599,7 @@ std::vector<double> MutationFilter::fit_parameters_two_stage(
                 : filter(f), alt(a), total(t), genotypes(g) {}
 
         double operator()(const Eigen::VectorXd& x, Eigen::VectorXd& grad) {
-            std::vector<double> params = {0.2, x[0], x[1], 10.0};  // dropout and od_h fixed
+            std::vector<double> params = {0.2, x[0], x[1], 6.0};  // dropout and od_h fixed
 
             double fval = filter.total_log_posterior(params, alt, total, genotypes);
 
@@ -600,7 +608,7 @@ std::vector<double> MutationFilter::fit_parameters_two_stage(
             for (int i = 0; i < 2; ++i) {
                 Eigen::VectorXd x_eps = x;
                 x_eps[i] += eps;
-                std::vector<double> params_eps = {0.2, x_eps[0], x_eps[1], 10.0};
+                std::vector<double> params_eps = {0.2, x_eps[0], x_eps[1], 6.0};
                 double fval_eps = filter.total_log_posterior(params_eps, alt, total, genotypes);
                 grad[i] = (fval_eps - fval) / eps;
             }
@@ -690,7 +698,6 @@ std::vector<double> MutationFilter::fit_parameters_two_stage(
     double fx2;
     solver2.minimize(het_obj, x_het, fx2, lb_het, ub_het);
 
-    // Return final parameters
     return {x_het[0], overdisp, error_rate, x_het[1]};
 }
 
@@ -837,7 +844,7 @@ std::tuple<double, double, double, double, std::vector<double>, std::vector<doub
     }
 
     // Fit all global parameters at once
-//    std::vector<double> global_params = fit_parameters(all_ref_counts, all_alt_counts, all_genotypes, {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous});
+    std::vector<double> global_params = fit_parameters(all_ref_counts, all_alt_counts, all_genotypes, {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous});
 //
 //    std::cout << "Global parameters: ";
 //    for (double param : global_params) {
@@ -846,14 +853,14 @@ std::tuple<double, double, double, double, std::vector<double>, std::vector<doub
 //    std::cout << std::endl;
 
     // Fit global parameters in two stages, first overdispersion and error rate, then dropout and overdispersion_h
-    std::vector<double> global_params = fit_parameters_two_stage(
-            all_ref_counts,
-            all_alt_counts,
-            all_genotypes,
-            {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous},
-            50,
-            1e-5
-    );
+//    std::vector<double> global_params = fit_parameters_two_stage(
+//            all_ref_counts,
+//            all_alt_counts,
+//            all_genotypes,
+//            {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous},
+//            50,
+//            1e-5
+//    );
 
     std::cout << "Global parameters: ";
     for (double param : global_params) {

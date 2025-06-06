@@ -124,6 +124,13 @@ class MutationFilter:
         self.overdispersion = overdispersion
         self.error_rate = error_rate
 
+    def update_alpha_beta(self, error_r, overdispersion_hom):
+        self.alpha_R = error_r * overdispersion_hom
+        self.beta_R = overdispersion_hom - self.alpha_R
+
+        self.alpha_A = (1 - error_r) * overdispersion_hom
+        self.beta_A = overdispersion_hom - self.alpha_A
+
     def set_mut_type_prior(self, genotype_freq, mut_freq):
         """
         Calculates and stores the log-prior for each possible mutation type of a locus (including non-mutated)
@@ -685,17 +692,17 @@ class MutationFilter:
         all_genotypes = inferred_genotypes.flatten()
 
         # Fit only error_rate and overdispersion using all SNVs
-        global_params = self.fit_parameters_two_stage(
-            all_ref_counts, all_alt_counts, all_genotypes,
-            initial_params_homozygous=[self.overdispersion, self.error_rate],
-            initial_params_heterozygous=[self.dropout_prob, self.overdispersion_H],
-            dropout_direction_prob=self.dropout_direction_prob,
-            max_iterations=50, tolerance=1e-5
-            # Initial values dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h
-        )
+        # global_params = self.fit_parameters_two_stage(
+        #     all_ref_counts, all_alt_counts, all_genotypes,
+        #     initial_params_homozygous=[self.overdispersion, self.error_rate],
+        #     initial_params_heterozygous=[self.dropout_prob, self.overdispersion_H],
+        #     dropout_direction_prob=self.dropout_direction_prob,
+        #     max_iterations=50, tolerance=1e-5
+        #     # Initial values dropout_prob, dropout_direction_prob, overdispersion, error_rate, overdispersion_h
+        # )
 
-        # print(self.fit_parameters(all_ref_counts, all_alt_counts, all_genotypes,
-        #                                     [self.dropout_prob, self.overdispersion, self.error_rate, self.overdispersion_H]))
+        global_params = self.fit_parameters(all_ref_counts, all_alt_counts, all_genotypes,
+                                            [self.dropout_prob, self.overdispersion, self.error_rate, self.overdispersion_H])
         print(f"Global parameters: {global_params}")
 
         dropout_prob, overdispersion, error_rate, overdispersion_h = global_params

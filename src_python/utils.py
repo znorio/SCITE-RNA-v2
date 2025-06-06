@@ -97,8 +97,12 @@ def create_genotype_matrix(not_selected_genotypes, selected, gt1, gt2, mutation_
     not_selected = [i for i in range(n_loci) if i not in selected]
 
     # those not selected have a gt independent of the tree learning
-    for n, locus in enumerate(not_selected):
-        genotype_matrix[:, locus] = [not_selected_genotypes[n] for _ in range(n_cells)]
+    if len(not_selected_genotypes) != len(not_selected):
+        for locus in not_selected:
+            genotype_matrix[:, locus] = 'X'
+    else:
+        for n, locus in enumerate(not_selected):
+            genotype_matrix[:, locus] = not_selected_genotypes[n]
 
     # these are the genes selected for the tree learning
     for n, locus in enumerate(selected):
