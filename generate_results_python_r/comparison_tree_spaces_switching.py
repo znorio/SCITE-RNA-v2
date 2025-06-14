@@ -45,7 +45,7 @@ def plot_results(num_cells_list, num_mut_list, optimal_tree_llh, n_rounds, title
         plot_boxplot(axes[1, s], relative_data, labels, n_cells, n_mut, f'{title} Predicted vs. Cell Tree')
 
     plt.tight_layout()
-    plt.savefig(f"../data/results/figures/space_switching_{title}.png")
+    plt.savefig(f"../data/results/figures/space_switching_{title}.pdf")
     plt.show()
 
 
@@ -75,6 +75,7 @@ def plot_boxplot(ax, all_data, labels, n_cells, n_mut, ylabel):
     for patch, color in zip(box['boxes'], colors[:len(box['boxes'])]):
         patch.set_facecolor(color)
 
+    labels = [label.replace("_", "") for label in labels]
     ax.axhline(0, color='orange', linestyle='--', linewidth=2)
     ax.set_xticks(range(1, len(labels) + 1))
     ax.set_xticklabels(labels, rotation=90, fontsize=24)
