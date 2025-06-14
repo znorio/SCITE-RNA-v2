@@ -627,7 +627,7 @@ std::vector<double> MutationFilter::fit_parameters_two_stage(
     LBFGSBParam<double> param1;
     param1.epsilon = tolerance;
     param1.max_iterations = max_iterations;
-    param1.delta = 1e-4;
+    param1.delta = 1e-3;
 
     LBFGSBSolver<double> solver1(param1);
     HomozygousObjective hom_obj(*this, alt_hom, total_hom, genotypes_hom);
@@ -792,7 +792,7 @@ std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<
     LBFGSpp::LBFGSBParam<double> param;
     param.epsilon = tolerance;
     param.max_iterations = max_iterations;
-    param.delta = 1e-3;
+    param.delta = 0.005;
 
     LBFGSpp::LBFGSBSolver<double> solver(param);
     Objective obj(*this, alt_het, total_reads, overdispersion, error_r, dropout_direction);
