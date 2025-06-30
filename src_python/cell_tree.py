@@ -5,6 +5,7 @@ Defines the cell lineage tree and how it is optimized.
 import numpy as np
 import graphviz
 import warnings
+from scipy.special import logsumexp
 
 from src_python.tree_base import PruneTree
 from src_python.utils import load_config_and_set_random_seed
@@ -235,7 +236,7 @@ class CellTree(PruneTree):
         self.mut_loc = self.reduce_to_n_clones(self.llr, penalty_weight, n_clones)
 
 
-    def update_mut_loc(self):
+    def update_tree_llh_mut_loc(self):
         """
         Updates the optimal mutation locations and the joint likelihood of the tree.
         """
@@ -260,12 +261,45 @@ class CellTree(PruneTree):
 
         self.joint = loc_joint.sum()
 
+    def update_tree_llh_marginalized(self):
+        """
+        Updates the mutation placement probabilities in the mutation tree
+        by marginalizing over all possible locations, and computes the joint likelihood.
+        """
+        if self.flipped_mutation_direction:
+            locs_neg = self.llr.argmin(axis=0)
+            locs_pos = self.llr.argmax(axis=0)
+
+            llhs_neg = self.loc_joint_2 - self.llr[locs_neg, np.arange(self.llr.shape[1])]
+            llhs_pos = self.loc_joint_1 + self.llr[locs_pos, np.arange(self.llr.shape[1])]
+
+            # Hard assignment, retained optionally
+            neg_larger = llhs_neg > llhs_pos
+            self.mut_loc = np.where(neg_larger, locs_neg, locs_pos)
+            self.flipped = neg_larger
+
+            # Full marginal likelihood over both directions and all placements
+            joint_pos = self.loc_joint_1 + logsumexp(self.llr, axis=0)
+            joint_neg = self.loc_joint_2 - logsumexp(-self.llr, axis=0)
+
+            loc_joint = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
+
+        else:
+            # When direction is known, just marginalize over placements
+            loc_joint = self.loc_joint_1 + logsumexp(self.llr, axis=0)
+
+            # Optionally retain hard assignment
+            self.mut_loc = self.llr.argmax(axis=0)
+
+        self.joint = loc_joint.sum()
+
     def update_all(self):
         """
         Updates the log-likelihood ratios, the optimal mutation locations, and the joint likelihood of the tree.
         """
         self.update_llr()
-        self.update_mut_loc()
+        # self.update_tree_llh_mut_loc()
+        self.update_tree_llh_marginalized()
 
     def binary_prune(self, subroot):
         """
@@ -296,7 +330,9 @@ class CellTree(PruneTree):
                 if not visited:
                     self.llr[anchor, :] = self.llr[subroot, :] + self.llr[current_target, :]
 
-                    self.update_mut_loc()
+                    self.update_tree_llh_marginalized()
+                    # self.update_tree_llh_mut_loc()
+
                     current_joint = self.joint
 
                     if current_joint == best_joint:

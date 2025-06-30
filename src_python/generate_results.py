@@ -114,11 +114,11 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
         )
         np.savetxt(
             os.path.join(pathout, "sciterna_flipped", f"sciterna_flipped_{r}r{i}.txt"),
-            flipped,
+            flipped, fmt="%i"
         )
         np.savetxt(
             os.path.join(pathout, "sciterna_mutation_location", f"sciterna_mutation_location_{r}r{i}.txt"),
-            optimizer.ct.mut_loc,
+            optimizer.ct.mut_loc, fmt="%i"
         )
 
 
