@@ -5,6 +5,8 @@ Defines the cell lineage tree and how it is optimized.
 import numpy as np
 import graphviz
 import warnings
+
+from pywin.Demos.dyndlg import test1
 from scipy.special import logsumexp
 
 from src_python.tree_base import PruneTree
@@ -35,6 +37,8 @@ class CellTree(PruneTree):
         # initialize with random structure
         self.rand_subtree()
         self.current_llr_max_without_anchor = None
+        self.attachment_probs = None
+        self.expected_mutations_per_edge = None
 
         # self.use_parent_vec([53,56,88,73,63,53,55,57,64,79,69,58,57,68,75,67,62,51,64,72,74,65,66,58,60,54,72,74,61,61,
         #                      77,56,81,73,52,54,50,69,52,51,76,62,59,65,63,86,55,97,50,78,60,70,67,77,59,71,70,80,88,82,
@@ -173,68 +177,6 @@ class CellTree(PruneTree):
                 # LLR at internal vertex is the sum of LLR of both children
                 self.llr[vtx, :] = self.llr[self.children(vtx), :].sum(axis=0)
 
-    def reduce_to_n_clones(self, matrix: np.ndarray, penalty_weight: float, n_clones: int):
-        n_rows, n_cols = matrix.shape
-
-        # Step 1: Initial assignments
-        argmax_indices = np.argmax(matrix, axis=0)
-        assignments = list(argmax_indices)
-
-        # Calculate initial index counts
-        index_counts = np.bincount(argmax_indices, minlength=n_rows)
-        non_zero_counts = np.nonzero(index_counts)[0]
-
-        while len(non_zero_counts) > n_clones:
-            # Sort by frequency (ascending) to prioritize rarest
-            rare_indices = non_zero_counts[np.argsort(index_counts[non_zero_counts])]
-
-            for rare_idx in rare_indices:
-                if len(non_zero_counts) <= n_clones:
-                    break
-
-                # Columns where rare_idx is currently assigned
-                affected_cols = np.where(np.array(assignments) == rare_idx)[0]
-
-                for col in affected_cols:
-                    original_val = matrix[rare_idx, col]
-
-                    # Candidates: shared rows (excluding the rare one)
-                    candidate_rows = non_zero_counts[non_zero_counts != rare_idx]
-                    candidate_values = matrix[candidate_rows, col]
-
-                    if len(candidate_rows) == 0:
-                        continue
-
-                    # Find the best replacement
-                    best_idx = np.argmax(candidate_values)
-                    best_row = candidate_rows[best_idx]
-                    best_val = candidate_values[best_idx]
-
-                    value_loss = original_val - best_val
-
-                    # Check if merging is allowed by penalty_weight
-                    if value_loss <= penalty_weight:
-                        assignments[col] = best_row
-                        index_counts[rare_idx] -= 1
-                        index_counts[best_row] += 1
-                        if index_counts[rare_idx] == 0:
-                            non_zero_counts = non_zero_counts[non_zero_counts != rare_idx]
-                    else:
-                        # Increase the number of allowed n_clones by one
-                        n_clones += 1
-                        break
-
-        return np.array(assignments)
-
-    def update_mut_loc_experimental(self, n_clones, penalty_weight = 10):
-        """
-        Updates the optimal mutation locations and the joint likelihood of the tree.
-        encourages clone formation
-        """
-        self.update_llr()
-
-        self.mut_loc = self.reduce_to_n_clones(self.llr, penalty_weight, n_clones)
-
 
     def update_tree_llh_mut_loc(self):
         """
@@ -261,45 +203,179 @@ class CellTree(PruneTree):
 
         self.joint = loc_joint.sum()
 
-    def update_tree_llh_marginalized(self):
+    def update_tree_llh_marginalized(self, mut_loc=False):
         """
         Updates the mutation placement probabilities in the mutation tree
         by marginalizing over all possible locations, and computes the joint likelihood.
         """
         if self.flipped_mutation_direction:
-            locs_neg = self.llr.argmin(axis=0)
-            locs_pos = self.llr.argmax(axis=0)
 
-            llhs_neg = self.loc_joint_2 - self.llr[locs_neg, np.arange(self.llr.shape[1])]
-            llhs_pos = self.loc_joint_1 + self.llr[locs_pos, np.arange(self.llr.shape[1])]
+            llhs_pos = self.loc_joint_1 + self.llr
+            llhs_neg = self.loc_joint_2 - self.llr
 
-            # Hard assignment, retained optionally
-            neg_larger = llhs_neg > llhs_pos
-            self.mut_loc = np.where(neg_larger, locs_neg, locs_pos)
-            self.flipped = neg_larger
-
-            # Full marginal likelihood over both directions and all placements
-            joint_pos = self.loc_joint_1 + logsumexp(self.llr, axis=0)
-            joint_neg = self.loc_joint_2 - logsumexp(-self.llr, axis=0)
+            joint_pos = logsumexp(llhs_pos, axis=0)
+            joint_neg = logsumexp(llhs_neg, axis=0)
 
             loc_joint = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
+            self.joint = np.sum(loc_joint)
+
+            if mut_loc:
+                neg_larger = joint_neg > joint_pos
+                self.flipped = neg_larger
+
+                self.mut_loc = np.where(
+                    neg_larger,
+                    np.argmax(llhs_neg, axis=0),
+                    np.argmax(llhs_pos, axis=0)
+                )
+
+                # Compute full attachment probabilities
+                p_pos = np.exp(llhs_pos - loc_joint)
+                p_neg = np.exp(llhs_neg - loc_joint)
+                self.attachment_probs = p_pos + p_neg
+        else:
+            loc_joint = self.loc_joint_1 + logsumexp(self.llr, axis=0)
+            self.mut_loc = self.llr.argmax(axis=0)
+            self.joint = np.sum(loc_joint)
+
+    def update_tree_llh_marginalized_not(self, min_clones=4, min_mutations_per_edge=2, cost_per_edge=50,
+                                                  mut_loc=False):
+        if self.flipped_mutation_direction:
+            # Full LLR-based likelihood matrices for both directions
+            llhs_pos = self.loc_joint_1 + self.llr
+            llhs_neg = self.loc_joint_2 - self.llr
+
+            # Softmax-normalized probabilities for each mutation-location pair
+            joint_pos = logsumexp(llhs_pos, axis=0)
+            joint_neg = logsumexp(llhs_neg, axis=0)
+            loc_joint = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
+
+            # Probabilities under each direction
+            p_pos = np.exp(llhs_pos - loc_joint)
+            p_neg = np.exp(llhs_neg - loc_joint)
+
+            # Expected mutations per edge
+            self.expected_mutations_per_edge = p_pos.sum(axis=1) + p_neg.sum(axis=1)
+
+            # Identify top candidate attachment nodes (clones)
+            above_threshold = np.where(self.expected_mutations_per_edge >= min_mutations_per_edge)[0]
+            n_clones = max(min_clones, len(above_threshold))
+            top_attachment_points = np.argsort(self.expected_mutations_per_edge)[-min_clones:]
+
+            # Restrict the log-likelihoods to only top nodes
+            llhs_pos_top = llhs_pos[top_attachment_points]
+            llhs_neg_top = llhs_neg[top_attachment_points]
+
+            # For each mutation, determine best node & direction among top edges
+            best_pos_llh = np.max(llhs_pos_top, axis=0)
+            best_neg_llh = np.max(llhs_neg_top, axis=0)
+            use_neg = best_neg_llh > best_pos_llh
+            self.flipped = use_neg
+
+            best_nodes_pos = np.argmax(llhs_pos_top, axis=0)
+            best_nodes_neg = np.argmax(llhs_neg_top, axis=0)
+            selected_nodes = np.where(use_neg, best_nodes_neg, best_nodes_pos)
+
+            self.mut_loc = top_attachment_points[selected_nodes]
+
+            # Compute joint likelihood using selected values
+            best_llhs = np.where(use_neg, best_neg_llh, best_pos_llh)
+            self.joint = np.sum(best_llhs) - n_clones * cost_per_edge
+
+            if mut_loc:
+                print(np.unique(self.mut_loc))
+
+        else:
+            # Direction is fixed (positive only)
+            llhs = self.loc_joint_1[:, None] + self.llr
+
+            joint_pos = logsumexp(llhs, axis=0)
+            p_pos = np.exp(llhs - joint_pos)
+            self.expected_mutations_per_edge = p_pos.sum(axis=1)
+
+            above_threshold = np.where(self.expected_mutations_per_edge >= min_mutations_per_edge)[0]
+            n_clones = max(min_clones, len(above_threshold))
+            top_attachment_points = np.argsort(self.expected_mutations_per_edge)[-n_clones:]
+
+            llhs_top = llhs[top_attachment_points]
+            selected_nodes = np.argmax(llhs_top, axis=0)
+            self.mut_loc = top_attachment_points[selected_nodes]
+            self.flipped = np.zeros(self.llr.shape[1], dtype=bool)
+
+            best_llhs = np.max(llhs_top, axis=0)
+            self.joint = np.sum(best_llhs) - n_clones * cost_per_edge
+
+            if mut_loc:
+                print(np.unique(self.mut_loc))
+
+    def update_tree_llh_marginalized_clones(self, entropy_weight = 0.1, n_clones = 4, mut_loc=False):
+        """
+        Updates the mutation placement probabilities in the mutation tree
+        by marginalizing over all possible locations, and computes the joint likelihood.
+        """
+        if self.flipped_mutation_direction:
+
+            # Full marginal likelihood over both directions and all placements
+            llhs_pos = self.loc_joint_1 + self.llr
+            llhs_neg = self.loc_joint_2 - self.llr
+
+            joint_pos = logsumexp(llhs_pos, axis=0)
+            joint_neg = logsumexp(llhs_neg, axis=0)
+
+            loc_joint = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
+
+            # normalize by the loc_joint likelihood
+            p_pos = np.exp(llhs_pos - loc_joint)  # shape: (n_nodes, n_mutations)
+            p_neg = np.exp(llhs_neg - loc_joint)  # shape: (n_nodes, n_mutations)
+
+            # Sum across all mutations to get the expected number of attachments per node
+            self.expected_mutations_per_edge = p_pos.sum(axis=1) + p_neg.sum(axis=1)
+            #
+            # # Penalize spread-out mutation assignments (prefer concentration)
+            # p = self.expected_mutations_per_edge / (self.n_mut + 1e-12)
+            #
+            # entropy_penalty = -np.sum(p * np.log(p + 1e-12)) * self.n_cells * self.n_mut
+            #
+            # self.joint = np.sum(loc_joint) - entropy_weight * entropy_penalty
+
+            # above_threshold = np.where(self.expected_mutations_per_edge >= min_mutations_per_edge)[0]
+            # n_clones = max(min_clones, len(above_threshold))
+            top_attachment_points = np.argsort(self.expected_mutations_per_edge)[-n_clones:]
+
+            # Step 5: Restrict the log-likelihoods to only those top nodes
+            llhs_pos_top = llhs_pos[top_attachment_points]
+            llhs_neg_top = llhs_neg[top_attachment_points]
+
+            # Step 6: Marginalize again over direction and top locations only
+            joint_pos_top = logsumexp(llhs_pos_top, axis=0)
+            joint_neg_top = logsumexp(llhs_neg_top, axis=0)
+
+            loc_joint_top = logsumexp(np.vstack([joint_pos_top, joint_neg_top]), axis=0)
+            self.joint = np.sum(loc_joint_top) # - n_clones * cost_per_edge
+
+            if mut_loc:
+                llhs_combined_top = logsumexp(np.stack([llhs_pos_top, llhs_neg_top]), axis=0)
+                best_node_indices = np.argmax(llhs_combined_top, axis=0)
+                self.mut_loc = top_attachment_points[best_node_indices]
+
+                # llhs_combined_top = logsumexp(np.stack([llhs_pos, llhs_neg]), axis=0)
+                # self.mut_loc = np.argmax(llhs_combined_top, axis=0)
+                print(np.unique(self.mut_loc))
 
         else:
             # When direction is known, just marginalize over placements
             loc_joint = self.loc_joint_1 + logsumexp(self.llr, axis=0)
 
-            # Optionally retain hard assignment
             self.mut_loc = self.llr.argmax(axis=0)
+            self.joint = np.sum(loc_joint)
 
-        self.joint = loc_joint.sum()
-
-    def update_all(self):
+    def update_all(self, mut_loc=False):
         """
         Updates the log-likelihood ratios, the optimal mutation locations, and the joint likelihood of the tree.
         """
         self.update_llr()
-        # self.update_tree_llh_mut_loc()
-        self.update_tree_llh_marginalized()
+        self.update_tree_llh_mut_loc()
+        # self.update_tree_llh_marginalized(mut_loc=mut_loc)
 
     def binary_prune(self, subroot):
         """
@@ -330,8 +406,8 @@ class CellTree(PruneTree):
                 if not visited:
                     self.llr[anchor, :] = self.llr[subroot, :] + self.llr[current_target, :]
 
-                    self.update_tree_llh_marginalized()
-                    # self.update_tree_llh_mut_loc()
+                    # self.update_tree_llh_marginalized()
+                    self.update_tree_llh_mut_loc()
 
                     current_joint = self.joint
 
@@ -426,7 +502,7 @@ class CellTree(PruneTree):
             self.update_llr()
             self.greedy_insert_experimental()
 
-        self.update_all()
+        self.update_all(mut_loc=True)
 
     def to_graphviz(self, filename=None, engine="dot", leaf_shape="circle", internal_shape="circle", gene_names=None):
         """
@@ -462,3 +538,5 @@ class CellTree(PruneTree):
                 dgraph.edge(str(self.parent(vtx)), node_label, label=edge_label, fontsize="70")
 
         return dgraph
+
+    def postprocess_trees(self):
