@@ -247,10 +247,10 @@ class MutationTree(PruneTree):
         """
         Updates the cumulative log-likelihood ratio and the optimal cell location in the mutation tree.
         """
-        # self.update_cumul_llr()
-        # self.update_tree_llh_cell_loc()
-        self.update_cumul_llr_marginalized()
-        self.update_tree_llh_marginalized(store_probs=False)  # True if you want to store the attachment probabilities
+        self.update_cumul_llr()
+        self.update_tree_llh_cell_loc()
+        # self.update_cumul_llr_marginalized()
+        # self.update_tree_llh_marginalized(store_probs=False)  # True if you want to store the attachment probabilities
 
     def greedy_attach(self):
         """

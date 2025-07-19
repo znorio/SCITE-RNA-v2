@@ -38,6 +38,20 @@ class SwapOptimizer:
     def mt_joint(self):
         return round(self.mt.joint, self.n_decimals)
 
+    def postprocess_trees(self):
+        """
+        Post-process the trees after optimization.
+        This includes removing single mutations and updating the joint likelihood.
+        """
+        self.ct.remove_single_mutations()
+        self.mt.remove_single_mutations()
+        self.ct.update_all()
+        self.mt.update_all()
+
+        # Update the joint likelihoods
+        self.ct.update_joint()
+        self.mt.update_joint()
+
     def fit_llh(self, llh_1, llh_2):
         self.ct = CellTree(llh_1.shape[0], llh_1.shape[1], flipped_mutation_direction=self.flipped_mutation_direction)
         self.ct.fit_llh(llh_1, llh_2)
@@ -97,3 +111,6 @@ class SwapOptimizer:
 
             if "c" in self.spaces and "m" in self.spaces:  # and converged[current_space] == True
                 current_space = 1 - current_space  # switch to the other tree space
+
+        self.postprocess_trees()
+

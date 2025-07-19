@@ -71,11 +71,11 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
 
 
 
-num_tests = 50  # Number of simulated samples
-n_rounds = 3  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
+num_tests = 100  # Number of simulated samples
+n_rounds = 1  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
 n_cells_list = [50]
-n_mut_list = [100]
-clones = [5]
+n_mut_list = [500]
+clones = [""]
 flipped_mutation_direction = True
 tree_space = ["c"]
 coverage_method = "zinb"

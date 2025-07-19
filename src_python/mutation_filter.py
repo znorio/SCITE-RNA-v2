@@ -397,11 +397,11 @@ class MutationFilter:
                 n = total[i, j]
                 zero_coverage_factor = 1
 
-                # If we have no read counts for a cell, we slightly favor the most common genotype of the other cells
-                if n == 0:
-                    k = np.round(median_vaf * imputed_coverage)
-                    n = np.round(imputed_coverage)
-                    zero_coverage_factor = no_coverage_f
+                # # If we have no read counts for a cell, we slightly favor the most common genotype of the other cells
+                # if n == 0:
+                #     k = np.round(median_vaf * imputed_coverage)
+                #     n = np.round(imputed_coverage)
+                #     zero_coverage_factor = no_coverage_f
 
                 if not individual:
                     llh_mat_1[i, j] = (self.single_read_llh_with_dropout(k, n, gt1[j]) +
