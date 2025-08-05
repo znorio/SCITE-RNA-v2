@@ -150,7 +150,7 @@ def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./c
 
     print(f"Running inference on data in {path}")
 
-    for i in tqdm(range(0, n_tests)):
+    for i in tqdm(range(60, n_tests)):
         alt = np.loadtxt(os.path.join(path, "alt", "alt_%i.txt" % i))
         ref = np.loadtxt(os.path.join(path, "ref", "ref_%i.txt" % i))
 
@@ -172,7 +172,7 @@ def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./c
 def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_data/results",
                               n_bootstrap=100, use_bootstrap=True, tree_space=None,
                               flipped_mutation_direction=True, n_keep=50, posterior_cutoff=0.5, n_rounds=3,
-                              only_preprocessing=False, method="threshold", reshuffle_nodes=False):
+                              only_preprocessing=False, method="threshold", reshuffle_nodes=False, ref_to_alt=False):
     """
     Runs SCITE-RNA on the data in the input path and saves the results in the output path.
 
@@ -186,6 +186,9 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
         n_keep: number of mutations to keep in the preprocessing step
         n_rounds: number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
         only_preprocessing: whether to only run the mutation filtering step
+        method: method used for filtering mutations, can be "first_k" or "threshold"
+        reshuffle_nodes: whether to reshuffle the nodes in the tree during optimization
+        ref_to_alt: whether to use only ref and het for genotypes1 and het and alt for genotype2
     """
 
     reference = pd.read_csv(os.path.join(path, "ref.csv"), index_col=0)
@@ -204,7 +207,7 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
     np.random.seed(config["random_seed"])
 
     print("Preprocessing data...")
-    selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method=method, t=posterior_cutoff, n_exp=n_keep)
+    selected, gt1, gt2, not_selected_genotypes = mf.filter_mutations(ref, alt, method=method, t=posterior_cutoff, n_exp=n_keep, ref_to_alt=ref_to_alt)
 
     if use_bootstrap:
         indices = np.random.choice(len(selected), (n_bootstrap, len(selected)), replace=True)

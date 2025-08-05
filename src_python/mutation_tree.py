@@ -1,6 +1,7 @@
 """
 Defines the mutation tree and how it is optimized.
 """
+import time
 
 import numpy as np
 import graphviz
@@ -37,6 +38,8 @@ class MutationTree(PruneTree):
         self.loc_joint_2 = None
         self.joint = None
         self.attachment_probs = None  # the expected attachment probability for each cell to the mutations (optional)
+        self.expected_llr = None
+        self.mut_llh = None
 
         # self.use_parent_vec([
         #     2, 2, 51, 2, 2, 2, 2, 5, 5, 7, 6, 10, 6, 11, 11, 8, 2, 7, 2, 13, 9, 20, 2, 18,
@@ -99,6 +102,51 @@ class MutationTree(PruneTree):
             parent = np.random.choice(potential_parents + [self.wt])
             self.assign_parent(vtx, parent)
 
+
+    def compute_expected_llr(self):
+        """
+        Computes the expected log-likelihood ratios marginalized over flip directions,
+        independent of tree structure.
+        """
+        if self.flipped_mutation_direction:
+            expected_llr = np.zeros_like(self.llr)
+
+            for j in range(self.n_mut):
+                llr_pos = logsumexp(self.llr[:, j])
+                llr_neg = logsumexp(-self.llr[:, j])
+
+                logp_pos = self.loc_joint_1[j] + llr_pos
+                logp_neg = self.loc_joint_2[j] - llr_neg
+                lse = logsumexp([logp_pos, logp_neg])
+
+                p_pos = np.exp(logp_pos - lse)
+                p_neg = np.exp(logp_neg - lse)
+
+                expected_llr[:, j] = p_pos * self.llr[:, j] + p_neg * (-self.llr[:, j])
+        else:
+            expected_llr = np.where(self.flipped, -self.llr, self.llr)
+
+        self.expected_llr = expected_llr
+
+    def compute_mutation_log_likelihood(self):
+        """
+        Computes the marginalized mutation-level log-likelihood (mut_llh),
+        independent of tree structure.
+        """
+
+        if self.flipped_mutation_direction:
+            mut_llh = np.zeros(self.n_mut)
+            for j in range(self.n_mut):
+                llh_pos = self.loc_joint_1[j] + logsumexp(self.llr[:, j])
+                llh_neg = self.loc_joint_2[j] - logsumexp(-self.llr[:, j])
+                mut_llh[j] = logsumexp([llh_pos, llh_neg])
+        else:
+            mut_llh = np.where(self.flipped[:self.n_mut],
+                               self.loc_joint_2 - logsumexp(-self.llr, axis=0),
+                               self.loc_joint_1 + logsumexp(self.llr, axis=0))
+
+        self.mut_llh = mut_llh
+
     def fit_llh(self, llh_1, llh_2):
         """
         Gets ready to run optimization using provided log-likelihoods.
@@ -122,6 +170,8 @@ class MutationTree(PruneTree):
         self.loc_joint_1 = llh_1.sum(axis=0)
         self.loc_joint_2 = llh_2.sum(axis=0)
 
+        self.compute_expected_llr()
+        self.compute_mutation_log_likelihood()
         self.update_all()
 
     def fit_cell_tree(self, ct):
@@ -171,41 +221,21 @@ class MutationTree(PruneTree):
                           self.loc_joint_1).sum()  # as filpped isn't updated this could be made a constant
         self.joint = self.cumul_llr.max(axis=1).sum() + wt_llh
 
+
     def update_cumul_llr_marginalized(self):
         """
         Updates the cumulative log-likelihood ratio by marginalizing over
         flip directions for each mutation (when enabled).
         """
 
-        # Precompute expected LLRs per mutation node (columns in self.llr)
-        if self.flipped_mutation_direction:
-            expected_llr = np.zeros_like(self.llr)
-
-            for j in range(self.n_mut):
-                llr_pos = logsumexp(self.llr[:, j])
-                llr_neg = logsumexp(-self.llr[:, j])
-
-                # Posterior over flip directions (log-domain then normalize)
-                logp_pos = self.loc_joint_1[j] + llr_pos
-                logp_neg = self.loc_joint_2[j] - llr_neg
-                lse = logsumexp([logp_pos, logp_neg])
-
-                p_pos = np.exp(logp_pos - lse)
-                p_neg = np.exp(logp_neg - lse)
-
-                # Expected LLR for each cell
-                expected_llr[:, j] = p_pos * self.llr[:, j] + p_neg * (-self.llr[:, j])
-        else:
-            expected_llr = np.where(self.flipped, -self.llr, self.llr)
-
-        # Compute cumulative LLRs using expected values
         for rt in self.roots:
             for vtx in self.dfs_experimental(rt):
-                llr_summand = expected_llr[:, vtx]
+                llr_summand = self.expected_llr[:, vtx]
                 if self.isroot(vtx):
                     self.cumul_llr[:, vtx] = llr_summand
                 else:
                     self.cumul_llr[:, vtx] = self.cumul_llr[:, self.parent(vtx)] + llr_summand
+
 
     def update_tree_llh_marginalized(self, store_probs=False):
         """
@@ -221,36 +251,80 @@ class MutationTree(PruneTree):
         if store_probs:
             self.attachment_probs = np.exp(self.cumul_llr - marginalized_ll[:, None])
 
-        # Compute mutation-side marginal likelihood (flipping direction per mutation)
-        if self.flipped_mutation_direction:
-            mut_llh = np.zeros(self.n_mut)
-
-            for j in range(self.n_mut):
-                llh_pos = self.loc_joint_1[j] + logsumexp(self.llr[:, j])
-                llh_neg = self.loc_joint_2[j] - logsumexp(-self.llr[:, j])
-
-                mut_llh[j] = logsumexp([llh_pos, llh_neg])
-
-        else:
-            # Use the direction currently specified in self.flipped
-            mut_llh = np.where(self.flipped[:self.n_mut],
-                               self.loc_joint_2 - logsumexp(-self.llr, axis=0),
-                               self.loc_joint_1 + logsumexp(self.llr, axis=0))
-
         # Total joint log-likelihood: sum over cells + mutations
-        self.joint = marginalized_ll.sum() + mut_llh.sum()
-
-        # Store MAP cell attachment (optional; not used in joint)
+        self.joint = marginalized_ll.sum() + self.mut_llh.sum()
         self.cell_loc = self.cumul_llr.argmax(axis=1)
 
-    def update_all(self):
+    def update_all(self, store_probs=False):
         """
         Updates the cumulative log-likelihood ratio and the optimal cell location in the mutation tree.
         """
         self.update_cumul_llr()
         self.update_tree_llh_cell_loc()
         # self.update_cumul_llr_marginalized()
-        # self.update_tree_llh_marginalized(store_probs=False)  # True if you want to store the attachment probabilities
+        # self.update_tree_llh_marginalized(store_probs=store_probs)  # True if you want to store the attachment probabilities
+
+    def report_llr_changes(self, old_cumul_llr, new_cumul_llr, atol=0):
+
+        diff = np.abs(new_cumul_llr - old_cumul_llr)
+        changed = diff > atol
+        delta = new_cumul_llr - old_cumul_llr
+        round_digits = 10
+
+        changes_detail = {}
+        for j in range(diff.shape[1]):
+            row_indices = np.where(changed[:, j])[0]
+            if row_indices.size > 0:
+                deltas = delta[row_indices, j]
+                rounded_deltas = np.round(deltas, round_digits)
+                unique_deltas = sorted(set(rounded_deltas))
+                changes_detail[j] = {
+                    'n_changed': len(row_indices),
+                    'deltas': unique_deltas
+                }
+
+        if changes_detail:
+            for col, info in sorted(changes_detail.items()):
+                print(f"  Mutation {col}: {info['n_changed']} cells affected")
+        else:
+            print("No significant changes in cumul_llr.")
+
+        return changes_detail
+
+    def greedy_attach_marginalized(self):
+        """
+        Attaches pruned subtrees to the optimal location in the main tree
+        using marginalized log-likelihood computations.
+        """
+        for subroot in self.pruned_roots():
+            best_joint_llh = -np.inf
+            best_loc = None
+            best_locs = []
+
+            main_tree_nodes = [r for r in self.dfs_experimental(self.main_root)]
+            subtree_nodes = [r for r in self.dfs_experimental(subroot)]
+
+            marginalized_ll_main_tree = logsumexp(self.cumul_llr[:, main_tree_nodes], axis=1)
+            marginalized_ll_subtree = logsumexp(self.cumul_llr[:, subtree_nodes], axis=1)
+
+            for vtx in main_tree_nodes:
+                new_ll_subtree = self.cumul_llr[:, vtx] + marginalized_ll_subtree
+
+                marginalized_ll_full = logsumexp(
+                    [marginalized_ll_main_tree, new_ll_subtree], axis=0
+                )
+
+                self.joint = np.sum(marginalized_ll_full) + self.mut_llh.sum()
+
+                if self.joint == best_joint_llh:
+                    best_locs.append(vtx)
+                if self.joint > best_joint_llh:
+                    best_joint_llh = self.joint
+                    best_loc = vtx
+                    best_locs = [vtx]
+
+            self.assign_parent(subroot, best_loc)
+            self.joint = best_joint_llh
 
     def greedy_attach(self):
         """
@@ -345,14 +419,21 @@ class MutationTree(PruneTree):
                 self.prune_node(subroot)
                 self.update_all()
                 self.greedy_attach_node()
+
             print("after Node reattachment ", self.joint)
 
         np.random.shuffle(mut_random_order)
 
         for subroot in mut_random_order:  # prune subtrees and insert them at their optimal location
+            # self.greedy_attach()
+
             self.prune(subroot)
             self.update_all()
             self.greedy_attach()
+            # self.greedy_attach_marginalized()
+
+        self.update_all()
+
 
     def to_graphviz(self, filename=None, engine='dot'):
         """

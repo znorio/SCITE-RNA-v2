@@ -99,8 +99,9 @@ class DataGenerator:
             stratified: If True, generate, where each clone has roughly the same number of cells.
         """
         if stratified and num_clones != "":
-            self.mt.random_mutation_clone_tree(num_clones)
-            self.ct.fit_mutation_tree(self.mt)
+            print("WARNING: Stratified sampling is not implemented.")
+        #     self.mt.random_mutation_clone_tree(num_clones)
+        #     self.ct.fit_mutation_tree(self.mt)
         else:
             self.ct.rand_subtree()
             self.ct.rand_mut_loc(num_clones)

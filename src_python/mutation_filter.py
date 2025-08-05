@@ -330,7 +330,7 @@ class MutationFilter:
             result[j] = np.exp(self.single_locus_posteriors(ref[:, j], alt[:, j], comp_priors))
         return result
 
-    def filter_mutations(self, ref, alt, method='highest_post', t=None, n_exp=None):
+    def filter_mutations(self, ref, alt, method='highest_post', t=None, n_exp=None, ref_to_alt=False):
         """
         Filters the loci according to the posteriors of each mutation state
 
@@ -354,9 +354,15 @@ class MutationFilter:
         else:
             raise ValueError('[MutationFilter.filter_mutations] Unknown filtering method.')
 
-        mut_type = np.argmax(posteriors[selected, 3:], axis=1)
-        gt1_inferred = np.choose(mut_type, choices=['R', 'H', 'H', 'A'])
-        gt2_inferred = np.choose(mut_type, choices=['H', 'A', 'R', 'H'])
+        if ref_to_alt:
+            mut_type = np.argmax(posteriors[selected, 3:5], axis=1)
+            gt1_inferred = np.choose(mut_type, choices=['R', 'H'])
+            gt2_inferred = np.choose(mut_type, choices=['H', 'A'])
+
+        else:
+            mut_type = np.argmax(posteriors[selected, 3:], axis=1)
+            gt1_inferred = np.choose(mut_type, choices=['R', 'H', 'H', 'A'])
+            gt2_inferred = np.choose(mut_type, choices=['H', 'A', 'R', 'H'])
 
         gt_not_selected = []  # maximum likelihood of genotypes that are not included in the tree learning
         for i in range(posteriors.shape[0]):
@@ -387,7 +393,7 @@ class MutationFilter:
             betas_h = np.array(overdispersions_h) * 0.5
             assert n_mut == len(alphas_h) and n_mut == len(betas_h)
 
-        imputed_coverage = np.mean(total)
+        # imputed_coverage = np.mean(total)
 
         for j in range(n_mut):
             vafs = [alt[l][j] / total[l][j] for l in range(n_cells) if total[l][j] > 0]
