@@ -54,7 +54,65 @@ class CellTree(PruneTree):
         self.mut_loc = np.ones(n_mut, dtype=int) * -1
         self.flipped = np.zeros(n_mut, dtype=bool)
 
-    def rand_subtree(self, leaves=None, internals=None):
+    def rand_subtree(self):
+        """
+        Construct a random binary tree using Rémy's algorithm and store it in the parent array.
+        Return the parent vector.
+        """
+        total_nodes = 1
+
+        current_nodes = [0]
+
+        parent = {0: -1}
+
+        for internal_id in range(self.n_cells-1):
+            # Choose a random node from current tree nodes
+            chosen = np.random.choice(current_nodes)
+
+            new_internal = total_nodes
+            total_nodes += 1
+            new_leaf = total_nodes
+            total_nodes += 1
+
+            # Parent of new internal node is parent of chosen node
+            parent[new_internal] = parent[chosen]
+
+            # The chosen node and the new leaf become children of new internal node
+            parent[chosen] = new_internal
+            parent[new_leaf] = new_internal
+
+            # Replace chosen node by new internal and new leaf in current nodes list
+            current_nodes.remove(chosen)
+            current_nodes.append(new_internal)
+            current_nodes.append(new_leaf)
+
+        parents = set(parent.values()) - {-1}
+
+        leaves = [node for node in parent if node not in parents]
+        internals = [node for node in parent if node in parents]
+
+        leaves.sort()
+        internals.sort()
+
+        # Leaves get [0 .. n_cells-1], internals get [n_cells .. n_cells + n_internal - 1]
+        mapping = {}
+        for new_id, old_id in enumerate(leaves):
+            mapping[old_id] = new_id
+        for new_id, old_id in enumerate(internals, start=self.n_cells):
+            mapping[old_id] = new_id
+
+        # Create parent vector with ordered indexing
+        ordered_parent = [-1] * (2 * self.n_cells -1)
+        for old_id, p in parent.items():
+            if p == -1:
+                ordered_parent[mapping[old_id]] = -1
+            else:
+                ordered_parent[mapping[old_id]] = mapping[p]
+
+
+        self.use_parent_vec(ordered_parent)
+
+    def rand_subtree_simple(self, leaves=None, internals=None):
         """
         Construct a random subtree. If no subtree is specified, randomize the entire tree.
         """
@@ -89,7 +147,6 @@ class CellTree(PruneTree):
                 raise ValueError("number of clones must be less than or equal to number of mutations")
             weights = np.ones(self.n_vtx)
             weights[:self.n_cells] = leaf_mut_prob  # make it less likely that clones consist of just a single cell
-            # weights[self.main_root] = 10 # higher probability of having mutations placed at the root than elsewhere
             weights /= weights.sum()
             sample = list(np.random.choice(self.n_vtx, size=num_clones, replace=False, p=weights))
             if self.main_root not in sample:
@@ -135,7 +192,7 @@ class CellTree(PruneTree):
 
         # joint likelihood of each locus when all cells have genotype 1 or 2
         self.loc_joint_1 = llh_1.sum(axis=0)
-        self.loc_joint_2 = llh_2.sum(axis=0)
+        self.loc_joint_2 = llh_2.sum(axis=0) # TODO potentially increase likelihood of placing mutations at the root, because of germline mutations
 
         # assign mutations to optimal locations
         self.update_all()
@@ -161,7 +218,7 @@ class CellTree(PruneTree):
                 self.mut_loc[mutation] = leaves[0]
             elif len(leaves) > 1:  # more than one cell below, add new internal node(s)
                 internals = [i for i in range(next_internal, next_internal + len(leaves) - 1)]
-                self.rand_subtree(leaves, internals)
+                self.rand_subtree_simple(leaves, internals)
                 mrca[mvtx] = internals[-1]
                 next_internal += len(internals)
             mutation = mvtx
@@ -223,151 +280,22 @@ class CellTree(PruneTree):
                 neg_larger = joint_neg > joint_pos
                 self.flipped = neg_larger
 
-                self.mut_loc = np.where(
-                    neg_larger,
-                    np.argmax(llhs_neg, axis=0),
-                    np.argmax(llhs_pos, axis=0)
-                )
+                # mut_loc = np.where(
+                #     neg_larger,
+                #     np.argmax(llhs_neg, axis=0),
+                #     np.argmax(llhs_pos, axis=0)
+                # )
 
-                # Compute full attachment probabilities
                 p_pos = np.exp(llhs_pos - loc_joint)
                 p_neg = np.exp(llhs_neg - loc_joint)
                 self.attachment_probs = p_pos + p_neg
+
+                self.mut_loc = np.argmax(self.attachment_probs, axis=0)
         else:
             loc_joint = self.loc_joint_1 + logsumexp(self.llr, axis=0)
             self.mut_loc = self.llr.argmax(axis=0)
             self.joint = np.sum(loc_joint)
 
-    def update_tree_llh_marginalized_not(self, min_clones=4, min_mutations_per_edge=2, cost_per_edge=50,
-                                                  mut_loc=False):
-        if self.flipped_mutation_direction:
-            # Full LLR-based likelihood matrices for both directions
-            llhs_pos = self.loc_joint_1 + self.llr
-            llhs_neg = self.loc_joint_2 - self.llr
-
-            # Softmax-normalized probabilities for each mutation-location pair
-            joint_pos = logsumexp(llhs_pos, axis=0)
-            joint_neg = logsumexp(llhs_neg, axis=0)
-            loc_joint = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
-
-            # Probabilities under each direction
-            p_pos = np.exp(llhs_pos - loc_joint)
-            p_neg = np.exp(llhs_neg - loc_joint)
-
-            # Expected mutations per edge
-            self.expected_mutations_per_edge = p_pos.sum(axis=1) + p_neg.sum(axis=1)
-
-            # Identify top candidate attachment nodes (clones)
-            above_threshold = np.where(self.expected_mutations_per_edge >= min_mutations_per_edge)[0]
-            n_clones = max(min_clones, len(above_threshold))
-            top_attachment_points = np.argsort(self.expected_mutations_per_edge)[-min_clones:]
-
-            # Restrict the log-likelihoods to only top nodes
-            llhs_pos_top = llhs_pos[top_attachment_points]
-            llhs_neg_top = llhs_neg[top_attachment_points]
-
-            # For each mutation, determine best node & direction among top edges
-            best_pos_llh = np.max(llhs_pos_top, axis=0)
-            best_neg_llh = np.max(llhs_neg_top, axis=0)
-            use_neg = best_neg_llh > best_pos_llh
-            self.flipped = use_neg
-
-            best_nodes_pos = np.argmax(llhs_pos_top, axis=0)
-            best_nodes_neg = np.argmax(llhs_neg_top, axis=0)
-            selected_nodes = np.where(use_neg, best_nodes_neg, best_nodes_pos)
-
-            self.mut_loc = top_attachment_points[selected_nodes]
-
-            # Compute joint likelihood using selected values
-            best_llhs = np.where(use_neg, best_neg_llh, best_pos_llh)
-            self.joint = np.sum(best_llhs) - n_clones * cost_per_edge
-
-            if mut_loc:
-                print(np.unique(self.mut_loc))
-
-        else:
-            # Direction is fixed (positive only)
-            llhs = self.loc_joint_1[:, None] + self.llr
-
-            joint_pos = logsumexp(llhs, axis=0)
-            p_pos = np.exp(llhs - joint_pos)
-            self.expected_mutations_per_edge = p_pos.sum(axis=1)
-
-            above_threshold = np.where(self.expected_mutations_per_edge >= min_mutations_per_edge)[0]
-            n_clones = max(min_clones, len(above_threshold))
-            top_attachment_points = np.argsort(self.expected_mutations_per_edge)[-n_clones:]
-
-            llhs_top = llhs[top_attachment_points]
-            selected_nodes = np.argmax(llhs_top, axis=0)
-            self.mut_loc = top_attachment_points[selected_nodes]
-            self.flipped = np.zeros(self.llr.shape[1], dtype=bool)
-
-            best_llhs = np.max(llhs_top, axis=0)
-            self.joint = np.sum(best_llhs) - n_clones * cost_per_edge
-
-            if mut_loc:
-                print(np.unique(self.mut_loc))
-
-    def update_tree_llh_marginalized_clones(self, entropy_weight = 0.1, n_clones = 4, mut_loc=False):
-        """
-        Updates the mutation placement probabilities in the mutation tree
-        by marginalizing over all possible locations, and computes the joint likelihood.
-        """
-        if self.flipped_mutation_direction:
-
-            # Full marginal likelihood over both directions and all placements
-            llhs_pos = self.loc_joint_1 + self.llr
-            llhs_neg = self.loc_joint_2 - self.llr
-
-            joint_pos = logsumexp(llhs_pos, axis=0)
-            joint_neg = logsumexp(llhs_neg, axis=0)
-
-            loc_joint = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
-
-            # normalize by the loc_joint likelihood
-            p_pos = np.exp(llhs_pos - loc_joint)  # shape: (n_nodes, n_mutations)
-            p_neg = np.exp(llhs_neg - loc_joint)  # shape: (n_nodes, n_mutations)
-
-            # Sum across all mutations to get the expected number of attachments per node
-            self.expected_mutations_per_edge = p_pos.sum(axis=1) + p_neg.sum(axis=1)
-            #
-            # # Penalize spread-out mutation assignments (prefer concentration)
-            # p = self.expected_mutations_per_edge / (self.n_mut + 1e-12)
-            #
-            # entropy_penalty = -np.sum(p * np.log(p + 1e-12)) * self.n_cells * self.n_mut
-            #
-            # self.joint = np.sum(loc_joint) - entropy_weight * entropy_penalty
-
-            # above_threshold = np.where(self.expected_mutations_per_edge >= min_mutations_per_edge)[0]
-            # n_clones = max(min_clones, len(above_threshold))
-            top_attachment_points = np.argsort(self.expected_mutations_per_edge)[-n_clones:]
-
-            # Step 5: Restrict the log-likelihoods to only those top nodes
-            llhs_pos_top = llhs_pos[top_attachment_points]
-            llhs_neg_top = llhs_neg[top_attachment_points]
-
-            # Step 6: Marginalize again over direction and top locations only
-            joint_pos_top = logsumexp(llhs_pos_top, axis=0)
-            joint_neg_top = logsumexp(llhs_neg_top, axis=0)
-
-            loc_joint_top = logsumexp(np.vstack([joint_pos_top, joint_neg_top]), axis=0)
-            self.joint = np.sum(loc_joint_top) # - n_clones * cost_per_edge
-
-            if mut_loc:
-                llhs_combined_top = logsumexp(np.stack([llhs_pos_top, llhs_neg_top]), axis=0)
-                best_node_indices = np.argmax(llhs_combined_top, axis=0)
-                self.mut_loc = top_attachment_points[best_node_indices]
-
-                # llhs_combined_top = logsumexp(np.stack([llhs_pos, llhs_neg]), axis=0)
-                # self.mut_loc = np.argmax(llhs_combined_top, axis=0)
-                print(np.unique(self.mut_loc))
-
-        else:
-            # When direction is known, just marginalize over placements
-            loc_joint = self.loc_joint_1 + logsumexp(self.llr, axis=0)
-
-            self.mut_loc = self.llr.argmax(axis=0)
-            self.joint = np.sum(loc_joint)
 
     def update_all(self, mut_loc=False):
         """
@@ -539,4 +467,96 @@ class CellTree(PruneTree):
 
         return dgraph
 
-    def postprocess_trees(self):
+    # def em_step(self):
+    #     """
+    #     Performs one EM step to optimize the mutation locations and attachment probabilities.
+    #     """
+    #     if self.flipped_mutation_direction:
+    #
+    #         llhs_pos = self.loc_joint_1 + self.llr
+    #         llhs_neg = self.loc_joint_2 - self.llr
+    #
+    #         joint_pos = logsumexp(llhs_pos, axis=0)
+    #         joint_neg = logsumexp(llhs_neg, axis=0)
+    #
+    #         loc_joint = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
+    #         self.joint = np.sum(loc_joint)
+    #
+    #         neg_larger = joint_neg > joint_pos
+    #         self.flipped = neg_larger
+    #
+    #         self.mut_loc = np.where(
+    #             neg_larger,
+    #             np.argmax(llhs_neg, axis=0),
+    #             np.argmax(llhs_pos, axis=0)
+    #         )
+    #
+    #         # Compute full attachment probabilities
+    #         p_pos = np.exp(llhs_pos - loc_joint)
+    #         p_neg = np.exp(llhs_neg - loc_joint)
+    #         self.attachment_probs = p_pos + p_neg
+    #     else:
+    #         loc_joint = self.loc_joint_1 + logsumexp(self.llr, axis=0)
+    #         self.mut_loc = self.llr.argmax(axis=0)
+    #         self.joint = np.sum(loc_joint)
+
+    def em_step(self, weights):
+        """
+        Performs one EM step. Updates attachment_probs and estimates new node weights.
+        """
+        log_weights = np.log(weights[:, np.newaxis])
+
+        if self.flipped_mutation_direction:
+            # Forward and reverse likelihoods
+            llhs_pos = self.loc_joint_1 + self.llr
+            llhs_neg = self.loc_joint_2 - self.llr
+
+            # Marginalize over both attachment directions
+            llhs_pos_weighted = llhs_pos + log_weights
+            llhs_neg_weighted = llhs_neg + log_weights
+
+            joint_pos = logsumexp(llhs_pos_weighted, axis=0)
+            joint_neg = logsumexp(llhs_neg_weighted, axis=0)
+
+            total_log_likelihood = logsumexp(np.vstack([joint_pos, joint_neg]), axis=0)
+            self.joint = np.sum(total_log_likelihood)
+
+            p_pos = np.exp(llhs_pos_weighted - total_log_likelihood)
+            p_neg = np.exp(llhs_neg_weighted - total_log_likelihood)
+            self.attachment_probs = p_pos + p_neg
+        else:
+            # Single-direction model
+            log_joint = self.loc_joint_1 + self.llr + log_weights
+            total_log_likelihood = logsumexp(log_joint, axis=0)
+            self.joint = np.sum(total_log_likelihood)
+            self.attachment_probs = np.exp(log_joint - total_log_likelihood)
+
+        # M-step: Update weights
+        new_weights = np.sum(self.attachment_probs, axis=1) / self.n_mut
+
+        # Store MAP attachment locations
+        self.mut_loc = np.argmax(self.attachment_probs, axis=0)
+
+        # Return new weights and change in weights
+        avg_diff = np.mean(np.abs(new_weights - weights))
+
+        return new_weights, avg_diff
+
+    def postprocess_trees(self, max_iters=100, tol=1e-4):
+        """
+        Runs the full EM loop until convergence.
+
+        Args:
+            max_iters (int): Maximum number of iterations.
+            tol (float): Convergence threshold on weight difference.
+        """
+        self.update_llr()
+        weights = np.ones(self.n_vtx) / self.n_vtx  # uniform prior
+        avg_diff = np.inf
+        n_loops = 0
+
+        while avg_diff > tol and n_loops < max_iters:
+            weights, avg_diff = self.em_step(weights)
+            n_loops += 1
+
+

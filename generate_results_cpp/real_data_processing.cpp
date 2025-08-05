@@ -17,12 +17,12 @@ Script used to run SCITE-RNA on the multiple myeloma dataset MM34.
 
 int main() {
     int bootstrap_samples = 1000;
-    bool use_bootstrap = true;
+    bool use_bootstrap = false;
     int n_snps = 3000;
     double posterior_threshold = 0.05;
     std::string method = "threshold";
-    int n_rounds = 3;
-    std::string sample = "bc03";
+    int n_rounds = 2;
+    std::string sample = "bc07";
     bool flipped_mutation_direction = true;
     bool only_preprocessing = false;
     std::vector<std::string> tree_space = {"c", "m"};
@@ -30,10 +30,10 @@ int main() {
     bool load_from_file = false;
     bool reduced_output = false;
 
-//    std::string input_path = "../data/input_data/" + sample;
-    std::string input_path = "/cluster/work/bewi/members/znorio/data/input_data/" + sample;
-//    std::string output_path = "../data/results/" + sample + "/sciterna";
-    std::string output_path = "/cluster/work/bewi/members/znorio/data/results/" + sample + "/sciterna";
+    std::string input_path = "../data/input_data/" + sample;
+//    std::string input_path = "/cluster/work/bewi/members/znorio/data/input_data/" + sample;
+    std::string output_path = "../data/results/" + sample + "/sciterna";
+//    std::string output_path = "/cluster/work/bewi/members/znorio/data/results/" + sample + "/sciterna";
 
     std::vector<std::vector<int>> ref = read_csv(input_path + "/ref.csv");
     std::vector<std::vector<int>> alt = read_csv(input_path + "/alt.csv");

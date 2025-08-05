@@ -116,23 +116,11 @@ std::vector<char> load_genotypes(const std::string& path) {
     return genotypes;
 }
 
-void process_rounds(
-        MutationFilter& mf,
-        SwapOptimizer& optimizer,
-        const std::vector<std::vector<int>>& ref,
-        const std::vector<std::vector<int>>& alt,
-        int n_snvs,
-        int n_rounds,
-        const std::string& pathout,
-        int i,
-        std::vector<int> selected,
-        const std::vector<char>& gt1,
-        const std::vector<char>& gt2,
-        const std::vector<char>& not_selected_genotypes,
-        int max_loops = 100,
-        bool insert_nodes = true,
-        bool bootstrap = false,
-        bool reduced_output = false) {
+void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vector<std::vector<int>> &ref,
+                    const std::vector<std::vector<int>> &alt, int n_snvs, int n_rounds, const std::string &pathout,
+                    int i, std::vector<int> selected, const std::vector<char> &gt1, const std::vector<char> &gt2,
+                    const std::vector<char> &not_selected_genotypes, int max_loops = 100, bool insert_nodes = true,
+                    bool reduced_output = false) {
 
     load_config("../config/config.yaml");
 
@@ -235,7 +223,8 @@ void generate_sciterna_simulation_results(
                           std::stod(config_variables["dropout_direction"]), std::stod(config_variables["overdispersion_h"]));
 
         auto [selected, gt1, gt2, not_selected_genotypes] = mf.filter_mutations(ref, alt, "first_k", 0.5, n_keep);
-        process_rounds(mf, optimizer, ref, alt, n_snvs, n_rounds, pathout, i, selected, gt1, gt2, not_selected_genotypes);
+        process_rounds(mf, optimizer, ref, alt, n_snvs, n_rounds, pathout, i, selected, gt1, gt2,
+                       not_selected_genotypes);
 
         auto end_time = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end_time - start_time;
@@ -331,10 +320,12 @@ void generate_sciterna_results(
                     b_gt2.push_back(gt2[index]);
                 }
 
-                process_rounds(mf, optimizer, ref, alt, static_cast<int>(b_selected.size()), n_rounds, pathout, i, b_selected, b_gt1, b_gt2, not_selected_genotypes, 100, insert_nodes, true, reduced_output);
+                process_rounds(mf, optimizer, ref, alt, static_cast<int>(b_selected.size()), n_rounds, pathout, i,
+                               b_selected, b_gt1, b_gt2, not_selected_genotypes, 100, insert_nodes, reduced_output);
             }
         } else {
-            process_rounds(mf, optimizer, ref, alt, static_cast<int>(selected.size()), n_rounds, pathout, 0, selected, gt1, gt2, not_selected_genotypes, 100, insert_nodes, true, reduced_output);
+            process_rounds(mf, optimizer, ref, alt, static_cast<int>(selected.size()), n_rounds, pathout, 0, selected,
+                           gt1, gt2, not_selected_genotypes, 100, insert_nodes, reduced_output);
         }
     }
     std::cout << "Done." << std::endl;

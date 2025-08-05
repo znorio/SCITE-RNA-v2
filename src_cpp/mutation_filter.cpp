@@ -326,12 +326,12 @@ std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> Mu
             int n = total[i][j];
             double zero_coverage_factor = 1;
 
-            if (n == 0) {
-                // If we have no read counts for a cell, we slightly favor the most common genotype of the other cells
-                k = static_cast<int>(round(median_vaf * imputed_coverage));
-                n = static_cast<int>(round(imputed_coverage));
-                zero_coverage_factor = no_coverage_f;
-            }
+//            if (n == 0) {
+//                // If we have no read counts for a cell, we slightly favor the most common genotype of the other cells
+//                k = static_cast<int>(round(median_vaf * imputed_coverage));
+//                n = static_cast<int>(round(imputed_coverage));
+//                zero_coverage_factor = no_coverage_f;
+//            }
             if (!individual) {
                 llh_mat_1[i][j] = (single_read_llh_with_dropout(k, n, gt1[j]) +
                                   mut_type_prior.at(std::string(1, gt1[j]))) / zero_coverage_factor;

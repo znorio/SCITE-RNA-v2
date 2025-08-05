@@ -11,24 +11,11 @@
 
 std::vector<std::vector<std::string>> convert_location_to_gene(const std::vector<std::string>& locations, const std::string& gene_file_path);
 void create_directories(const std::string& pathout);
-void process_rounds(
-        MutationFilter& mf,
-        SwapOptimizer& optimizer,
-        const std::vector<std::vector<int>>& ref,
-        const std::vector<std::vector<int>>& alt,
-        int n_snvs,
-        int n_rounds,
-        const std::string& pathout,
-        int i,
-        std::vector<int> selected,
-        const std::vector<char>& gt1,
-        const std::vector<char>& gt2,
-        const std::vector<char>& not_selected_genotypes,
-        int max_loops,
-        bool insert_nodes,
-        bool bootstrap,
-        bool reduced_output
-);
+void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vector<std::vector<int>> &ref,
+                    const std::vector<std::vector<int>> &alt, int n_snvs, int n_rounds, const std::string &pathout,
+                    int i, std::vector<int> selected, const std::vector<char> &gt1, const std::vector<char> &gt2,
+                    const std::vector<char> &not_selected_genotypes, int max_loops, bool insert_nodes,
+                    bool reduced_output);
 void generate_sciterna_simulation_results(const std::string& path,
                                           const std::string& pathout,
                                           int n_tests,
