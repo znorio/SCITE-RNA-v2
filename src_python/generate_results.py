@@ -1,3 +1,7 @@
+"""
+Functions to run SCITE-RNA on the data in the input path and saves the results in the output path.
+"""
+
 import numpy as np
 import pandas as pd
 import os
@@ -12,6 +16,9 @@ config = load_config_and_set_random_seed()
 
 
 def convert_location_to_gene(locations):
+    """
+    Convert genomic locations to gene names
+    """
     loc_to_gene = []
 
     df = pd.read_csv("../data/input_data/mm34/gene_positions.csv", index_col=False)
@@ -26,6 +33,7 @@ def convert_location_to_gene(locations):
 
 
 def create_directories(pathout):
+    """Create necessary directories for SCITE-RNA results."""
     os.makedirs(os.path.join(pathout, "sciterna_selected_loci"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_inferred_mut_types"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_parent_vec"), exist_ok=True)
@@ -37,11 +45,27 @@ def create_directories(pathout):
     os.makedirs(os.path.join(pathout, "sciterna_global_parameters"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_flipped"), exist_ok=True)
     os.makedirs(os.path.join(pathout, "sciterna_mutation_location"), exist_ok=True)
-    os.makedirs(os.path.join(pathout, "sciterna_attachment_probs"), exist_ok=True)
 
 
 def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, selected, gt1, gt2, not_selected_genotypes,
                    reshuffle_nodes=False):
+    """
+    Process multiple rounds of SCITE-RNA optimization. Saves results after each round.
+    Arguments:
+        mf: MutationFilter instance for parameter updates
+        ref: Reference allele matrix
+        alt: Alternative allele matrix
+        n_snvs: Number of SNVs
+        n_rounds: Number of optimization rounds
+        optimizer: SwapOptimizer instance for tree optimization
+        pathout: Output path for saving results
+        i: Index of the current bootstrap sample if we do bootstrap sampling
+        selected: Indices of selected mutations
+        gt1: Genotype matrix for genotype 1
+        gt2: Genotype matrix for genotype 2
+        not_selected_genotypes: Inferred genotypes for not selected mutations
+        reshuffle_nodes: Whether to prune and reinsert individual nodes in the tree during mutation tree optimization
+    """
     individual_dropout_probs = (np.ones(n_snvs, dtype=float) * config["dropout_alpha"] /
                                 (config["dropout_alpha"] + config["dropout_beta"]))
 
@@ -121,10 +145,6 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
             os.path.join(pathout, "sciterna_mutation_location", f"sciterna_mutation_location_{r}r{i}.txt"),
             optimizer.ct.mut_loc, fmt="%i"
         )
-        np.savetxt(
-            os.path.join(pathout, "sciterna_attachment_probs", f"sciterna_attachment_probs_{r}r{i}.txt"),
-            optimizer.ct.attachment_probs
-        )
 
 
 def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./comparison_data/results", n_tests=100,
@@ -138,8 +158,8 @@ def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./c
         n_tests: number of simulated samples
         tree_space: tree spaces that will be searched and the order of the search
         flipped_mutation_direction: whether the root genotype can be changed during optimization
-        n_keep: number of mutations to keep in the preprocessing step
-        n_rounds: number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
+        n_keep: number of mutations to keep in the preprocessing step if the method is "first_k"
+        n_rounds: number of rounds of SCITE-RNA to optimize the global and SNV specific parameters like dropout
     """
 
     if tree_space is None:
@@ -179,16 +199,16 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
     Arguments:
         path: input path where the data is stored
         pathout: output path where the results will be stored
-        n_bootstrap: number of bootstrap sample trees to generate
+        n_bootstrap: number of bootstrap sample trees to generate if use_bootstrap=True
         use_bootstrap: whether to use bootstrap sampling
         tree_space: tree spaces that will be searched and the order of the search
-        flipped_mutation_direction: whether thr root genotype can be changed during optimization
+        flipped_mutation_direction: whether the root genotype can be changed during optimization
         n_keep: number of mutations to keep in the preprocessing step
         n_rounds: number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
-        only_preprocessing: whether to only run the mutation filtering step
+        only_preprocessing: whether to only run the mutation filtering step without tree inference
         method: method used for filtering mutations, can be "first_k" or "threshold"
-        reshuffle_nodes: whether to reshuffle the nodes in the tree during optimization
-        ref_to_alt: whether to use only ref and het for genotypes1 and het and alt for genotype2
+        reshuffle_nodes: whether to prune and reinsert individual nodes in the tree during mutation tree optimization
+        ref_to_alt: whether to use only ref to het for genotypes1 and het to alt for genotype2
     """
 
     reference = pd.read_csv(os.path.join(path, "ref.csv"), index_col=0)
@@ -201,8 +221,6 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
                         dropout_alpha=config["dropout_alpha"], dropout_beta=config["dropout_beta"],
                         dropout_direction_prob=config["dropout_direction"],
                         overdispersion_h=config["overdispersion_h"])
-
-    n_cells, n_snvs = ref.shape
 
     np.random.seed(config["random_seed"])
 
@@ -227,8 +245,7 @@ def generate_sciterna_results(path="./comparison_data/", pathout="./comparison_d
     np.savetxt(os.path.join(pathout, "selected.txt"), selected, fmt='%d', delimiter=',')
     np.savetxt(os.path.join(pathout, "gt1.txt"), gt1, fmt='%s', delimiter=',')
     np.savetxt(os.path.join(pathout, "gt2.txt"), gt2, fmt='%s', delimiter=',')
-    np.savetxt(os.path.join(pathout, "not_selected_genotypes.txt"), not_selected_genotypes, fmt='%s',
-               delimiter=',')
+    np.savetxt(os.path.join(pathout, "not_selected_genotypes.txt"), not_selected_genotypes, fmt='%s', delimiter=',')
     np.savetxt(os.path.join(pathout, "selected_chromosome_positions.txt"), selected_positions, fmt='%s', delimiter=',')
 
     if not only_preprocessing:

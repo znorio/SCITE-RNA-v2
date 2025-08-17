@@ -38,14 +38,13 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
     os.makedirs(os.path.join(path, "mut_indicator"), exist_ok=True)
     os.makedirs(os.path.join(path, "genotype"), exist_ok=True)
     os.makedirs(os.path.join(path, "dropout_probs"), exist_ok=True)
-    os.makedirs(os.path.join(path, "dropout_directions"), exist_ok=True)
     os.makedirs(os.path.join(path, "overdispersions_H"), exist_ok=True)
     os.makedirs(os.path.join(path, "mutation_location"), exist_ok=True)
 
     generator = DataGenerator(n_cells, n_mut, coverage_method=coverage_method)
 
     for i in tqdm(range(size)):
-        ref, alt, dropout_probs, dropout_directions, overdispersions_H = generator.generate_reads(new_tree=True,
+        ref, alt, dropout_probs, overdispersions_H = generator.generate_reads(new_tree=True,
                                                                                                   new_mut_type=True,
                                                                                                   num_clones=n_clones)
 
@@ -65,7 +64,6 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
         np.savetxt(os.path.join(path, f'mut_indicator/mut_indicator_{i}.txt'), mut_indicator, fmt='%i')
         np.savetxt(os.path.join(path, f'genotype/genotype_{i}.txt'), generator.genotype, fmt='%s')
         np.savetxt(os.path.join(path, f'dropout_probs/dropout_probs_{i}.txt'), dropout_probs)
-        np.savetxt(os.path.join(path, f'dropout_directions/dropout_directions_{i}.txt'), dropout_directions)
         np.savetxt(os.path.join(path, f'overdispersions_H/overdispersions_H_{i}.txt'), overdispersions_H)
         np.savetxt(os.path.join(path, f'mutation_location/mutation_location_{i}.txt'), generator.ct.mut_loc, fmt='%i')
 
