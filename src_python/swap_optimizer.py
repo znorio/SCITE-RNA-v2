@@ -1,5 +1,5 @@
 """
-To optimize the trees, SCITE-RNA alternates between mutation and cell lineage tree spaces.
+To optimize the trees, SCITE-RNA offers the option to alternate between mutation and cell lineage tree spaces.
 """
 
 import warnings
@@ -18,8 +18,8 @@ class SwapOptimizer:
         [Arguments]
             spaces: spaces that will be searched and the order of the search
                     'c' = cell tree space, 'm' = mutation tree space
-                    default is ['c','m'], i.e. start with cell tree and search both spaces
-            sig_dig: number of significant digits to use when calculating joint probability
+                    default is ['c','m'], i.e. start with a cell tree and search both spaces
+            sig_dig: number of significant digits to use when calculating the joint probability
         """
         self.mt = None
         self.ct = None
@@ -83,13 +83,13 @@ class SwapOptimizer:
 
             if current_space == 0:
                 print('Optimizing cell lineage tree ...')
-                self.ct.exhaustive_optimize()  # loop_count=loop_count)
+                self.ct.exhaustive_optimize()
                 self.mt.fit_cell_tree(self.ct)
                 self.mt.update_all()
 
             else:  # i.e. current_space == 1:
                 print('Optimizing mutation tree ...')
-                self.mt.exhaustive_optimize(prune_single_mutations=reshuffle_nodes)  # loop_count=loop_count)
+                self.mt.exhaustive_optimize(prune_single_mutations=reshuffle_nodes)
                 self.ct.fit_mutation_tree(self.mt)
                 self.ct.update_all()
 
@@ -109,71 +109,7 @@ class SwapOptimizer:
             if self.spaces == ["m"]:
                 start_joint = self.mt_joint
 
-            if "c" in self.spaces and "m" in self.spaces:  # and converged[current_space] == True
+            if "c" in self.spaces and "m" in self.spaces:
                 current_space = 1 - current_space  # switch to the other tree space
 
         self.ct.postprocess_trees(max_iters=1)
-
-    # def optimize(self, max_loops=100, max_no_improve=3, reshuffle_nodes=True):
-    #     """
-    #     Joint optimization of cell and mutation trees under a marginalized likelihood model.
-    #     Tracks best-scoring parent vectors and restores them at the end.
-    #
-    #     Parameters:
-    #         max_loops (int): Maximum number of iterations.
-    #         max_no_improve (int): Stop if no improvement in either tree after these many iterations.
-    #         reshuffle_nodes (bool): Whether to allow mutation reshuffling during optimization.
-    #     """
-    #     current_space = 0 if self.spaces[0] == 'c' else 1
-    #     no_improvement = [0, 0]  # [cell tree, mutation tree]
-    #     best_joint = [float('-inf'), float('-inf')]  # best likelihood per tree
-    #     best_parents = [None, None]  # to store best parent vectors for ct and mt
-    #
-    #     loop_count = 0
-    #     while loop_count < max_loops and (no_improvement[0] < max_no_improve or no_improvement[1] < max_no_improve):
-    #         loop_count += 1
-    #
-    #         if current_space == 0:
-    #             print(f"[Loop {loop_count}] Optimizing Cell Lineage Tree ...")
-    #             self.ct.exhaustive_optimize()
-    #             self.mt.fit_cell_tree(self.ct)
-    #             self.mt.update_all()
-    #             current_joint = self.mt.joint
-    #
-    #         else:
-    #             print(f"[Loop {loop_count}] Optimizing Mutation Tree ...")
-    #             self.mt.exhaustive_optimize(prune_single_mutations=reshuffle_nodes)
-    #             self.ct.fit_mutation_tree(self.mt)
-    #             self.ct.update_all()
-    #             current_joint = self.ct.joint
-    #
-    #         print(self.ct.joint, self.mt.joint)
-    #
-    #         if current_joint > best_joint[current_space] + 1e-6:
-    #             best_joint[current_space] = current_joint
-    #             no_improvement[current_space] = 0
-    #             best_parents[current_space] = (
-    #                 self.ct.parent_vec if current_space == 0 else self.mt.parent_vec
-    #             )
-    #         else:
-    #             no_improvement[current_space] += 1
-    #
-    #         # Alternate tree space if both are being optimized
-    #         if "c" in self.spaces and "m" in self.spaces:
-    #             current_space = 1 - current_space
-    #
-    #     print("Optimization finished.")
-    #     print(f"  Best joint (ct): {best_joint[0]:.6f}")
-    #     print(f"  Best joint (mt): {best_joint[1]:.6f}")
-    #
-    #     # Restore best structures
-    #     if best_parents[0] is not None:
-    #         self.ct.use_parent_vec(best_parents[0])
-    #     if best_parents[1] is not None:
-    #         self.mt.use_parent_vec(best_parents[1])
-    #
-    #     # Final update after restoring structure
-    #     self.ct.update_all()
-    #     self.mt.update_all()
-
-

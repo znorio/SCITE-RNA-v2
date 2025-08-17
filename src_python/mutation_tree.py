@@ -59,31 +59,6 @@ class MutationTree(PruneTree):
     def n_cells(self, n_cells):
         self.cell_loc = np.ones(n_cells, dtype=int) * -1
 
-    def random_mutation_clone_tree(self, num_clones):
-        """
-        Generates a mutation tree with roughly equally sized clones.
-        """
-        random_numbers = np.unique([np.random.randint(1, num_clones) for _ in range(self.n_mut)], return_counts=True)[1]
-        muts = list(range(self.n_mut))
-        chosen_muts = np.random.choice(muts, random_numbers[0], replace=False)
-        muts = [m for m in muts if m not in chosen_muts]
-        self.assign_parent(chosen_muts[0], self.wt)
-        for mut1, mut2 in zip(chosen_muts, chosen_muts[1:]):
-            self.assign_parent(mut2, mut1)
-        potential_branch_points = [chosen_muts[-1]]
-
-        for i in range(1, num_clones):
-            chosen_muts = np.random.choice(muts, random_numbers[i], replace=False)
-            muts = [m for m in muts if m not in chosen_muts]
-
-            branch_point = np.random.choice(potential_branch_points)
-            self.assign_parent(chosen_muts[0], branch_point)
-            for mut1, mut2 in zip(chosen_muts, chosen_muts[1:]):
-                self.assign_parent(mut2, mut1)
-            potential_branch_points.append(chosen_muts[-1])
-
-        self.cell_loc = [np.random.choice(potential_branch_points) for _ in range(self.n_cells)]
-
     def random_mutation_tree(self):
         """
         Generates a random mutation tree
@@ -184,7 +159,7 @@ class MutationTree(PruneTree):
         mrm = np.empty(ct.n_vtx + 1, dtype=int)  # mrm for "most recent mutation"
         mrm[-1] = self.wt  # put wildtype at sentinel
 
-        for cvtx in ct.dfs_experimental(ct.main_root):  # cvtx for "cell vertex"
+        for cvtx in ct.dfs(ct.main_root):  # cvtx for "cell vertex"
             mut_list = np.where(ct.mut_loc == cvtx)[0]  # mutations attached to the edge above cvtx
             parent_mut = mrm[ct.parent(cvtx)]
             if mut_list.size > 0:
@@ -205,7 +180,7 @@ class MutationTree(PruneTree):
         Updates the cumulative log-likelihood ratio between the two genotypes
         """
         for rt in self.roots:
-            for vtx in self.dfs_experimental(rt):
+            for vtx in self.dfs(rt):
                 llr_summand = -self.llr[:, vtx] if self.flipped[vtx] else self.llr[:, vtx]
                 if self.isroot(vtx):
                     self.cumul_llr[:, vtx] = llr_summand
@@ -229,7 +204,7 @@ class MutationTree(PruneTree):
         """
 
         for rt in self.roots:
-            for vtx in self.dfs_experimental(rt):
+            for vtx in self.dfs(rt):
                 llr_summand = self.expected_llr[:, vtx]
                 if self.isroot(vtx):
                     self.cumul_llr[:, vtx] = llr_summand
@@ -301,8 +276,8 @@ class MutationTree(PruneTree):
             best_loc = None
             best_locs = []
 
-            main_tree_nodes = [r for r in self.dfs_experimental(self.main_root)]
-            subtree_nodes = [r for r in self.dfs_experimental(subroot)]
+            main_tree_nodes = [r for r in self.dfs(self.main_root)]
+            subtree_nodes = [r for r in self.dfs(subroot)]
 
             marginalized_ll_main_tree = logsumexp(self.cumul_llr[:, main_tree_nodes], axis=1)
             marginalized_ll_subtree = logsumexp(self.cumul_llr[:, subtree_nodes], axis=1)
@@ -331,13 +306,13 @@ class MutationTree(PruneTree):
         Attaches the pruned subtrees to the optimal location in the main tree.
         """
         for subroot in self.pruned_roots():
-            main_tree_max = self.cumul_llr[:, list(self.dfs_experimental(self.main_root))].max(axis=1)
-            subtree_max = self.cumul_llr[:, list(self.dfs_experimental(subroot))].max(axis=1)
+            main_tree_max = self.cumul_llr[:, list(self.dfs(self.main_root))].max(axis=1)
+            subtree_max = self.cumul_llr[:, list(self.dfs(subroot))].max(axis=1)
 
             best_llr = -np.inf
             best_loc = None
             best_locs = []
-            for vtx in self.dfs_experimental(self.main_root):
+            for vtx in self.dfs(self.main_root):
                 # calculate the llr of the tree with reattached subtree at the vtx
                 total_llr = np.maximum(main_tree_max, subtree_max + self.cumul_llr[:, vtx]).sum()
                 if total_llr == best_llr:
@@ -365,7 +340,7 @@ class MutationTree(PruneTree):
             summand_llr_subroot = -self.llr[:, subroot] if self.flipped[subroot] else self.llr[:, subroot]
             cumul_llr_rest_max = np.delete(self.cumul_llr, subroot, axis=1).max(axis=1)
 
-            for vtx in self.dfs_experimental(self.main_root):
+            for vtx in self.dfs(self.main_root):
                 cumul_llr_subroot = summand_llr_subroot + self.cumul_llr[:, vtx]
                 total_llr = np.maximum(cumul_llr_rest_max, cumul_llr_subroot).sum() + wt_llh
 
@@ -378,11 +353,11 @@ class MutationTree(PruneTree):
 
             best_inserts = []
             all_columns = set(range(self.cumul_llr.shape[1]))
-            for vtx in self.dfs_experimental(self.main_root):
+            for vtx in self.dfs(self.main_root):
                 children = self.children(vtx).copy()
                 for child in children:
 
-                    reduced_dfs = [v for v in self.dfs_experimental(child)]
+                    reduced_dfs = [v for v in self.dfs(child)]
                     max_subtree = self.cumul_llr[:, reduced_dfs].max(axis=1) + summand_llr_subroot
                     cumul_llr_subroot = self.cumul_llr[:, vtx] + summand_llr_subroot
                     remaining_columns = list(all_columns - set(reduced_dfs + [subroot]))

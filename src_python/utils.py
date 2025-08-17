@@ -1,6 +1,6 @@
 """
-This module provides utility functions for loading configuration, setting random seeds,
-and creating genotype and mutation matrices for tree learning algorithms.
+This module provides utility functions for loading the configurations, setting random seeds,
+calculating tree distance metrics and creating genotype and mutation matrices for tree learning algorithms.
 """
 
 import numpy as np
@@ -10,11 +10,13 @@ from scipy.spatial.distance import pdist, squareform
 
 
 def leaf_dist_mat(ct, unrooted=False):
-    ''' Distance matrix for all leaves in a cell lineage tree '''
+    """
+    Distance matrix for all leaves in a cell lineage tree
+    """
     result = - np.ones((ct.n_cells, ct.n_vtx), dtype=int)
     np.fill_diagonal(result, 0)
 
-    for vtx in ct.rdfs_experimental(ct.main_root):
+    for vtx in ct.rdfs(ct.main_root):
         if ct.isleaf(vtx):
             continue
 
@@ -38,17 +40,22 @@ def leaf_dist_mat(ct, unrooted=False):
 
 
 def path_len_dist(ct1, ct2, unrooted=False):
-    '''
-    MSE between the distance matrices of two cell/mutation trees
-    The MSE (excluding the diagonal), only distances between leaf cells
-    '''
+    """
+    MAE between the distance matrices of two cell lineage trees
+    only distances between leaf cells. Distance is smaller if the tree structure is similar.
+    """
 
     dist_mat1, dist_mat2 = leaf_dist_mat(ct1, unrooted), leaf_dist_mat(ct2, unrooted)
     denominator = (dist_mat1.size - dist_mat1.shape[0])
     return np.sum(np.abs(dist_mat1 - dist_mat2)) / denominator
-    # return np.sum((dist_mat1 - dist_mat2)**2) / denominator
+
 
 def mut_count_distance(genotype_matrix1, genotype_matrix2):
+    """
+    Computes the number of mutations differing between each pair of cells from two genotype matrices.
+    Then it calculates the mean absolute difference between the two. Thus, the distance is smaller
+    if the trees encode similar genotypes.
+    """
     # Compute the pairwise Hamming distances
     hamming_distances = pdist(genotype_matrix1, metric='hamming')
     distance_matrix1 = squareform(hamming_distances)
@@ -60,7 +67,6 @@ def mut_count_distance(genotype_matrix1, genotype_matrix2):
 
     denominator = (distance_matrix1.size - distance_matrix1.shape[0])
     return np.sum(np.abs(distance_matrix1 - distance_matrix2)) / denominator
-    # return np.sum((distance_matrix1 - distance_matrix2)**2) / denominator
 
 
 def load_config_and_set_random_seed():
@@ -81,10 +87,10 @@ def load_config_and_set_random_seed():
 
 def create_genotype_matrix(not_selected_genotypes, selected, gt1, gt2, mutation_matrix, flipped):
     """
-    Creates a genotype matrix based on selected and not selected genotypes.
+    Creates a genotype matrix based on selected and not selected genotypes during the mutation filtering step.
 
     Arguments:
-        not_selected_genotypes (list): SNVs not selected for tree learning.
+        not_selected_genotypes (list): Inferred genotypes of loci not selected for tree learning.
         selected (list): Indices of selected SNVs.
         gt1 (list): Genotype 1 values.
         gt2 (list): Genotype 2 values.

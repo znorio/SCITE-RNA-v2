@@ -208,7 +208,7 @@ class CellTree(PruneTree):
 
         next_internal = self.n_cells
         mutation = -1
-        for mvtx in mt.rdfs_experimental(mt.main_root):  # mvtx for "mutation vertex"
+        for mvtx in mt.rdfs(mt.main_root):  # mvtx for "mutation vertex"
             leaves = [mrca[child] for child in mt.children(mvtx) if mrca[child] != -1]
             leaves += np.where(mt.cell_loc == mvtx)[0].tolist()
             if len(leaves) == 0:  # no cell below, nothing to do
@@ -228,7 +228,7 @@ class CellTree(PruneTree):
         Updates the log-likelihood ratios between the two genotypes.
         """
         for rt in self.roots:
-            for vtx in self.rdfs_experimental(rt):
+            for vtx in self.rdfs(rt):
                 if self.isleaf(vtx):  # nothing to be done for leaves
                     continue
                 # LLR at internal vertex is the sum of LLR of both children
