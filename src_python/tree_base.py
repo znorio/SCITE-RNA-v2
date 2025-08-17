@@ -1,5 +1,5 @@
 """
-Defines the base class for all trees with some simple functions.
+Defines the base class for all trees with some basic functions.
 """
 
 import numpy as np
@@ -16,13 +16,10 @@ class PruneTree:
         - Vertices are represented by integers, ranging from 0 to n_nodes - 1
         - A parent vector and a children list are kept and updated simultaneously
         - An additional sentinel vertex is created and serves as the parent of the root vertex
-            This sentinel vertex is represented by index -1
+          This sentinel vertex is represented by index -1
     """
 
     def __init__(self, n_vertices):
-        """
-        Initialize the forest with all vertices being individual trees
-        """
         self._pvec = np.ones(n_vertices, dtype=int) * -1  # parent vector
         self._clist = [[] for _ in range(n_vertices)] + [list(range(n_vertices))]
         self._main_root = 0
@@ -107,39 +104,13 @@ class PruneTree:
 
     def dfs(self, subroot):
         """ Traverse the subtree rooted at subroot, in DFS order """
-        yield subroot
-        for child in self._clist[subroot]:
-            yield from self.dfs(child)
-
-    # faster
-    def dfs_experimental(self, subroot):
-        """ Traverse the subtree rooted at subroot, in DFS order """
         stack = [subroot]
         while stack:
             node = stack.pop()
             yield node
             stack.extend(self._clist[node][::-1])
 
-    def dfs_ordered(self, subroot):
-        """Traverse the subtree rooted at subroot in DFS order,
-        visiting children in ascending node ID order.
-        """
-        stack = [subroot]
-        while stack:
-            node = stack.pop()
-            yield node
-            # Sort children in reverse so smallest is on top of the stack
-            children_sorted = sorted(self._clist[node], reverse=True)
-            stack.extend(children_sorted)
-
     def rdfs(self, subroot):
-        """ Traverse the subtree rooted at subroot, in reversed DFS order """
-        for child in self._clist[subroot]:
-            yield from self.rdfs(child)
-        yield subroot
-
-    # faster
-    def rdfs_experimental(self, subroot):
         """ Traverse the subtree rooted at subroot, in reversed DFS order """
         stack = [subroot]
         output = []
