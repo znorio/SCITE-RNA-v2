@@ -29,8 +29,8 @@ class DataGenerator:
         n_cells – Number of cells.
         n_mut – Number of mutations.
         mut_prop – Proportion of mutations.
-        error_rate – Error rate for read counts.
-        overdispersion – Overdispersion parameter of error rate.
+        error_rate – Expected variant allele frequency for homozygous reference genotype
+        overdispersion – Overdispersion parameter in homozygous reference and alternative cases
         genotype_freq – Frequencies of genotypes.
         coverage_method – Method to generate coverage values.
         coverage_mean – Mean coverage value.
@@ -90,21 +90,15 @@ class DataGenerator:
             else:
                 self.gt2[j] = "H"
 
-    def random_tree(self, num_clones, stratified=False):
+    def random_tree(self, num_clones):
         """
         Generate a random tree
 
         [Arguments]
             num_clones: Number of clones (cells with the same genotype) in the tree.
-            stratified: If True, generate, where each clone has roughly the same number of cells.
         """
-        if stratified and num_clones != "":
-            print("WARNING: Stratified sampling is not implemented.")
-        #     self.mt.random_mutation_clone_tree(num_clones)
-        #     self.ct.fit_mutation_tree(self.mt)
-        else:
-            self.ct.rand_subtree()
-            self.ct.rand_mut_loc(num_clones)
+        self.ct.rand_subtree()
+        self.ct.rand_mut_loc(num_clones)
 
     def random_coverage(self):
         """
@@ -182,7 +176,7 @@ class DataGenerator:
             new_tree: if True, generate a new random tree
             new_mut_type: if True, generate new random mutation types
             new_coverage: if True, generate new random coverage values
-            num_clones: number of clones in the tree
+            num_clones: number of clones in the tree, otherwise random mutation placement is used
             min_value: minimum value for the overdispersion parameter in the heterozygous case
             shape: shape parameter for the gamma distribution, which is used to sample the overdispersion parameter
 
@@ -190,7 +184,6 @@ class DataGenerator:
             ref: reference read counts
             alt: alternative read counts
             all_dropout_probs: dropout probabilities per SNV
-            all_dropout_directions: dropout directions per SNV
             all_overdispersions_h: overdispersion parameters for heterozygous case per SNV
         """
         if new_mut_type:
@@ -211,17 +204,14 @@ class DataGenerator:
         alt = np.empty((self.n_cells, self.n_mut), dtype=int)
 
         all_dropout_probs = []
-        all_dropout_directions = []
         all_overdispersions_h = []
 
         for j in range(self.n_mut):
             # Sample dropout probabilities from beta distributions for each SNV
             dropout_prob = np.random.beta(self.dropout_alpha, self.dropout_beta)
-            dropout_direction = self.dropout_dir #
-
             all_dropout_probs.append(dropout_prob)
-            all_dropout_directions.append(dropout_direction)
 
+            # Sample overdispersion parameter for heterozygous case from gamma distribution for each SNV
             scale = (self.overdispersion_h - min_value) / shape  # θ = (mean - shift) / k
 
             overdispersion_H = gamma.rvs(shape, loc=min_value, scale=scale)
@@ -233,9 +223,9 @@ class DataGenerator:
 
             for i in range(self.n_cells):
                 ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j],
-                                                                 dropout_prob, dropout_direction, alpha_H, beta_H)
+                                                                 dropout_prob, config.dropout_direction, alpha_H, beta_H)
 
-        return ref, alt, all_dropout_probs, all_dropout_directions, all_overdispersions_h
+        return ref, alt, all_dropout_probs, all_overdispersions_h
 
     def mut_indicator(self):
         """

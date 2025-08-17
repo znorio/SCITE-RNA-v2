@@ -34,7 +34,6 @@ class CellTree(PruneTree):
         # initialize with random structure
         self.rand_subtree()
         self.current_llr_max_without_anchor = None
-        self.attachment_probs = None
         self.expected_mutations_per_edge = None
 
         # self.use_parent_vec([53,56,88,73,63,53,55,57,64,79,69,58,57,68,75,67,62,51,64,72,74,65,66,58,60,54,72,74,61,61,
@@ -132,7 +131,7 @@ class CellTree(PruneTree):
 
         self.reroot(internals[-1])
 
-    def rand_mut_loc(self, num_clones, leaf_mut_prob=0.001):
+    def rand_mut_loc(self, num_clones, leaf_mut_prob=0.01):
         """
         This function is used by the data generator to create simulated data with a specified number of clones.
         """
