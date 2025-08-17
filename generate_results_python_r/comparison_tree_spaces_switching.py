@@ -192,7 +192,7 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
         merge_dicts(vaf_distance, vaf_distances)
         merge_dicts(mut_count_dist, mut_count_distances)
 
-    plot_results(num_cells_list, num_mut_list, optimal_tree_llhs, n_rounds, "LLH")
+    plot_results(num_cells_list, num_mut_list, optimal_tree_llhs, n_rounds, "LL")
     plot_results(num_cells_list, num_mut_list, path_len_distances, n_rounds, "Pathlength")
     plot_results(num_cells_list, num_mut_list, vaf_distances, n_rounds, "VAF")
     plot_results(num_cells_list, num_mut_list, mut_count_distances, n_rounds, "MutationCountDist")
@@ -205,7 +205,7 @@ n_mut_list = [500, 500, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 
-generate_results = True  # set to True to rerun the SCITE-RNA tree inference
+generate_results = False  # set to True to rerun the SCITE-RNA tree inference
 flipped_mutation_direction = False  # flip mutations or not (change root genotype)
 cpp = "_cpp"
 
