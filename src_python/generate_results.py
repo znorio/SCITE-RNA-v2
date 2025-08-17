@@ -61,7 +61,7 @@ def process_rounds(mf, ref, alt, n_snvs, n_rounds, optimizer, pathout, i, select
         for n, sel in enumerate(selected):
             complete_mut_indicator[:, sel] = mutation_matrix[:, n]
 
-        params = mf.update_parameters(np.array(ref[:, selected]), np.array(alt[:, selected]), np.array(genotype[:, selected]), i, pathout)
+        params = mf.update_parameters(np.array(ref[:, selected]), np.array(alt[:, selected]), np.array(genotype[:, selected]))
 
         (dropout_prob, overdispersion, error_rate, overdispersion_h,
          individual_dropout_probs, individual_overdispersions_h) = params
