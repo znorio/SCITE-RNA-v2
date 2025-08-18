@@ -98,7 +98,7 @@ The same file can also be used for tree inference. Alternatively, run the C++ ve
 
     generate_results_cpp/comparison_num_clones.cpp 
 
-for tree inference (not data generation).
+for tree inference (not data generation), which is a lot faster.
 
 To **compare different optimization strategies** of tree space switching run:
 

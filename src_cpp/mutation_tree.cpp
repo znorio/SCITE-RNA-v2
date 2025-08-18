@@ -10,8 +10,7 @@ Defines the mutation tree and how it is optimized.
 #include <set>
 #include <deque>
 #include <vector>
-#include <chrono>
-//#include <Eigen/Dense>
+
 
 #include "mutation_tree.h"
 #include "utils.h"
@@ -63,7 +62,6 @@ void MutationTree::fitCellTree(CellTree ct) {
         }
         int parent_mut = mrm[parent];
         if (!mut_list.empty()) {
-//            std::sort(mut_list.begin(), mut_list.end());
             std::shuffle(mut_list.begin(), mut_list.end(), gen); // randomize the order of mutations at the same edge
             assignParent(mut_list[0], parent_mut); // assigns the first mutation to the parent_mut
             for (size_t i = 1; i < mut_list.size(); ++i) {
@@ -511,11 +509,9 @@ void MutationTree::greedyAttachNode(int subroot) {
         std::mt19937 gen = create_rng();
         std::uniform_int_distribution<std::vector<int>::size_type> dis(0, best_inserts.size() - 1); // Uniform distribution over the vector indices
 
-        // Get the random element in one line
+        // Get the random best insert location
         int random_element = best_inserts[dis(gen)];
-//        int chosen_node = *std::min_element(best_inserts.begin(), best_inserts.end());
         insert(subroot, random_element);
-//        std::cout << min_node << " insert" << std::endl;
     }
 
 //    std::cout << best_loc << " append" << std::endl;
@@ -658,31 +654,6 @@ std::vector<int> MutationTree::rdfs(int subroot) {
 }
 
 // HELPER FUNCTIONS
-
-// returns maximum of indexed columns of a 2d matrix
-std::vector<double> MutationTree::getMaxValues(const std::vector<std::vector<double>>& matrix, const std::vector<int>& indices) {
-    std::vector<double> max_values(matrix.size(), std::numeric_limits<double>::lowest());
-    for (size_t i = 0; i < matrix.size(); ++i) {
-        for (int idx : indices) {
-            if (idx < matrix[i].size()) {
-                max_values[i] = std::max(max_values[i], matrix[i][idx]);
-            }
-        }
-    }
-    return max_values;
-}
-
-// add two 1d vectors
-std::vector<double> MutationTree::addVectors(const std::vector<double>& a, const std::vector<double>& b) {
-    if (a.size() != b.size()) {
-        throw std::invalid_argument("Vectors must be of the same size for element-wise addition.");
-    }
-    std::vector<double> result(a.size());
-    for (size_t i = 0; i < a.size(); ++i) {
-        result[i] = a[i] + b[i];
-    }
-    return result;
-}
 
 // random number generator
 std::mt19937& MutationTree::create_rng() {

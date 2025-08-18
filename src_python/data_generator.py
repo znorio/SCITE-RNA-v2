@@ -223,7 +223,7 @@ class DataGenerator:
 
             for i in range(self.n_cells):
                 ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j],
-                                                                 dropout_prob, config.dropout_direction, alpha_H, beta_H)
+                                                                 dropout_prob, config["dropout_direction"], alpha_H, beta_H)
 
         return ref, alt, all_dropout_probs, all_overdispersions_h
 

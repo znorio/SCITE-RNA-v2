@@ -347,7 +347,7 @@ class MutationFilter:
         return llh_mat_1, llh_mat_2
 
 
-    def compute_log_prior(self, dropout_prob, overdispersion, error_rate, overdispersion_h,
+    def compute_llh_parameters(self, dropout_prob, overdispersion, error_rate, overdispersion_h,
                           global_opt=False, min_value=2, shape=2, alpha_parameters=2):
         """
         Computes the log-likelihood of the parameters of the model based on the priors.
@@ -419,7 +419,7 @@ class MutationFilter:
         log_likelihood = self.total_log_likelihood(params, k_obs, n_obs, genotypes)
 
         # Compute log-likelihood of the parameters
-        log_prior = self.compute_log_prior(dropout_prob, overdispersion, error_rate,
+        log_prior = self.compute_llh_parameters(dropout_prob, overdispersion, error_rate,
                                            overdispersion_h, global_opt=True)
 
         return -(log_likelihood + log_prior)  # Negative because we're minimizing
@@ -445,7 +445,7 @@ class MutationFilter:
             log_likelihood += logsumexp([log_no_dropout, log_dropout_R, log_dropout_A])
 
         # Compute the log-likelihood of the parameters
-        log_prior = self.compute_log_prior(dropout_prob, overdispersion, error_rate,
+        log_prior = self.compute_llh_parameters(dropout_prob, overdispersion, error_rate,
                                            overdispersion_h, global_opt=False)
 
         return -(log_likelihood + log_prior)  # Negative because we're minimizing

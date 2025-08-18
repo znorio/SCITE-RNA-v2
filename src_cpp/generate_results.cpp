@@ -257,7 +257,6 @@ void generate_sciterna_results(
     load_config("../config/config.yaml");
 
     int n_cells = ref.size();
-//    int n_snvs = ref[0].size();
 
     std::map<std::string, double> genotype_freq = {
             {"A", std::stod(config_variables["genotype_freq.  A"])},

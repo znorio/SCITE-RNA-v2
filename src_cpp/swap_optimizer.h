@@ -13,7 +13,6 @@ class SwapOptimizer {
 private:
     int sig_digits;
     std::vector<std::string> spaces;
-    bool reverse_mutations;
     int n_decimals{};
     int n_mut_;
     int n_cells_;

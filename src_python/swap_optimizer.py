@@ -111,5 +111,3 @@ class SwapOptimizer:
 
             if "c" in self.spaces and "m" in self.spaces:
                 current_space = 1 - current_space  # switch to the other tree space
-
-        self.ct.postprocess_trees(max_iters=1)

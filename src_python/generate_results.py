@@ -170,7 +170,7 @@ def generate_sciterna_simulation_results(path="./comparison_data/", pathout="./c
 
     print(f"Running inference on data in {path}")
 
-    for i in tqdm(range(60, n_tests)):
+    for i in tqdm(range(0, n_tests)):
         alt = np.loadtxt(os.path.join(path, "alt", "alt_%i.txt" % i))
         ref = np.loadtxt(os.path.join(path, "ref", "ref_%i.txt" % i))
 

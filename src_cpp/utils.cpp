@@ -1,12 +1,11 @@
-//
-// Created by Norio on 09.04.2025.
-//
+/*
+Defines helper functions for loading configurations, saving matrices, and manipulating data structures.
+*/
 
 #include "utils.h"
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
-#include <stack>
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -14,11 +13,13 @@
 
 std::map<std::string, std::string> config_variables;
 
+// Used to trim trailing whitespace from a string
 std::string rtrim(const std::string& str) {
     size_t last = str.find_last_not_of(" \t");
     return (last == std::string::npos) ? "" : str.substr(0, last + 1);
 }
 
+// Load configuration from a yaml file
 void load_config(const std::string& file_path) {
     std::ifstream file(file_path);
     if (!file.is_open()) {
@@ -47,9 +48,9 @@ void load_config(const std::string& file_path) {
         if (line.back() == ':') {
             // New section header
             current_section = rtrim(line.substr(0, line.size() - 1)); // Trim trailing ':'
-        } else if (line.find(":") != std::string::npos) {
+        } else if (line.find(':') != std::string::npos) {
             // Key-value pair
-            size_t colon_pos = line.find(":");
+            size_t colon_pos = line.find(':');
             std::string key = rtrim(line.substr(0, colon_pos));
             std::string value = rtrim(line.substr(colon_pos + 1));
 
@@ -101,14 +102,6 @@ std::vector<std::vector<int>> load_txt(const std::string& filename) {
     }
     file.close();
 
-//    std::vector<std::vector<int>> transposed(data[0].size(), std::vector<int>(data.size()));
-//
-//    for (size_t i = 0; i < data.size(); ++i) {
-//        for (size_t j = 0; j < data[i].size(); ++j) {
-//            transposed[j][i] = data[i][j];
-//        }
-//    }
-
     return data;
 }
 
@@ -128,6 +121,7 @@ std::vector<std::vector<int>> slice_columns(const std::vector<std::vector<int>>&
     return sliced_matrix;
 }
 
+
 // using indices to extract columns of matrix
 std::vector<std::vector<char>> slice_columns_char(const std::vector<std::vector<char>>& matrix, const std::vector<int>& indices) {
     std::vector<std::vector<char>> sliced_matrix;
@@ -144,6 +138,32 @@ std::vector<std::vector<char>> slice_columns_char(const std::vector<std::vector<
     return sliced_matrix;
 }
 
+// add two 1d vectors
+std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b) {
+    if (a.size() != b.size()) {
+        throw std::invalid_argument("Vectors must be of the same size for element-wise addition.");
+    }
+    std::vector<double> result(a.size());
+    for (size_t i = 0; i < a.size(); ++i) {
+        result[i] = a[i] + b[i];
+    }
+    return result;
+}
+
+// returns maximum of indexed columns of a 2d matrix
+std::vector<double> getMaxValues(const std::vector<std::vector<double>>& matrix, const std::vector<int>& indices) {
+    std::vector<double> max_values(matrix.size(), std::numeric_limits<double>::lowest());
+    for (size_t i = 0; i < matrix.size(); ++i) {
+        for (int idx : indices) {
+            if (idx < matrix[i].size()) {
+                max_values[i] = std::max(max_values[i], matrix[i][idx]);
+            }
+        }
+    }
+    return max_values;
+}
+
+// Save functions for different data types
 void save_matrix_to_file(const std::string& filepath, const std::vector<std::vector<int>>& matrix) {
     std::ofstream file(filepath);
     for (const auto& row : matrix) {
@@ -181,15 +201,15 @@ void save_double_vector_to_file(const std::string& filepath, const std::vector<d
     }
 }
 
-
+// Function to create a mutation matrix indicating which cells have which mutations
 std::vector<std::vector<int>> create_mutation_matrix(
         const std::vector<int>& parent_vector,
         const std::vector<int>& mutation_indices,
         CellTree& ct
 ) {
-    int n_nodes = parent_vector.size();
+    int n_nodes = static_cast<int>(parent_vector.size());
     int n_cells = (n_nodes + 1) / 2;
-    int n_mutations = mutation_indices.size();
+    int n_mutations = static_cast<int>(mutation_indices.size());
 
     std::vector<std::vector<int>> mutation_matrix(n_nodes, std::vector<int>(n_mutations, 0));
 
@@ -213,7 +233,7 @@ std::vector<std::vector<int>> create_mutation_matrix(
 }
 
 
-// Function to create a genotype matrix
+// Function to create a genotype matrix for each cell and SNV locus
 std::vector<std::vector<char>> create_genotype_matrix(
         const std::vector<char>& not_selected_genotypes,
         const std::vector<int>& selected,
@@ -222,8 +242,8 @@ std::vector<std::vector<char>> create_genotype_matrix(
         const std::vector<std::vector<int>>& mutation_matrix,
         const std::vector<bool>& flipped
 ) {
-    int n_cells = mutation_matrix.size();
-    int n_loci = selected.size() + not_selected_genotypes.size();
+    int n_cells = static_cast<int>(mutation_matrix.size());
+    int n_loci = static_cast<int>(selected.size()) + static_cast<int>(not_selected_genotypes.size());
     std::vector<std::vector<char>> genotype_matrix(n_cells, std::vector<char>(n_loci, ' '));
 
     // Determine the indices of not selected genotypes
@@ -236,8 +256,7 @@ std::vector<std::vector<char>> create_genotype_matrix(
 
     // Assign genotypes for not selected loci
     if (not_selected_genotypes.size() != not_selected.size()) {
-        for (size_t n = 0; n < not_selected.size(); ++n) {
-            int locus = not_selected[n];
+        for (int locus : not_selected) {
             for (int i = 0; i < n_cells; ++i) {
                 genotype_matrix[i][locus] = 'X';
             }
@@ -285,6 +304,7 @@ std::vector<int> loadSelectedVector(const std::string& filename) {
     return data;
 }
 
+// Function to read a CSV file and return a 2D vector of integers
 std::vector<std::vector<int>> read_csv(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -324,36 +344,4 @@ std::vector<std::vector<int>> read_csv(const std::string& filename) {
 
     file.close();
     return data;
-}
-
-
-void loadGenotypes(const std::string& filename, std::vector<char>& gt1, std::vector<char>& gt2) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file " + filename);
-    }
-
-    std::string line;
-    std::vector<std::vector<char>> genotypes;
-
-    while (std::getline(file, line)) {
-        std::istringstream ss(line);
-        char value;
-        std::vector<char> row;
-
-        while (ss >> value) {
-            row.push_back(value);
-        }
-
-        genotypes.push_back(row);
-    }
-
-    file.close();
-
-    if (genotypes.size() != 2) {
-        throw std::runtime_error("Unexpected number of genotype rows in file " + filename);
-    }
-
-    gt1 = genotypes[0];
-    gt2 = genotypes[1];
 }

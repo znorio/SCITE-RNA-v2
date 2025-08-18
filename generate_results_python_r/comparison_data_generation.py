@@ -18,19 +18,22 @@ config = load_config_and_set_random_seed()
 
 def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./comparison_data/', random_seed=None,
                              n_clones=None, coverage_method="zinb"):
+    """
+    Generates simulated data.
+    """
     if random_seed is not None:
         np.random.seed(random_seed)
 
-    # if os.path.exists(path):
-    #     while True:
-    #         ans = input(f'Directory {path} already exists. Existing files will be overwritten. Continue? [Y/N] ')
-    #         match ans:
-    #             case 'Y' | 'y' | 'Yes' | 'yes':
-    #                 break
-    #             case 'N' | 'n' | 'No' | 'no':
-    #                 return
-    # else:
-    #     os.makedirs(path)
+    if os.path.exists(path):
+        while True:
+            ans = input(f'Directory {path} already exists. Existing files will be overwritten. Continue? [Y/N] ')
+            match ans:
+                case 'Y' | 'y' | 'Yes' | 'yes':
+                    break
+                case 'N' | 'n' | 'No' | 'no':
+                    return
+    else:
+        os.makedirs(path)
 
     os.makedirs(os.path.join(path, "ref"), exist_ok=True)
     os.makedirs(os.path.join(path, "alt"), exist_ok=True)
@@ -69,19 +72,21 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
 
 num_tests = 100  # Number of simulated samples
 n_rounds = 1  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
-n_cells_list = [50]
-n_mut_list = [500]
-clones = ["", 5, 10, 20]
-flipped_mutation_direction = True
-tree_space = ["c", "m"]
-coverage_method = "zinb"
+n_cells_list = [50] # Number of cells in the simulated dataset
+n_mut_list = [500] # Number of SNVs in the simulated dataset
+clones = [""] #["", 5, 10, 20] # Number of clones in the simulated dataset, empty string means random mutation placement
+flipped_mutation_direction = True # Whether to allow to flip the mutation direction (change root genotype)
+tree_space = ["c", "m"] # Tree spaces to use during tree inference and which space to start. ["c", "m] means we start optimizing a cell tree then switch to optimizing a mutation tree
+coverage_method = "zinb" # Determines from which distribution the coverage is sampled. Can be "zinb", "poisson", "geometric" or from a real data sample
+run_tree_inference = False # Whether to run tree inference after generating the simulated data
 
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
         data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
         generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
-        # path_results = os.path.join(data_path, 'sciterna')
-        # generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
-        #                                      tree_space=tree_space,
-        #                                      flipped_mutation_direction=flipped_mutation_direction,
-        #                                      n_keep=num_mut, n_rounds=n_rounds)
+        if run_tree_inference:
+            path_results = os.path.join(data_path, 'sciterna')
+            generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
+                                                 tree_space=tree_space,
+                                                 flipped_mutation_direction=flipped_mutation_direction,
+                                                 n_keep=num_mut, n_rounds=n_rounds)
