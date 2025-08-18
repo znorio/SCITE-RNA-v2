@@ -173,7 +173,6 @@ class MutationTree(PruneTree):
                 mrm[cvtx] = mrm[ct.parent(cvtx)]
 
         self.flipped[:-1] = ct.flipped
-        self.wt_llh = np.where(self.flipped[:-1], self.loc_joint_2, self.loc_joint_1).sum()
 
     def update_cumul_llr(self):
         """
@@ -282,6 +281,10 @@ class MutationTree(PruneTree):
         Optimizes the mutation tree exhaustively by iterating though all nodes and pruning and reattaching the
         respective subtrees and individual mutation nodes.
         """
+        # precompute the wildtype log-likelihood
+        self.wt_llh = np.where(self.flipped[:-1], self.loc_joint_2, self.loc_joint_1).sum()
+
+        # optimize the mutation tree by pruning and reattaching subtrees and single nodes
         mut_random_order = list(range(self.n_mut))
         np.random.shuffle(mut_random_order)
         if prune_single_mutations:  # prune single mutations and attach/insert them at their optimal location

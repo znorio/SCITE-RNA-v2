@@ -1,7 +1,3 @@
-//
-// Created by Norio on 09.04.2025.
-//
-
 #ifndef SCITE_RNA_UTILS_H
 #define SCITE_RNA_UTILS_H
 
@@ -33,8 +29,9 @@ std::vector<std::vector<int>> create_mutation_matrix(
 void save_double_vector_to_file(const std::string& filepath, const std::vector<double>& vector);
 std::vector<std::vector<int>> slice_columns(const std::vector<std::vector<int>>& matrix, const std::vector<int>& indices);
 std::vector<std::vector<char>> slice_columns_char(const std::vector<std::vector<char>>& matrix, const std::vector<int>& indices);
+std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b);
+std::vector<double> getMaxValues(const std::vector<std::vector<double>>& matrix, const std::vector<int>& indices);
 std::vector<std::vector<int>> read_csv(const std::string& filename);
-void loadGenotypes(const std::string& filename, std::vector<char>& gt1, std::vector<char>& gt2);
-std::vector<int> loadSelectedVector(const std::string& filename);
+
 
 #endif //SCITE_RNA_UTILS_H

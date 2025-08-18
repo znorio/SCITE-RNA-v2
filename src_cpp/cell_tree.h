@@ -12,7 +12,7 @@ class MutationTree;
 
 class CellTree {
 private:
-    double joint_1_sum;
+    double joint_1_sum{};
     bool reversible;
     std::vector<std::vector<double>> llr;
     std::vector<double> loc_joint_1;
@@ -56,11 +56,10 @@ public:
     std::vector<int> roots();
     std::vector<int> dfs(int subroot);
     std::vector<int> rdfs(int subroot);
+    std::vector<int> leaves(int subroot);
 
     // helper functions
-    static std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b);
     static std::mt19937& create_rng();
-    std::vector<int> leaves(int subroot);
 
     // public variables
     double joint = -std::numeric_limits<double>::infinity();
