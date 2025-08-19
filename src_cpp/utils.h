@@ -35,6 +35,7 @@ std::vector<int> get_column(const std::vector<std::vector<int>>& matrix, size_t 
 std::vector<double> add_scalar_to_vector(double scalar, const std::vector<double>& vec);
 std::vector<std::vector<int>> read_csv(const std::string& filename);
 std::vector<int> load_selected(const std::string& path);
+void loadGenotypes(const std::string& filename, std::vector<char>& gt1, std::vector<char>& gt2);
 std::vector<char> load_genotypes(const std::string& path);
 
 

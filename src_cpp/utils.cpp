@@ -381,7 +381,41 @@ std::vector<int> load_selected(const std::string& path) {
     return selected;
 }
 
-// Load genotypes from a file
+
+// Load genotype matrix from file
+void loadGenotypes(const std::string& filename, std::vector<char>& gt1, std::vector<char>& gt2) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file " + filename);
+    }
+
+    std::string line;
+    std::vector<std::vector<char>> genotypes;
+
+    while (std::getline(file, line)) {
+        std::istringstream ss(line);
+        char value;
+        std::vector<char> row;
+
+        while (ss >> value) {
+            row.push_back(value);
+        }
+
+        genotypes.push_back(row);
+    }
+
+    file.close();
+
+    if (genotypes.size() != 2) {
+        throw std::runtime_error("Unexpected number of genotype rows in file " + filename);
+    }
+
+    gt1 = genotypes[0];
+    gt2 = genotypes[1];
+}
+
+
+// Load gt1/gt2 genotypes from a file
 std::vector<char> load_genotypes(const std::string& path) {
     std::vector<char> genotypes;
     std::ifstream file(path);

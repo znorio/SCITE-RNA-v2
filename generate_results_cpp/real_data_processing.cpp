@@ -16,7 +16,7 @@ int main() {
     bool use_bootstrap = false; // if true, bootstrap samples of the SNVs are used, otherwise the results are computed from the original data
     int n_snps = 3000; // how many mutations to select for tree inference, only used if method is "first_k"
     double posterior_threshold = 0.05; // threshold for filtering mutations, only used if method is "threshold"
-    std::string method = "threshold"; // criterion for filtering mutations, can be "threshold" (loci with posterior probability of being mutated > threshold are selected) , "first_k" (k loci with highest posterior probability of being mutated are selected) or "highest_post" (all loci are selected for tree inference, the most likely genotypes are inferred from the posterior probabilities)
+    std::string method = "threshold"; // criterion for filtering mutations, can be "threshold" (loci with posterior probability of being mutated > threshold are selected) , "first_k" (k loci with highest posterior probability of being mutated are selected) or "highest_post" (loci where highest probability is a mutation and not no mutation are selected)
     int n_rounds = 2; // how many rounds of tree inference and parameter optimization to perform
     std::string sample = "mm16"; // specify the sample name, e.g. "mm16", "mm34"
     bool flipped_mutation_direction = true; // if true, we allow the model to switch the root genotype/mutation direction during tree inference

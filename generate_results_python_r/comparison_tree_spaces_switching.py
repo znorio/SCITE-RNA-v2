@@ -205,8 +205,8 @@ n_mut_list = [500, 500, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 
-generate_results = False  # set to True to rerun the SCITE-RNA tree inference
-flipped_mutation_direction = False  # flip mutations or not (change root genotype)
+generate_results = True  # set to True to rerun the SCITE-RNA tree inference
+flipped_mutation_direction = False  # flip mutations or not (change root genotype) -> only done in cell lineage trees
 cpp = "_cpp"
 
 if generate_results:
