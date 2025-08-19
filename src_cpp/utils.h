@@ -31,7 +31,11 @@ std::vector<std::vector<int>> slice_columns(const std::vector<std::vector<int>>&
 std::vector<std::vector<char>> slice_columns_char(const std::vector<std::vector<char>>& matrix, const std::vector<int>& indices);
 std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b);
 std::vector<double> getMaxValues(const std::vector<std::vector<double>>& matrix, const std::vector<int>& indices);
+std::vector<int> get_column(const std::vector<std::vector<int>>& matrix, size_t col_index);
+std::vector<double> add_scalar_to_vector(double scalar, const std::vector<double>& vec);
 std::vector<std::vector<int>> read_csv(const std::string& filename);
+std::vector<int> load_selected(const std::string& path);
+std::vector<char> load_genotypes(const std::string& path);
 
 
 #endif //SCITE_RNA_UTILS_H

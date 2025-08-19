@@ -63,7 +63,6 @@ void MutationFilter::set_mut_type_prior(const std::map<std::string, double>& gen
     mut_type_prior["AH"] = std::log(genotype_freq.at("A") * mut_freq);
 }
 
-
 // likelihood of the data at a cell locus position
 double MutationFilter::single_read_llh_with_dropout(int n_alt, int n_total, char genotype) const {
     if (genotype == 'R') {
@@ -319,7 +318,6 @@ std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> Mu
     return {llh_mat_1, llh_mat_2};
 }
 
-
 // FUNCTIONS TO OPTIMIZE MODEL PARAMETERS
 
 // Calculates the log-likelihood of observing k alternative reads with n coverage for a heterozygous locus.
@@ -423,7 +421,7 @@ double MutationFilter::total_log_posterior(const std::vector<double>& params, co
     double error_r = params[2];
     double overdispersion_h = params[3];
 
-    // Compute log-likelihood (same logic as before)
+    // Compute log-likelihood of the observations given the parameters and genotypes
     double log_likelihood = total_log_likelihood(params, k_obs, n_obs, genotypes);
 
     // Compute log-likelihood of the parameters
@@ -457,7 +455,6 @@ std::vector<double> MutationFilter::fit_parameters(const std::vector<int>& ref,
         }
     }
 
-    // Objective function class
     struct Objective
     {
         const MutationFilter& filter;
@@ -529,6 +526,7 @@ double MutationFilter::total_log_posterior_individual(const std::vector<double>&
     double alpha_h = overdispersionH * 0.5;
     double beta_h = overdispersionH - alpha_h;
 
+    // Compute log-likelihood for the observations given the parameters
     for (size_t i = 0; i < k_obs.size(); ++i) {
         int k = k_obs[i];
         int n = n_obs[i];
@@ -553,7 +551,7 @@ std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<
                                                               std::vector<double> initial_params,
                                                               int max_iterations,
                                                               double tolerance) {
-    // Nested functor class must not use `this` directly in constructor
+
     struct Objective {
         const MutationFilter& filter;
         const std::vector<int>& alt_het;
@@ -589,13 +587,8 @@ std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<
 
                 grad[i] = (val_eps - val) / eps;
             }
-
             return val;
         }
-
-
-
-
     };
 
     Eigen::VectorXd x = Eigen::Map<Eigen::VectorXd>(initial_params.data(), static_cast<Eigen::Index>(initial_params.size()));
@@ -639,12 +632,10 @@ std::vector<double> MutationFilter::fit_parameters_individual(const std::vector<
             best_x = random_x;
         }
     }
-
-    // Return the best result found
     return {best_x.data(), best_x.data() + best_x.size()};
 }
 
-
+// Update model parameters based on the reference and alternative counts, and inferred genotypes.
 std::tuple<double, double, double, double, std::vector<double>, std::vector<double>> MutationFilter::update_parameters(
         const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
         const std::vector<std::vector<char>>& inferred_genotypes) {
@@ -661,22 +652,6 @@ std::tuple<double, double, double, double, std::vector<double>, std::vector<doub
 
     // Fit all global parameters at once
     std::vector<double> global_params = fit_parameters(all_ref_counts, all_alt_counts, all_genotypes, {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous});
-//
-//    std::cout << "Global parameters: ";
-//    for (double param : global_params) {
-//        std::cout << param << " ";
-//    }
-//    std::cout << std::endl;
-
-    // Fit global parameters in two stages, first overdispersion and error rate, then dropout and overdispersion_h
-//    std::vector<double> global_params = fit_parameters_two_stage(
-//            all_ref_counts,
-//            all_alt_counts,
-//            all_genotypes,
-//            {dropout_prob, overdispersion_homozygous, error_rate, overdispersion_heterozygous},
-//            50,
-//            1e-5
-//    );
 
     std::cout << "Global parameters: ";
     for (double param : global_params) {
@@ -738,6 +713,7 @@ std::tuple<double, double, double, double, std::vector<double>, std::vector<doub
     return {dropout, overdispersion, error_r, overdispersion_h, individual_dropout_probs, individual_overdispersions_h};
 }
 
+//HELPER FUNCTIONS
 
 // Function to compute the natural logarithm of the beta function
 double MutationFilter::betaln(double x, double y) {
@@ -772,7 +748,6 @@ double MutationFilter::log_betabinom_pmf(int k, int n, double a, double b) {
 
     return (num - denom + log_binom_coef);
 }
-
 
 // Function to compute the log-PDF of a beta distribution
 double MutationFilter::beta_logpdf(double x, double alpha, double beta) {
@@ -825,32 +800,10 @@ std::vector<double> MutationFilter::lognormalize_exp(const std::vector<double>& 
     return result;
 }
 
-// get column of a 2D matrix
-std::vector<int> MutationFilter::get_column(const std::vector<std::vector<int>>& matrix, size_t col_index) {
-    std::vector<int> column;
-    column.reserve(matrix.size());  // Reserve space to avoid multiple allocations
-
-    for (const auto& row : matrix) {
-        if (col_index < row.size()) {
-            column.push_back(row[col_index]);
-        }
-    }
-    return column;
-}
-
 // concatenate several 1D vectors
 template<typename... Vectors>
 std::vector<double> MutationFilter::concat(const std::vector<double>& first, const Vectors&... rest) const {
     std::vector<double> result = first;
     (result.insert(result.end(), rest.begin(), rest.end()), ...);
-    return result;
-}
-
-// add scalar to 1D vector
-std::vector<double> MutationFilter::add_scalar_to_vector(double scalar, const std::vector<double>& vec) {
-    std::vector<double> result(vec.size());
-    for (size_t i = 0; i < vec.size(); ++i) {
-        result[i] = scalar + vec[i];
-    }
     return result;
 }

@@ -1,7 +1,3 @@
-//
-// Created by Norio on 05.04.2025.
-//
-
 #ifndef SCITE_RNA_GENERATE_RESULTS_H
 #define SCITE_RNA_GENERATE_RESULTS_H
 
@@ -9,8 +5,7 @@
 #include "mutation_filter.h"
 #include "swap_optimizer.h"
 
-std::vector<std::vector<std::string>> convert_location_to_gene(const std::vector<std::string>& locations, const std::string& gene_file_path);
-void create_directories(const std::string& pathout);
+void create_directories(const std::string& pathout, bool reduced_ouput);
 void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vector<std::vector<int>> &ref,
                     const std::vector<std::vector<int>> &alt, int n_snvs, int n_rounds, const std::string &pathout,
                     int i, std::vector<int> selected, const std::vector<char> &gt1, const std::vector<char> &gt2,
@@ -23,7 +18,6 @@ void generate_sciterna_simulation_results(const std::string& path,
                                           bool flipped_mutation_direction,
                                           int n_keep,
                                           int n_rounds);
-
 void generate_sciterna_results(
         const std::vector<std::vector<int>>& ref,
         const std::vector<std::vector<int>>& alt,

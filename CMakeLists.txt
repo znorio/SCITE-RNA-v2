@@ -25,8 +25,8 @@ add_executable(SCITE-RNA
         src_cpp/generate_results.h
         src_cpp/utils.cpp
         src_cpp/utils.h
-#        generate_results_cpp/comparison_num_clones.cpp
-        generate_results_cpp/real_data_processing.cpp
+        generate_results_cpp/comparison_num_clones.cpp
+#        generate_results_cpp/real_data_processing.cpp
 #        generate_results_cpp/comparison_bootstrapping.cpp
 #        generate_results_cpp/space_switching_results_postprocessing.cpp
 #        generate_results_cpp/comparison_tree_spaces_switching.cpp
