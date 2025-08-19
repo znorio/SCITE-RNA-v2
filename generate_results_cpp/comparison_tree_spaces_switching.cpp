@@ -13,11 +13,11 @@ or in the mutation tree space (m,c).
 // run inference with SCITE-RNA
 int main() {
     int n_tests = 100; //number of runs
-    int n_rounds = 3; //number of optimization rounds
-    std::vector<int> n_cells_list = {500};
-    std::vector<int> n_mut_list = {500};
-    std::vector<std::vector<std::string>> tree_spaces = {{"m"}, {"c"}, {"c", "m"}, {"m", "c"}}; // {"m"}, {"c"}, {"c", "m"},  {"m", "c"}
-    bool flipped_mutation_direction = false;
+    int n_rounds = 2; //number of optimization rounds
+    std::vector<int> n_cells_list = {500, 500, 100}; // number of cells in the simulated data
+    std::vector<int> n_mut_list = {500, 100, 500}; // number of mutations in the simulated data
+    std::vector<std::vector<std::string>> tree_spaces = {{"m"}, {"c"}, {"c", "m"}, {"m", "c"}}; // {"m"}, {"c"}, {"c", "m"},  {"m", "c"} which tree spaces to use during optimization, "c" for cell lineage tree, "m" for mutation tree, the order determines in which space the optimization starts
+    bool flipped_mutation_direction = false; // if true, we allow the model to switch the root genotype/mutation direction during tree inference
 
     for (const auto& space : tree_spaces) {
         for (int i = 0; i < n_cells_list.size(); ++i) {

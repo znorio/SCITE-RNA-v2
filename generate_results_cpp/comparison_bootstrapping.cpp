@@ -1,3 +1,8 @@
+/*
+Run bootstrapping comparison for simulated data.
+*/
+
+
 #include <vector>
 #include <string>
 #include <sstream>
@@ -14,8 +19,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string sample_dir = argv[1]; // e.g., "100c100m"
-    int idx = std::stoi(argv[2]);
+    std::string sample_dir = argv[1]; // e.g., "50c500m" (only for simulated data), otherwise use real_data_processing.cpp
+    int idx = std::stoi(argv[2]); // simulated sample id
 
     std::string input_path = "/cluster/work/bewi/members/znorio/data/simulated_data/" + sample_dir + "/";
 //    std::string input_path = "../data/simulated_data/" + sample_dir + "/";
@@ -28,22 +33,22 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<int>> alt = load_txt(alt_file);
     std::vector<std::vector<int>> ref = load_txt(ref_file);
 
-    int bootstrap_samples = 1000;
-    bool use_bootstrap = true;
-    int n_snps = 100;
-    double posterior_threshold = 0.05;
-    std::string method = "threshold";
-    int n_rounds = 3;
-    bool flipped_mutation_direction = true;
-    bool only_preprocessing = false;
-    std::vector<std::string> tree_space = {"c", "m"};
-    bool reshuffle_nodes = true;
-    bool load_from_file = false;
-    bool reduced_output = true;
+    int bootstrap_samples = 1000; // number of bootstrap samples
+    bool use_bootstrap = true; // use bootstrap samples or not
+    int n_snvs = std::stoi(sample_dir.substr(sample_dir.find('c') + 1, sample_dir.find('m') - sample_dir.find('c') - 1)); // number of mutations
+    double posterior_threshold = 0.05; // posterior threshold for filtering mutations, only used if method is "threshold"
+    std::string method = "first_k"; // "threshold", "first_k", or "highest_post"
+    int n_rounds = 2; // number of rounds for tree inference and parameter optimization
+    bool flipped_mutation_direction = true; // whether to allow to change the root genotype during tree inference
+    bool only_preprocessing = false; // if true, only preprocess the data and do not run the inference
+    std::vector<std::string> tree_space = {"c", "m"}; // tree space to use, "c" for cell space, "m" for mutation space, or both
+    bool reshuffle_nodes = true; // whether to reshuffle the nodes in the mutation tree space by pruning and re-inserting individual nodes
+    bool load_from_file = false; // if true, load the selected mutations and genotypes from file, otherwise preprocess the data
+    bool reduced_output = true; // if true doesn't save the genotype and mutation indicator files
 
     generate_sciterna_results(ref, alt, input_path, output_path,
                               bootstrap_samples, use_bootstrap, tree_space,
-                              flipped_mutation_direction, n_snps, posterior_threshold,
+                              flipped_mutation_direction, n_snvs, posterior_threshold,
                               n_rounds, only_preprocessing, method, reshuffle_nodes, load_from_file, reduced_output);
 
     return 0;

@@ -1,3 +1,7 @@
+/*
+Calculate the differences in joint likelihoods, path length distances, VAF distances, and mutation count distances for different tree spaces
+*/
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -106,9 +110,9 @@ double path_len_dist(const CellTree& ct1, const CellTree& ct2, bool unrooted = f
 
     double denominator = static_cast<double>(dist_mat1.size()) - static_cast<double>(dist_mat1.rows());
     MatrixXi diff = dist_mat1 - dist_mat2;
-    double mse = diff.array().abs().sum() / denominator; // .square()
+    double mae = diff.array().abs().sum() / denominator; // .square()
 
-    return mse;
+    return mae;
 }
 
 // Function to compute the pairwise Hamming distances
@@ -352,6 +356,5 @@ int main() {
             writeToFile(filePathMutCountDist, mutCountDistance);
         }
     }
-
     return 0;
 }
