@@ -163,6 +163,29 @@ std::vector<double> getMaxValues(const std::vector<std::vector<double>>& matrix,
     return max_values;
 }
 
+// get column of a 2D matrix
+std::vector<int> get_column(const std::vector<std::vector<int>>& matrix, size_t col_index) {
+    std::vector<int> column;
+    column.reserve(matrix.size());  // Reserve space to avoid multiple allocations
+
+    for (const auto& row : matrix) {
+        if (col_index < row.size()) {
+            column.push_back(row[col_index]);
+        }
+    }
+    return column;
+}
+
+// add scalar to 1D vector
+std::vector<double> add_scalar_to_vector(double scalar, const std::vector<double>& vec) {
+    std::vector<double> result(vec.size());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        result[i] = scalar + vec[i];
+    }
+    return result;
+}
+
+
 // Save functions for different data types
 void save_matrix_to_file(const std::string& filepath, const std::vector<std::vector<int>>& matrix) {
     std::ofstream file(filepath);
@@ -344,4 +367,29 @@ std::vector<std::vector<int>> read_csv(const std::string& filename) {
 
     file.close();
     return data;
+}
+
+
+// Load selected mutations from a file
+std::vector<int> load_selected(const std::string& path) {
+    std::vector<int> selected;
+    std::ifstream file(path);
+    int val;
+    while (file >> val) {
+        selected.push_back(val);
+    }
+    return selected;
+}
+
+// Load genotypes from a file
+std::vector<char> load_genotypes(const std::string& path) {
+    std::vector<char> genotypes;
+    std::ifstream file(path);
+    std::string line;
+    while (std::getline(file, line)) {
+        if (!line.empty()) {
+            genotypes.push_back(line[0]);  // Only take the first character
+        }
+    }
+    return genotypes;
 }

@@ -1,6 +1,6 @@
-//
-// Created by Norio on 05.04.2025.
-//
+/*
+Functions to run SCITE-RNA on the data in the input path and saves the results in the output path.
+*/
 
 #include <string>
 #include <vector>
@@ -14,49 +14,6 @@
 #include <swap_optimizer.h>
 #include "utils.h"
 
-
-std::vector<std::vector<std::string>> convert_location_to_gene(const std::vector<std::string>& locations, const std::string& gene_file_path) {
-    std::vector<std::vector<std::string>> loc_to_gene;
-    std::ifstream file(gene_file_path);
-    std::string line;
-
-    struct GeneRow {
-        std::string chromosome;
-        int start;
-        int end;
-        std::string gene;
-    };
-
-    std::vector<GeneRow> gene_rows;
-    std::getline(file, line); // Skip header
-
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string chrom, start, end, gene;
-        std::getline(ss, chrom, ',');
-        std::getline(ss, start, ',');
-        std::getline(ss, end, ',');
-        std::getline(ss, gene, ',');
-
-        gene_rows.push_back({ chrom, std::stoi(start), std::stoi(end), gene });
-    }
-
-    for (const auto& loc : locations) {
-        auto delim_pos = loc.find(':');
-        std::string chrom = loc.substr(0, delim_pos);
-        int pos = std::stoi(loc.substr(delim_pos + 1));
-
-        std::vector<std::string> matching_genes;
-        for (const auto& row : gene_rows) {
-            if (row.chromosome == chrom && pos >= row.start && pos <= row.end) {
-                matching_genes.push_back(row.gene);
-            }
-        }
-        loc_to_gene.push_back(matching_genes);
-    }
-
-    return loc_to_gene;
-}
 
 void create_directories(const std::string& pathout, bool reduced_ouput) {
     std::vector<std::string> dirs = {};
@@ -93,29 +50,7 @@ void create_directories(const std::string& pathout, bool reduced_ouput) {
     }
 }
 
-std::vector<int> load_selected(const std::string& path) {
-    std::vector<int> selected;
-    std::ifstream file(path);
-    int val;
-    while (file >> val) {
-        selected.push_back(val);
-    }
-    return selected;
-}
-
-
-std::vector<char> load_genotypes(const std::string& path) {
-    std::vector<char> genotypes;
-    std::ifstream file(path);
-    std::string line;
-    while (std::getline(file, line)) {
-        if (!line.empty()) {
-            genotypes.push_back(line[0]);  // Only take the first character
-        }
-    }
-    return genotypes;
-}
-
+// Function to process rounds of tree inference and parameter optimization
 void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vector<std::vector<int>> &ref,
                     const std::vector<std::vector<int>> &alt, int n_snvs, int n_rounds, const std::string &pathout,
                     int i, std::vector<int> selected, const std::vector<char> &gt1, const std::vector<char> &gt2,
@@ -141,7 +76,6 @@ void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vec
                                              slice_columns(alt, selected), gt1, gt2, true,
                                              dropout_probs_round, overdispersion_h_round);
 
-
         optimizer.fit_llh(llh_1, llh_2);
         optimizer.optimize(max_loops, insert_nodes);
 
@@ -157,7 +91,6 @@ void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vec
         }
 
         auto params = mf.update_parameters(slice_columns(ref, selected), slice_columns(alt, selected), slice_columns_char(genotype, selected));
-//        auto params = mf.update_parameters(ref, alt, genotype);
         auto [dropout_prob, overdispersion, error_rate, overdispersion_h,
                 individual_dropouts, individual_overdispersions] = params;
 
@@ -184,7 +117,7 @@ void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vec
     }
 }
 
-
+// Function to generate simulation results for sciterna
 void generate_sciterna_simulation_results(
         const std::string& path = "./comparison_data/",
         const std::string& pathout = "./comparison_data/results",
@@ -235,7 +168,7 @@ void generate_sciterna_simulation_results(
     std::cout << "Done." << std::endl;
 }
 
-
+// Function to read the input data, filter mutations, run the inference, optimize parameters, and save the results
 void generate_sciterna_results(
         const std::vector<std::vector<int>>& ref,
         const std::vector<std::vector<int>>& alt,
@@ -256,7 +189,7 @@ void generate_sciterna_results(
 
     load_config("../config/config.yaml");
 
-    int n_cells = ref.size();
+    int n_cells = static_cast<int>(ref.size());
 
     std::map<std::string, double> genotype_freq = {
             {"A", std::stod(config_variables["genotype_freq.  A"])},
@@ -297,8 +230,6 @@ void generate_sciterna_results(
 
     if (!only_preprocessing) {
         SwapOptimizer optimizer(tree_space, flipped_mutation_direction, static_cast<int>(selected.size()), n_cells);
-
-        create_directories(pathout + "/sciterna_selected_genes", reduced_output);
 
         std::cout << "Running inference on data in " << path << std::endl;
 

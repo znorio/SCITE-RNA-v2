@@ -48,6 +48,9 @@ public:
             const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
             const std::vector<char>& gt1, const std::vector<char>& gt2, bool individual,
             const std::vector<double>& dropout_probs = {}, const std::vector<double>& = {});
+    void update_alpha_beta(double error_r, double overdispersion_hom);
+
+    // Functions to optimize model parameters
 
     [[nodiscard]] double compute_llh_parameters(
             double dropout, double overdispersion,
@@ -73,7 +76,14 @@ public:
             const std::vector<std::vector<int>>& ref, const std::vector<std::vector<int>>& alt,
             const std::vector<std::vector<char>>& inferred_genotypes);
 
-    void update_alpha_beta(double error_r, double overdispersion_hom);
+    [[nodiscard]] static std::tuple<double, double, double>
+    calculate_heterozygous_log_likelihoods(int k, int n, double dropout_prob, double dropout_direction_prob,
+                                           double alpha_h, double beta_h, double error_rate, double overdispersion) ;
+
+    [[nodiscard]] double total_log_likelihood(const std::vector<double>& params,
+                                              const std::vector<int>& k_obs,
+                                              const std::vector<int>& n_obs,
+                                              const std::vector<char>& genotypes) const;
 
     // helper functions
     static double betaln(double x, double y);
@@ -83,24 +93,11 @@ public:
     static double logbinom(int n, int k);
     static double logsumexp(const std::vector<double>& v);
     static std::vector<double> lognormalize_exp(const std::vector<double>& v);
-    static std::vector<int> get_column(const std::vector<std::vector<int>>& matrix, size_t col_index);
+    static double beta_logpdf(double x, double alpha, double beta);
+    static double gamma_logpdf(double x, double shape, double scale, double loc);
+
     template<typename... Vectors>
     std::vector<double> concat(const std::vector<double>& first, const Vectors&... rest) const;
-    static std::vector<double> add_scalar_to_vector(double scalar, const std::vector<double>& vec);
-
-
-    [[nodiscard]] static std::tuple<double, double, double>
-    calculate_heterozygous_log_likelihoods(int k, int n, double dropout_prob, double dropout_direction_prob,
-                                           double alpha_h, double beta_h, double error_rate, double overdispersion) ;
-
-    [[nodiscard]] double total_log_likelihood(const std::vector<double>& params,
-                                                const std::vector<int>& k_obs,
-                                                const std::vector<int>& n_obs,
-                                                const std::vector<char>& genotypes) const;
-
-    static double beta_logpdf(double x, double alpha, double beta);
-
-    static double gamma_logpdf(double x, double shape, double scale, double loc);
 };
 
 #endif //SCITE_RNA_CPP_MUTATION_FILTER_H

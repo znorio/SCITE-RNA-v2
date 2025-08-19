@@ -1,12 +1,11 @@
-# Script used to run DENDRO and SClineager on simulated datasets
+# Script used to run DENDRO and SClineager on cancer datasets
 
 library(DENDRO)
 library(SClineager)
 
 base_path <- file.path("data")
-# base_dir <- file.path("/cluster/work/bewi/members/znorio/data")
 
-sample <- "bc03"
+sample <- "mm34"
 clones <- c(2,3,4,5)
 
 read.matrix <- function(path){
@@ -99,8 +98,6 @@ for (clone in clones) {
   cluster_scl <- DENDRO.cluster(dist_scl, plot=FALSE, type="phylogram")
   parent_vec_scl <- merge.to.parent(cluster_scl$merge)
 
-  write.table(t(res_scl[["genotype_mat"]]), file = file.path(base_path, "results", sample, "sclineager", "sclineager_vaf", paste0("sclineager_vaf_", clone, ".txt")), row.names = FALSE, col.names = FALSE)
-  write.table(parent_vec_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_parent_vec", paste0("sclineager_parent_vec_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
   write.table(memb_pred_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_clones", paste0("sclineager_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 
   hc <- hclust(dist,method='ward.D')
@@ -108,6 +105,9 @@ for (clone in clones) {
   cluster <- DENDRO.cluster(dist, plot=FALSE,type="phylogram")
   dendro_parent_vec <- merge.to.parent(cluster$merge)
 
-  write.table(dendro_parent_vec, file.path(base_path, "results", sample, "dendro", "dendro_parent_vec", paste0("dendro_parent_vec_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
   write.table(memb_pred, file.path(base_path, "results", sample, "dendro", "dendro_clones", paste0("dendro_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 }
+
+write.table(t(res_scl[["genotype_mat"]]), file = file.path(base_path, "results", sample, "sclineager", "sclineager_vaf", paste0("sclineager_vaf.txt")), row.names = FALSE, col.names = FALSE)
+write.table(parent_vec_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_parent_vec", paste0("sclineager_parent_vec.txt")), row.names=FALSE, col.names=FALSE)
+write.table(dendro_parent_vec, file.path(base_path, "results", sample, "dendro", "dendro_parent_vec", paste0("dendro_parent_vec.txt")), row.names=FALSE, col.names=FALSE)
