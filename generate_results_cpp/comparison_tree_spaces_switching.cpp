@@ -23,8 +23,8 @@ int main() {
         for (int i = 0; i < n_cells_list.size(); ++i) {
             int n_cells = n_cells_list[i];
             int n_mut = n_mut_list[i];
-            std::string path = "../data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
-//            std::string path = "/cluster/work/bewi/members/znorio/data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
+//            std::string path = "../data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
+            std::string path = "/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/simulated_data/" + std::to_string(n_cells) + "c" + std::to_string(n_mut) + "m";
             std::string path_results = path + "/sciterna_tree_space_comparison_cpp_";
 
             for (auto it = space.begin(); it != space.end(); ++it) {

@@ -18,7 +18,7 @@ def normalize_split(split):
 
 def get_splits(ct, node, labels=None):
     splits = []
-    for child in ct.dfs_experimental(node):
+    for child in ct.dfs(node):
         if ct.isleaf(child):
             continue
 
@@ -110,9 +110,10 @@ def main():
     from src_python.cell_tree import CellTree
 
     parser = argparse.ArgumentParser(description="Convert bootstrap samples of trees to consensus parent vectors")
-    parser.add_argument("--input_folder", type=str, help="Path to the input folder containing bootstrap tree files.", default="50c500m")
-    parser.add_argument("--base_path", type=str, help="Base path for the files", default="/cluster/work/bewi/members/znorio/data/results")
+    parser.add_argument("--input_folder", type=str, help="Path to the input folder containing bootstrap tree files.", default="mm16") # "50c500m"
+    parser.add_argument("--base_path", type=str, help="Base path for the files", default="/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/results")
     parser.add_argument("--model", type=str, help="Model used for the bootstrap samples.", default="sciterna")
+    parser.add_argument("--simulated", type=bool, help="Run on simulated data.", default=False)
     parser.add_argument("--n_samples", type=int, help="Number of simulated samples to process.", default=100)
     parser.add_argument("--round", type=int, help="Which round to use. Each round updates optimized SNV specific and global parameters like dropout probabilities", default=1)
     parser.add_argument("--n_bootstrap", type=int, help="Number of bootstrap samples to process.", default=1000)
@@ -124,10 +125,15 @@ def main():
     n_bootstrap = args.n_bootstrap
     input_folder = args.input_folder
     base_path = args.base_path
-
+    simulated = args.simulated
 
     for s in range(n_samples):
-        path = os.path.join(base_path, rf"{input_folder}/{model}_{s}_bootstrap")
+
+        if simulated:
+            path = os.path.join(base_path, rf"{input_folder}/{model}_{s}_bootstrap")
+        else:
+            path = os.path.join(base_path, rf"{input_folder}/{model}_bootstrap")
+
         taxa = TaxonNamespace()
         trees = TreeList(taxon_namespace=taxa)
         split_counter = Counter()
@@ -165,11 +171,18 @@ def main():
 
         consensus_parent_vec, node_index_map = tree_to_parent_vector(consensus_tree)
 
-        os.makedirs(os.path.join(path, "..", f"{model}_consensus_parent_vec"), exist_ok=True)
-        np.savetxt(
-            os.path.join(path, "..", f"{model}_consensus_parent_vec", f"{model}_parent_vec_{round}r{s}.txt"),
-            consensus_parent_vec, fmt='%d')
+        if simulated:
+            os.makedirs(os.path.join(path, "..", f"{model}_consensus_parent_vec"), exist_ok=True)
+            np.savetxt(
+                os.path.join(path, "..", f"{model}_consensus_parent_vec", f"{model}_parent_vec_{round}r{s}.txt"),
+                consensus_parent_vec, fmt='%d')
 
+        else:
+            os.makedirs(os.path.join(path, f"{model}_consensus_parent_vec"), exist_ok=True)
+            np.savetxt(
+                os.path.join(path, f"{model}_consensus_parent_vec", f"{model}_parent_vec_{round}r.txt"),
+                consensus_parent_vec, fmt='%d')
+            break
 
 if __name__ == "__main__":
     main()

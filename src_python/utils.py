@@ -48,6 +48,7 @@ def path_len_dist(ct1, ct2, unrooted=False):
     dist_mat1, dist_mat2 = leaf_dist_mat(ct1, unrooted), leaf_dist_mat(ct2, unrooted)
     denominator = (dist_mat1.size - dist_mat1.shape[0])
     return np.sum(np.abs(dist_mat1 - dist_mat2)) / denominator
+    # return np.sum((dist_mat1 - dist_mat2)**2) / denominator
 
 
 def mut_count_distance(genotype_matrix1, genotype_matrix2):
