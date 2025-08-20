@@ -240,7 +240,7 @@ int main() {
     vector<int> numCellsList = {100, 500, 500};
     vector<int> numMutList = {500, 100, 500};
     vector<vector<string>> spaces = {{"m"}, {"c"}, {"c", "m"}, {"m", "c"}};
-    int nRounds = 3;
+    int nRounds = 2;
     int nTests = 100;
     bool flipped_mutation_direction = false;
 

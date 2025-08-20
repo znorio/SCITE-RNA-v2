@@ -2,15 +2,15 @@
 #SBATCH --job-name=scite_rna
 #SBATCH --output=logs/output_%A_%a.log
 #SBATCH --error=logs/error_%A_%a.err
-#SBATCH --array=0-10
+#SBATCH --array=0-100
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=8G
 #SBATCH --time=10:00:00
 
-INPUT_DIR="50c500m"
+INPUT_DIR="50c500m5"
 
-cd build_test
+cd build_test2
 
 # Run the program with input directory and array index
 ./SCITE-RNA "$INPUT_DIR" "$SLURM_ARRAY_TASK_ID"

@@ -4,13 +4,13 @@ library(DENDRO)
 library(SClineager)
 
 n_tests <- 100
-n_cells_list <- c(50)
-n_mut_list <- c(500)
-clones_list <- c("5", "10", "20", "")
+n_cells_list <- c(50, 50, 100, 100, 100, 200, 200)
+n_mut_list <- c(50, 100, 50, 100, 200, 100, 200)
+clones_list <- c("")
 
 # base_dir <- file.path("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data", "simulated_data")
-base_dir <- file.path("data", "simulated_data")
-# base_dir <- file.path("/cluster/work/bewi/members/znorio/data", "simulated_data")
+# base_dir <- file.path("data", "simulated_data")
+base_dir <- file.path("/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data", "simulated_data")
 
 
 read.matrix <- function(path){
@@ -61,16 +61,13 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
     n_round <- 0
     ref <- t(read.matrix(file.path(base_path, sprintf("ref/ref_%d.txt", i))))
     alt <- t(read.matrix(file.path(base_path, sprintf("alt/alt_%d.txt", i))))
-    # genotype_sciterna <- as.matrix(read.table(file.path(base_path, "sciterna", "sciterna_genotype_marginal",
-    #                                               paste0("sciterna_genotype_marginal_", n_round, "r", i, ".txt")),
-    #                                     stringsAsFactors = FALSE))
 
     genotype_matrix <- as.matrix(read.table(file.path(base_path, "sciterna", "sciterna_genotype",
                                                   paste0("sciterna_genotype_", n_round, "r", i, ".txt")),
                                         stringsAsFactors = FALSE))
 
 
-    # Define the mapping
+
     mapping_dict <- c("A" = 1.0, "H" = 0.5, "R" = 0)
 
     # Apply the mapping

@@ -22,10 +22,10 @@ int main(int argc, char* argv[]) {
     std::string sample_dir = argv[1]; // e.g., "50c500m" (only for simulated data), otherwise use real_data_processing.cpp
     int idx = std::stoi(argv[2]); // simulated sample id
 
-    std::string input_path = "/cluster/work/bewi/members/znorio/data/simulated_data/" + sample_dir + "/";
-//    std::string input_path = "../data/simulated_data/" + sample_dir + "/";
-    std::string output_path = "/cluster/work/bewi/members/znorio/data/results/" + sample_dir + "/sciterna_" + std::to_string(idx);
-//    std::string output_path = "../data/results/" + sample_dir + "/sciterna_" + std::to_string(idx);
+//    std::string input_path = "/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/simulated_data/" + sample_dir + "/";
+    std::string input_path = "../data/simulated_data/" + sample_dir + "/";
+//    std::string output_path = "/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/results/" + sample_dir + "/sciterna_" + std::to_string(idx);
+    std::string output_path = "../data/results/" + sample_dir + "/sciterna_" + std::to_string(idx);
 
     std::string alt_file = input_path + "alt/alt_" + std::to_string(idx) + ".txt";
     std::string ref_file = input_path + "ref/ref_" + std::to_string(idx) + ".txt";
