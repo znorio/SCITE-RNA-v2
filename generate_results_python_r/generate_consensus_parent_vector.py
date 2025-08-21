@@ -103,6 +103,7 @@ def to_newick(ct, node):
 def main():
     import dendropy
     import os
+    import json
     import argparse
     import numpy as np
     from collections import Counter
@@ -110,8 +111,8 @@ def main():
     from src_python.cell_tree import CellTree
 
     parser = argparse.ArgumentParser(description="Convert bootstrap samples of trees to consensus parent vectors")
-    parser.add_argument("--input_folder", type=str, help="Path to the input folder containing bootstrap tree files.", default="mm16") # "50c500m"
-    parser.add_argument("--base_path", type=str, help="Base path for the files", default="/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/results")
+    parser.add_argument("--input_folder", type=str, help="Path to the input folder containing bootstrap tree files.", default="mm34") # "50c500m"
+    parser.add_argument("--base_path", type=str, help="Base path for the files", default="../data/results") # "/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/results"
     parser.add_argument("--model", type=str, help="Model used for the bootstrap samples.", default="sciterna")
     parser.add_argument("--simulated", type=bool, help="Run on simulated data.", default=False)
     parser.add_argument("--n_samples", type=int, help="Number of simulated samples to process.", default=100)
@@ -141,7 +142,7 @@ def main():
             path_parent = os.path.join(path, f"{model}_parent_vec", f"{model}_parent_vec_{round}r{test}.txt")
             path_selected = os.path.join(path, f"{model}_selected_loci", f"{model}_selected_loci_{round}r{test}.txt")
 
-            if not os.path.exists(path_parent)or not os.path.exists(path_selected):
+            if not os.path.exists(path_parent) or not os.path.exists(path_selected):
                 continue
 
             parent_vec = np.loadtxt(path_parent, dtype=int)
@@ -171,14 +172,33 @@ def main():
 
         consensus_parent_vec, node_index_map = tree_to_parent_vector(consensus_tree)
 
+        support_values = {}
+        for node in consensus_tree.postorder_node_iter():
+            if not node.is_leaf():
+                node_id = int(node_index_map[node])
+                try:
+                    support = float(node.label)
+                    support_values[str(node_id)] = support
+                except (ValueError, TypeError):
+                    continue
+
         if simulated:
-            os.makedirs(os.path.join(path, "..", f"{model}_consensus_parent_vec"), exist_ok=True)
+            support_values_file = os.path.join(path, "..", f"{model}_consensus_parent_vec",
+                                               f"{model}_support_values_{round}r{s}.json")
+        else:
+            support_values_file = os.path.join(path, f"{model}_consensus_parent_vec",
+                                               f"{model}_support_values_{round}r.json")
+
+        os.makedirs(os.path.dirname(support_values_file), exist_ok=True)
+
+        with open(support_values_file, 'w') as f:
+            json.dump(support_values, f, indent=4)
+
+        if simulated:
             np.savetxt(
                 os.path.join(path, "..", f"{model}_consensus_parent_vec", f"{model}_parent_vec_{round}r{s}.txt"),
                 consensus_parent_vec, fmt='%d')
-
         else:
-            os.makedirs(os.path.join(path, f"{model}_consensus_parent_vec"), exist_ok=True)
             np.savetxt(
                 os.path.join(path, f"{model}_consensus_parent_vec", f"{model}_parent_vec_{round}r.txt"),
                 consensus_parent_vec, fmt='%d')

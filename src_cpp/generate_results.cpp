@@ -235,7 +235,7 @@ void generate_sciterna_results(
 
         if (use_bootstrap) {
             std::cout << "Running bootstrap..." << std::endl;
-            for (int i = 0; i < n_bootstrap; ++i) {
+            for (int i = 828; i < n_bootstrap; ++i) {
                 std::vector<int> b_selected;
                 std::vector<char> b_gt1, b_gt2;
 
