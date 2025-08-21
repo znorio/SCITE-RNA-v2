@@ -28,23 +28,31 @@ def run_sciterna_tree_inference(spaces, num_cells_list, num_mut_list, n_tests, f
 
 
 def plot_results(num_cells_list, num_mut_list, optimal_tree_llh, n_rounds, title):
-    fig, axes = plt.subplots(2, 3, figsize=(22, 12))
+    fig, axes = plt.subplots(2, 3, figsize=(22, 13), constrained_layout=True)
 
     # each column corresponds to a different number of cells and mutations
     for s, (n_cells, n_mut) in enumerate(zip(num_cells_list, num_mut_list)): # s are columns
         #plot the upper row
+        setting = f'{n_cells} Cells, {n_mut} SNVs'
         all_data, labels = prepare_plot_data(optimal_tree_llh, n_cells, n_mut, n_rounds)
         # all data has format {'m': [1,...], 'c': [1,...], 'c_m': [1,...], 'm_c': [1,...]} labels = ['m', 'c', 'c_m', 'm_c']
-        plot_boxplot(axes[0, s], all_data, labels, n_cells, n_mut, f'{title} Predicted vs. True Tree')
+        if s == 0:
+            plot_boxplot(axes[0, s], all_data, labels, setting, f'{title} Predicted vs. True Tree', "")
+        else:
+            plot_boxplot(axes[0, s], all_data, labels, setting, "", "")
 
         #plot the lower row
+        xlabels = [label.replace("_", "") for label in labels]
         cell_tree_likelihoods = np.array(all_data["c"])
         relative_data = {}
         for key in all_data.keys():
             relative_data[key] = np.array(all_data[key]) - cell_tree_likelihoods
-        plot_boxplot(axes[1, s], relative_data, labels, n_cells, n_mut, f'{title} Predicted vs. Cell Tree')
+        if s == 0:
+            plot_boxplot(axes[1, s], relative_data, labels, "", f'{title} Predicted vs. Cell Tree', xlabels)
+        else:
+            plot_boxplot(axes[1, s], relative_data, labels, "", "", xlabels)
 
-    plt.tight_layout()
+    # plt.tight_layout()
     plt.savefig(f"../data/results/figures/space_switching_{title}.pdf")
     plt.show()
 
@@ -62,50 +70,40 @@ def prepare_plot_data(optimal_tree_llh, n_cells, n_mut, num_rounds):
     return all_data, labels
 
 
-def plot_boxplot(ax, all_data, labels, n_cells, n_mut, ylabel):
+def plot_boxplot(ax, all_data, labels, setting, ylabel, xlabel):
     colors = ['lightblue', 'yellow', 'turquoise', 'lightgreen']
-    meanprops = dict(color='black', linewidth=3)
+    medianprops = dict(color='black', linewidth=3)
 
     # Ensure all_data is a list of lists with consistent lengths
     all_data_list = [np.array(all_data[label]) for label in labels]
 
-    box = ax.boxplot(all_data_list, showmeans=True, meanline=True, widths=0.8,
-                     patch_artist=True, meanprops=meanprops, showfliers=False)
+    box = ax.boxplot(all_data_list, widths=0.8, medianprops=medianprops, patch_artist=True, showfliers=False)
 
     for patch, color in zip(box['boxes'], colors[:len(box['boxes'])]):
         patch.set_facecolor(color)
 
-    labels = [label.replace("_", "") for label in labels]
     ax.axhline(0, color='orange', linestyle='--', linewidth=2)
     ax.set_xticks(range(1, len(labels) + 1))
-    ax.set_xticklabels(labels, rotation=90, fontsize=24)
-    ax.set_title(f'{n_cells} Cells, {n_mut} SNVs', fontsize=28, pad=15)
-    ax.set_ylabel(ylabel, fontsize=19)
+    ax.set_xticklabels(xlabel, rotation=0, fontsize=32)
+    ax.set_ylabel(ylabel, fontsize=30)
+    ax.tick_params(axis='y', labelsize=20)
+    ax.set_title(setting, fontsize=30, pad=10, fontweight="bold")
 
 def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare_cpp, n_rounds, flipped_mutation_direction):
     mapping_dict = {'A': 1.0, 'H': 0.5, 'R': 0}
     vectorized_map = np.vectorize(lambda x: float(mapping_dict[x]))
 
     optimal_tree_llhs = {}
-    path_len_distances = {}
-    vaf_distances = {}
-    mut_count_distances = {}
+
     for s, (n_cells, n_mut) in enumerate(zip(num_cells_list, num_mut_list)):
         file_path = rf"../data/results/figures/{n_cells}c{n_mut}m/optimal_tree_llh_comparison_{n_cells}c{n_mut}m.json"
-        file_path_dist = rf"../data/results/figures/{n_cells}c{n_mut}m/path_len_distance_comparison_{n_cells}c{n_mut}m.json"
-        file_path_vaf = rf"../data/results/figures/{n_cells}c{n_mut}m/vaf_comparison_{n_cells}c{n_mut}m.json"
-        file_path_mut_dist = rf"../data/results/figures/{n_cells}c{n_mut}m/mut_count_distance_comparison_{n_cells}c{n_mut}m.json"
-        if not os.path.exists(file_path_vaf):
+
+        if not os.path.exists(file_path):
             os.makedirs(rf"../data/results/figures/{n_cells}c{n_mut}m", exist_ok=True)
             optimal_tree_llh = {}
-            path_len_distance = {}
-            vaf_distance = {}
-            mut_count_dist = {}
             for space in spaces:
                 optimal_tree_llh["_".join(space)] = {}
-                path_len_distance["_".join(space)] = {}
-                vaf_distance["_".join(space)] = {}
-                mut_count_dist["_".join(space)] = {}
+
                 path = f"../data/simulated_data/{n_cells}c{n_mut}m"
                 path_results = os.path.join(path, f'sciterna_tree_space_comparison{compare_cpp}_{"_".join(space)}')
 
@@ -117,24 +115,13 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
 
                 for r in range(n_rounds):
                     optimal_tree_llh["_".join(space)][f"{n_cells}_{n_mut}_{r}"] = []
-                    path_len_distance["_".join(space)][f"{n_cells}_{n_mut}_{r}"] = []
-                    vaf_distance["_".join(space)][f"{n_cells}_{n_mut}_{r}"] = []
-                    mut_count_dist["_".join(space)][f"{n_cells}_{n_mut}_{r}"] = []
 
                     for i in tqdm(range(n_tests)):
                         sciterna_parent_vec = np.loadtxt(os.path.join(path_results, f'sciterna_parent_vec/sciterna_parent_vec_{r}r{i}.txt'), dtype=int)
                         true_parent_vec = np.loadtxt(os.path.join(path, f'parent_vec/parent_vec_{i}.txt'), dtype=int)
                         ref = np.loadtxt(os.path.join(path, f'ref/ref_{i}.txt'))
                         alt = np.loadtxt(os.path.join(path, f'alt/alt_{i}.txt'))
-                        genotype_pred = np.loadtxt(os.path.join(path_results, "sciterna_genotype", f"sciterna_genotype_{r}r{i}.txt"), dtype=str)
-                        gt = np.loadtxt(os.path.join(path, "genotype", f"genotype_{i}.txt"), dtype=str)
 
-                        genotype_predicted = vectorized_map(genotype_pred)
-                        genotype = vectorized_map(gt)
-
-                        # mut_indicator = np.loadtxt(os.path.join(path, f'mut_indicator/mut_indicator_{i}.txt'))
-                        # rows_to_zero = np.all(mut_indicator == 1, axis=1)  # if all cells are mutated = no mutations
-                        # mut_indicator[rows_to_zero] = 0
                         selected = np.loadtxt(os.path.join(path_results, f'sciterna_selected_loci/sciterna_selected_loci_{r}r{i}.txt'), dtype=int)
                         gt1, gt2 = np.loadtxt(os.path.join(path_results, f'sciterna_inferred_mut_types/sciterna_inferred_mut_types_{r}r{i}.txt'), dtype=str)
                         llh_1, llh_2 = mf.get_llh_mat(ref[:, selected], alt[:, selected], gt1, gt2)
@@ -156,28 +143,12 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
                         optimal_tree_llh["_".join(space)][f"{n_cells}_{n_mut}_{r}"].append(
                             (ct_sciterna.joint - true_joint) / (ct_sciterna.n_cells * ct_sciterna.n_mut))
 
-                        path_len_distance["_".join(space)][f"{n_cells}_{n_mut}_{r}"].append(
-                            path_len_dist(ct_gt, ct_sciterna))
-                        vaf_distance["_".join(space)][f"{n_cells}_{n_mut}_{r}"].append(np.mean(np.abs(genotype_predicted - genotype)))
-                        mut_count_dist["_".join(space)][f"{n_cells}_{n_mut}_{r}"].append(mut_count_distance(genotype, genotype_predicted))
 
             with open(file_path, "w") as f:
                 json.dump(optimal_tree_llh, f)
-            with open(file_path_dist, "w") as f:
-                json.dump(path_len_distance, f)
-            with open(file_path_vaf, "w") as f:
-                json.dump(vaf_distance, f)
-            with open(file_path_mut_dist, "w") as f:
-                json.dump(mut_count_dist, f)
 
         with open(file_path, "r") as f:
             optimal_tree_llh = json.load(f)
-        with open(file_path_dist, "r") as f:
-            path_len_distance = json.load(f)
-        with open(file_path_vaf, "r") as f:
-            vaf_distance = json.load(f)
-        with open(file_path_mut_dist, "r") as f:
-            mut_count_dist = json.load(f)
 
         def merge_dicts(source, target):
             for key in source.keys():
@@ -188,24 +159,18 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
                         target[key][inner_key] = source[key][inner_key]
 
         merge_dicts(optimal_tree_llh, optimal_tree_llhs)
-        merge_dicts(path_len_distance, path_len_distances)
-        merge_dicts(vaf_distance, vaf_distances)
-        merge_dicts(mut_count_dist, mut_count_distances)
 
     plot_results(num_cells_list, num_mut_list, optimal_tree_llhs, n_rounds, "LL")
-    plot_results(num_cells_list, num_mut_list, path_len_distances, n_rounds, "Pathlength")
-    plot_results(num_cells_list, num_mut_list, vaf_distances, n_rounds, "VAF")
-    plot_results(num_cells_list, num_mut_list, mut_count_distances, n_rounds, "MutationCountDist")
 
 
 num_tests = 100  # Number of simulated samples
-n_rounds = 3  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
+n_rounds = 2  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
 n_cells_list = [100, 500, 500]
 n_mut_list = [500, 500, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 
-generate_results = True  # set to True to rerun the SCITE-RNA tree inference
+generate_results = False  # set to True to rerun the SCITE-RNA tree inference
 flipped_mutation_direction = False  # flip mutations or not (change root genotype) -> only done in cell lineage trees
 cpp = "_cpp"
 

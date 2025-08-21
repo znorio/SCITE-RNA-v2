@@ -11,4 +11,4 @@ genotype_freq: # prior of the genotype frequencies
   H: 0.33
   A: 0.33
 mut_freq: 0.5 # prior of frequency of mutated loci during the mutation selection step
-random_seed: 0 # random seed for reproducibility
+random_seed: 1 # random seed for reproducibility
