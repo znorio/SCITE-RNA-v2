@@ -100,7 +100,7 @@ for (clone in clones) {
 
   write.table(memb_pred_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_clones", paste0("sclineager_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 
-  hc <- hclust(dist,method='ward.D')
+  hc <- hclust(dist,method="ward.D")
   memb_pred <- cutree(hc, k = clone)
   cluster <- DENDRO.cluster(dist, plot=FALSE,type="phylogram")
   dendro_parent_vec <- merge.to.parent(cluster$merge)

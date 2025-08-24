@@ -62,7 +62,7 @@ class SwapOptimizer:
         mean_abs = np.sum(np.abs(llh_1 + llh_2)) / 2  # mean abs value when attaching mutations randomly
         self.n_decimals = int(self.sig_digits - np.log10(mean_abs))
 
-    def optimize(self, max_loops=100, reshuffle_nodes=True):
+    def optimize(self, max_loops=100, reshuffle_nodes=True): # in practice the max number of loops is not reached, usually not more than 10-20 times space switching
         current_space = 0
         converged = [space not in self.spaces for space in ['c', 'm']]  # choose the spaces to be optimized
         if self.spaces[0] == 'c':  # choose the starting search space

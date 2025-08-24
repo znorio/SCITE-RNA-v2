@@ -1,7 +1,7 @@
 """
 Script used to generate simulated datasets. The number of cells and SNVs and the number of clones simulated can be set.
-Tree inference is run as well. However, for large datasets you might want to use
-generate_results_cpp/comparison_num_clones.cpp for tree inference as it is faster.
+Tree inference is run as well. However, you might want to use generate_results_cpp/comparison_num_clones.cpp for
+tree inference as it is faster.
 """
 
 from src_python.data_generator import DataGenerator

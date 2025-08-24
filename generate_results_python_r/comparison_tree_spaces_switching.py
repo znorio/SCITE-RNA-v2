@@ -12,7 +12,7 @@ import json
 
 from src_python.mutation_filter import MutationFilter
 from src_python.cell_tree import CellTree
-from src_python.utils import load_config_and_set_random_seed, path_len_dist, mut_count_distance
+from src_python.utils import load_config_and_set_random_seed
 from src_python.generate_results import generate_sciterna_simulation_results
 
 config = load_config_and_set_random_seed()
@@ -90,9 +90,6 @@ def plot_boxplot(ax, all_data, labels, setting, ylabel, xlabel):
     ax.set_title(setting, fontsize=30, pad=10, fontweight="bold")
 
 def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare_cpp, n_rounds, flipped_mutation_direction):
-    mapping_dict = {'A': 1.0, 'H': 0.5, 'R': 0}
-    vectorized_map = np.vectorize(lambda x: float(mapping_dict[x]))
-
     optimal_tree_llhs = {}
 
     for s, (n_cells, n_mut) in enumerate(zip(num_cells_list, num_mut_list)):
@@ -164,13 +161,13 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
 
 
 num_tests = 100  # Number of simulated samples
-n_rounds = 2  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
+n_rounds = 2  # Number of rounds of SCITE-RNA with tree inference and parameter optimization
 n_cells_list = [100, 500, 500]
 n_mut_list = [500, 500, 100]
 
 tree_spaces = [["m"], ["c"], ["c", "m"], ["m", "c"]]
 
-generate_results = False  # set to True to rerun the SCITE-RNA tree inference
+generate_results = False  # set to True to rerun the SCITE-RNA tree inference (run generate_results_cpp/comparison_tree_spaces_switching.cpp for faster results)
 flipped_mutation_direction = False  # flip mutations or not (change root genotype) -> only done in cell lineage trees
 cpp = "_cpp"
 
