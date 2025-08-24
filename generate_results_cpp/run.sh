@@ -10,7 +10,7 @@
 
 INPUT_DIR="50c500m5"
 
-cd build_test2
+cd build_test
 
 # Run the program with input directory and array index
 ./SCITE-RNA "$INPUT_DIR" "$SLURM_ARRAY_TASK_ID"

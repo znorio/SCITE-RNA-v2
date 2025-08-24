@@ -27,9 +27,7 @@ int main() {
     bool reduced_output = false; // if true the number of output files is reduced, i.e. the genotype and mutation indicator files are not saved
 
     std::string input_path = "../data/input_data/" + sample;
-//    std::string input_path = "/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/input_data/" + sample;
     std::string output_path = "../data/results/" + sample + "/sciterna";
-//    std::string output_path = "/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/results/" + sample + "/sciterna";
 
     std::vector<std::vector<int>> ref = read_csv(input_path + "/ref.csv");
     std::vector<std::vector<int>> alt = read_csv(input_path + "/alt.csv");

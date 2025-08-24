@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 3.27)
 project(SCITE-RNA)
 
-set(CMAKE_TOOLCHAIN_FILE "C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/")
+set(CMAKE_TOOLCHAIN_FILE "../data/")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 include_directories(src_cpp)
-include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/yixuan-LBFGSpp-9db7a6d/include")
-include_directories("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data/eigen3")
-#include_directories("/cluster/work/bewi/members/znorio/data/yixuan-LBFGSpp-9db7a6d/include")
-#include_directories("/cluster/work/bewi/members/znorio/data/eigen3")
-
+include_directories("../data/yixuan-LBFGSpp-9db7a6d/include")
+include_directories("../data/eigen3")
 
 add_executable(SCITE-RNA
         src_cpp/cell_tree.cpp
