@@ -463,8 +463,7 @@ class MutationFilter:
             ref: 1D array of reference read counts
             alt: 1D array of alternative read counts
             genotypes: 1D array of inferred genotypes corresponding to the read counts
-            initial_params: Initial guess for the parameters [dropout_prob, overdispersion, error
-            rate, overdispersion_h]
+            initial_params: Initial guess for the parameters [dropout_prob, overdispersion, error rate, overdispersion_h]
             max_iterations: Maximum number of iterations for the optimization algorithm
             tolerance: Tolerance for convergence of the optimization algorithm
         [Returns]
@@ -647,8 +646,6 @@ def log_binomial_coefficient(n, k):
     else:
         return 0.0  # Return 0.0 for invalid inputs
 
-
-# custom betabinom_pmf function
 @njit
 def log_betabinom_pmf(k, n, a, b):
     if n < 0 or k < 0 or k > n or a <= 0 or b <= 0:

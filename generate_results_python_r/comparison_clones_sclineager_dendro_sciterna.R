@@ -8,10 +8,7 @@ n_cells_list <- c(50, 50, 100, 100, 100, 200, 200)
 n_mut_list <- c(50, 100, 50, 100, 200, 100, 200)
 clones_list <- c("")
 
-# base_dir <- file.path("C:/Users/Norio/Documents/GitHub/SCITE-RNA-v2/data", "simulated_data")
-# base_dir <- file.path("data", "simulated_data")
-base_dir <- file.path("/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data", "simulated_data")
-
+base_dir <- file.path("data", "simulated_data")
 
 read.matrix <- function(path){
   mat <- as.matrix(read.table(path, header=FALSE, sep=" "))

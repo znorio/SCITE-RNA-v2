@@ -33,8 +33,8 @@ def get_splits(ct, node, labels=None):
 def annotate_clade_frequencies(tree, split_counter, total_trees):
     """
     Annotates each internal node in the consensus tree with its clade frequency
-    based on a user-provided split_counter.
-    Frequencies are stored in node.label (string, formatted to 2 decimals).
+    based on provided split_counter.
+    Frequencies are stored in node.label
     """
     for node in tree.postorder_node_iter():
         if node.is_leaf():
@@ -63,21 +63,18 @@ def tree_to_parent_vector(tree):
     """
     node_index_map = {}
 
-    # Step 1: Assign leaf labels directly
     leaf_labels = [int(node.taxon.label) for node in tree.leaf_node_iter()]
     max_leaf_label = max(leaf_labels)
 
     for node in tree.leaf_node_iter():
         node_index_map[node] = node.taxon.label  # Keep leaf labels (as str)
 
-    # Step 2: Assign numeric labels to internal nodes
     next_internal_label = max_leaf_label + 1
     for node in tree.postorder_node_iter():
         if node not in node_index_map:
             node_index_map[node] = str(next_internal_label)
             next_internal_label += 1
 
-    # Step 3: Build parent mapping using labels
     parent_dict = {}
     for parent in tree.preorder_node_iter():
         parent_id = int(node_index_map[parent])
@@ -85,7 +82,6 @@ def tree_to_parent_vector(tree):
             child_id = int(node_index_map[child])
             parent_dict[child_id] = parent_id
 
-    # Step 4: Build the parent vector list
     total_nodes = next_internal_label
     parent_vector = [-1] * total_nodes  # Initialize with -1 for all nodes
 
