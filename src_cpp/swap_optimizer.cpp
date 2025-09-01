@@ -10,14 +10,11 @@ To optimize the trees, SCITE-RNA alternates between mutation and cell lineage tr
 
 // initialize tree space swap optimizer
 SwapOptimizer::SwapOptimizer(std::vector<std::string> spaces, bool reverse_mutations, int n_mut, int n_cells, int sig_digits)
-        : sig_digits(sig_digits), spaces(std::move(spaces)), reverse_mutations(reverse_mutations), mt(n_mut, n_cells),
-        ct(n_cells, n_mut, reverse_mutations){
-    n_cells_ = n_cells;
-    n_mut_ = n_mut;
-}
+        : sig_digits(sig_digits), spaces(std::move(spaces)), mt(n_mut, n_cells), n_cells_(n_cells), n_mut_(n_mut),
+        ct(n_cells, n_mut, reverse_mutations){}
 
 // get rounded cell lineage tree joint LLH
-double SwapOptimizer::getCurrentJoint() const {
+double SwapOptimizer::getCtJoint() const {
     return round_to_n_decimals(ct.joint, n_decimals);
 }
 
@@ -71,13 +68,9 @@ void SwapOptimizer::optimize(int max_loops, bool insert_nodes) {
 
         std::cout << ct.joint << " " << mt.joint << std::endl;
 
-        double current_joint = getCurrentJoint();
-//        if (spaces == std::vector<std::string>{"m"}) {
-//            current_joint = getMtJoint();
-//        }
-        if (current_space == 1) {
-            current_joint = getMtJoint();
-        }
+        double current_joint = (spaces.size() == 1 && spaces[0] == "m") ? getMtJoint() :
+                               (spaces.size() == 1 && spaces[0] == "c") ? getCtJoint() :
+                               (getCtJoint()); // get the likelihood of the current space
 
         if (start_joint < current_joint) {
             converged[current_space] = false;
@@ -87,29 +80,19 @@ void SwapOptimizer::optimize(int max_loops, bool insert_nodes) {
             throw std::runtime_error("Observed decrease in joint likelihood.");
         }
 
-        start_joint = getCurrentJoint();
-//        if (spaces == std::vector<std::string>{"m"}) {
-//            start_joint = getMtJoint();
-//        }
+        start_joint = (spaces.size() == 1 && spaces[0] == "m") ? getMtJoint() :
+                      (spaces.size() == 1 && spaces[0] == "c") ? getCtJoint() :
+                      (getCtJoint()); // get the starting likelihood of the next space
 
-        if (current_space == 1) {
-            start_joint = getMtJoint();
-        }
 
         if (std::find(spaces.begin(), spaces.end(), "c") != spaces.end() &&
             std::find(spaces.begin(), spaces.end(), "m") != spaces.end()) {
             current_space = 1 - current_space;
         }
-//        if (std::find(spaces.begin(), spaces.end(), "c") != spaces.end() &&
-//            std::find(spaces.begin(), spaces.end(), "m") != spaces.end() &&
-//            converged[current_space]) {
-//            current_space = 1 - current_space;
-//        }
-
     }
 }
 
-// round to make sure, that small rounding errors don't affect the optimization
+// round to make sure, that smaller rounding errors don't affect the optimization
 double SwapOptimizer::round_to_n_decimals(double value, int n_decimals) {
     double scale = std::pow(10.0, n_decimals);
     return std::round(value * scale) / scale;

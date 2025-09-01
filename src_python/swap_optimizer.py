@@ -1,51 +1,72 @@
 """
-To optimize the trees, SCITE-RNA alternates between mutation and cell lineage tree spaces.
+To optimize the trees, SCITE-RNA offers the option to alternate between mutation and cell lineage tree spaces.
 """
 
 import warnings
 import numpy as np
 
-from .cell_tree import CellTree
-from .mutation_tree import MutationTree
+from src_python.cell_tree import CellTree
+from src_python.mutation_tree import MutationTree
+from src_python.utils import load_config_and_set_random_seed
+
+config = load_config_and_set_random_seed()
 
 
 class SwapOptimizer:
-    def __init__(self, sig_digits=10, spaces=["c", "m"], reverse_mutations=True):
-        '''
+    def __init__(self, sig_digits=9, spaces=None, flipped_mutation_direction=True):
+        """
         [Arguments]
             spaces: spaces that will be searched and the order of the search
                     'c' = cell tree space, 'm' = mutation tree space
-                    default is ['c','m'], i.e. start with cell tree and search both spaces
-            sig_dig: number of significant digits to use when calculating joint probability
-        '''
+                    default is ['c','m'], i.e. start with a cell tree and search both spaces
+            sig_dig: number of significant digits to use when calculating the joint probability
+        """
+        self.mt = None
+        self.ct = None
+        self.n_decimals = None
+        if spaces is None:
+            spaces = ["c", "m"]
         self.sig_digits = sig_digits
         self.spaces = spaces
-        self.reverse_mutations = reverse_mutations
+        self.flipped_mutation_direction = flipped_mutation_direction
 
     @property
     def current_joint(self):
         return round(self.ct.joint, self.n_decimals)
+
     @property
     def mt_joint(self):
         return round(self.mt.joint, self.n_decimals)
 
+    def postprocess_trees(self):
+        """
+        Post-process the trees after optimization.
+        This includes removing single mutations and updating the joint likelihood.
+        """
+        self.ct.remove_single_mutations()
+        self.mt.remove_single_mutations()
+        self.ct.update_all()
+        self.mt.update_all()
+
+        # Update the joint likelihoods
+        self.ct.update_joint()
+        self.mt.update_joint()
 
     def fit_llh(self, llh_1, llh_2):
-        self.ct = CellTree(llh_1.shape[0], llh_1.shape[1], reversible_mut=self.reverse_mutations)
+        self.ct = CellTree(llh_1.shape[0], llh_1.shape[1], flipped_mutation_direction=self.flipped_mutation_direction)
         self.ct.fit_llh(llh_1, llh_2)
-        
+
         self.mt = MutationTree(llh_1.shape[1], llh_1.shape[0])
         self.mt.fit_llh(llh_1, llh_2)
 
-        # determine a rounding precision for joint likelihood calculation
-        mean_abs = np.sum(np.abs(llh_1 + llh_2)) / 2 # mean abs value when attaching mutations randomly
+        mean_abs = np.sum(np.abs(llh_1 + llh_2)) / 2  # mean abs value when attaching mutations randomly
         self.n_decimals = int(self.sig_digits - np.log10(mean_abs))
-        # Need to round because the sum of floating point numbers can slightly vary depending on the exact process
 
-    def optimize(self, max_loops=100):
-        converged = [space not in self.spaces for space in ['c', 'm']] # choose the spaces to be optimized
-        if self.spaces[0] == 'c': # choose the starting search space
-            current_space = 0 # 0 for cell lineage tree, 1 for mutation tree
+    def optimize(self, max_loops=100, reshuffle_nodes=True): # in practice the max number of loops is not reached, usually not more than 10-20 times space switching
+        current_space = 0
+        converged = [space not in self.spaces for space in ['c', 'm']]  # choose the spaces to be optimized
+        if self.spaces[0] == 'c':  # choose the starting search space
+            current_space = 0  # 0 for cell lineage tree, 1 for mutation tree
         elif self.spaces[0] == 'm':
             current_space = 1
         else:
@@ -62,13 +83,13 @@ class SwapOptimizer:
 
             if current_space == 0:
                 print('Optimizing cell lineage tree ...')
-                self.ct.exhaustive_optimize(loop_count=loop_count)
+                self.ct.exhaustive_optimize()
                 self.mt.fit_cell_tree(self.ct)
                 self.mt.update_all()
 
-            else: # i.e. current_space == 1:
+            else:  # i.e. current_space == 1:
                 print('Optimizing mutation tree ...')
-                self.mt.exhaustive_optimize(loop_count=loop_count)
+                self.mt.exhaustive_optimize(prune_single_mutations=reshuffle_nodes)
                 self.ct.fit_mutation_tree(self.mt)
                 self.ct.update_all()
 
@@ -88,5 +109,5 @@ class SwapOptimizer:
             if self.spaces == ["m"]:
                 start_joint = self.mt_joint
 
-            if "c" in self.spaces and "m" in self.spaces: #and converged[current_space] == True # switch to the other tree space
-                current_space = 1 - current_space
+            if "c" in self.spaces and "m" in self.spaces:
+                current_space = 1 - current_space  # switch to the other tree space
