@@ -16,7 +16,7 @@ import numpy as np
 config = load_config_and_set_random_seed()
 
 
-def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./comparison_data/', random_seed=None,
+def generate_comparison_data(n_cells: int, n_mut: int, size=100, path="./comparison_data/", random_seed=None,
                              n_clones=None, coverage_method="zinb"):
     """
     Generates simulated data.
@@ -26,11 +26,11 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
 
     if os.path.exists(path):
         while True:
-            ans = input(f'Directory {path} already exists. Existing files will be overwritten. Continue? [Y/N] ')
+            ans = input(f"Directory {path} already exists. Existing files will be overwritten. Continue? [Y/N] ")
             match ans:
-                case 'Y' | 'y' | 'Yes' | 'yes':
+                case "Y" | "y" | "Yes" | "yes":
                     break
-                case 'N' | 'n' | 'No' | 'no':
+                case "N" | "n" | "No" | "no":
                     return
     else:
         os.makedirs(path)
@@ -61,14 +61,14 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path='./compari
         mt = MutationTree(n_mut=n_mut, n_cells=n_cells)
         mt.fit_cell_tree(generator.ct)
 
-        np.savetxt(os.path.join(path, f'ref/ref_{i}.txt'), ref, fmt='%i')
-        np.savetxt(os.path.join(path, f'alt/alt_{i}.txt'), alt, fmt='%i')
-        np.savetxt(os.path.join(path, f'parent_vec/parent_vec_{i}.txt'), generator.ct.parent_vec, fmt='%i')
-        np.savetxt(os.path.join(path, f'mut_indicator/mut_indicator_{i}.txt'), mut_indicator, fmt='%i')
-        np.savetxt(os.path.join(path, f'genotype/genotype_{i}.txt'), generator.genotype, fmt='%s')
-        np.savetxt(os.path.join(path, f'dropout_probs/dropout_probs_{i}.txt'), dropout_probs)
-        np.savetxt(os.path.join(path, f'overdispersions_H/overdispersions_H_{i}.txt'), overdispersions_H)
-        np.savetxt(os.path.join(path, f'mutation_location/mutation_location_{i}.txt'), generator.ct.mut_loc, fmt='%i')
+        np.savetxt(os.path.join(path, f"ref/ref_{i}.txt"), ref, fmt="%i")
+        np.savetxt(os.path.join(path, f"alt/alt_{i}.txt"), alt, fmt="%i")
+        np.savetxt(os.path.join(path, f"parent_vec/parent_vec_{i}.txt"), generator.ct.parent_vec, fmt="%i")
+        np.savetxt(os.path.join(path, f"mut_indicator/mut_indicator_{i}.txt"), mut_indicator, fmt="%i")
+        np.savetxt(os.path.join(path, f"genotype/genotype_{i}.txt"), generator.genotype, fmt="%s")
+        np.savetxt(os.path.join(path, f"dropout_probs/dropout_probs_{i}.txt"), dropout_probs)
+        np.savetxt(os.path.join(path, f"overdispersions_H/overdispersions_H_{i}.txt"), overdispersions_H)
+        np.savetxt(os.path.join(path, f"mutation_location/mutation_location_{i}.txt"), generator.ct.mut_loc, fmt="%i")
 
 
 num_tests = 100  # Number of simulated samples
@@ -83,10 +83,10 @@ run_tree_inference = False  # Whether to run tree inference after generating the
 
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
-        data_path = f'../data/simulated_data/{num_cells}c{num_mut}m{clone}'
+        data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"
         generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
         if run_tree_inference:
-            path_results = os.path.join(data_path, 'sciterna')
+            path_results = os.path.join(data_path, "sciterna")
             generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
                                                  tree_space=tree_space,
                                                  flipped_mutation_direction=flipped_mutation_direction,
