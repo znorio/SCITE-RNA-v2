@@ -1,3 +1,5 @@
 /cmake-build-debug/
+src_python/__pycache__/
 .idea
-data_raw
+data/eigen3
+data/yixuan-LBFGSpp-9db7a6d

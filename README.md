@@ -1,6 +1,6 @@
 # SCITE-RNA
 
-This repository contains the code and data for the paper **Phylogenetic Tree Inference from Single-Cell RNA Sequencing**. 
+This repository contains the code and data for the paper **Phylogenetic tree inference from single-cell RNA sequencing data**. 
 The code and datasets provided here enable users to replicate the experiments and figures presented in the paper, as well as to run SCITE-RNA on new data.
 
 ## Table of Contents
@@ -25,23 +25,24 @@ We implement a new method for reconstructing phylogenetic trees from single-cell
 SCITE-RNA selects single-nucleotide variants (SNVs), and reconstructs a phylogenetic tree of the sequenced cells. 
 We maximize the likelihood of the inferred tree by alternating between the cell lineage and mutation tree spaces until convergence is achieved in both.
 This repository provides:
-1. Scripts to execute SCITE-RNA. The model is split into C++ `src_cpp` and Python files `src_python`. Especially for large numbers of cells and SNVs it is recommended to use the C++ code, as it is significantly faster. The inferred trees should be comparable between the C++ and Python implementations. 
-2. Summaries of the data used in the paper is available in the `data/` directory, which contains all necessary files to reproduce the figures.
+1. Scripts to execute SCITE-RNA. The model is split into C++ `src_cpp` and Python files `src_python`. Especially for large numbers of cells and SNVs it is recommended to use the C++ code, as it is significantly faster. The inferred trees should be comparable between the C++ and Python implementations, but as the method is stochastic likely won't produce the exact same tree. 
+2. Data used in the paper are available in the `data_summary/`and `data/` directories, which contain all necessary files to reproduce the figures.
 3. Visualization scripts to generate plots as presented in the paper.
 
 
 ## Repository Structure
 
 **SCITE-RNA**<br>
+├── data_summary/               # Summary data files, as the raw output is quite large <br>
 ├── data/                       # Input data files and results <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── input_data               # Alternative and reference read counts among other files. <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── results                  # Inferred trees of the multiple myeloma dataset and figures <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── simulated_data           # Summary statistics of simulated data and respective inferred trees <br>
-├── generate_results_cpp/       # C++ scripts for tree inference <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── results                  # Inferred trees of the multiple myeloma dataset and consensus tree results <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── simulated_data           # Simulated data and inference results <br>
+├── generate_results_cpp/       # C++ scripts to run SCITE-RNA on various datasets <br>
 ├── generate_results_python_r/  # Python and R scripts for simulating data, inferring trees and visualization <br>
 ├── src_cpp/                    # C++ source files for SCITE-RNA <br>
 ├── src_python/                 # Python source files for SCITE-RNA <br>
-├── configs/                    # Model parameters (Python) <br>
+├── config/                     # Model parameters <br>
 ├── CMakeLists.txt              # Primary configuration file for CMake <br>
 └── README.md                   # Project overview and setup instructions
 
@@ -73,24 +74,15 @@ To set up the SCITE-RNA project locally:
     cd SCITE-RNA
 
 
-### Data Preparation
-
-To reproduce the figures quickly you can use the files provided in `data`. 
-As the size and the number of files was quite large, we produced summary statistics
-using 
-
-    generate_results_python_r/generate_summary_statistics.ipynb
-
 ## Running the Model
 
 ### Set Model Parameters
 
-Adjust model parameters in `configs/config.yaml` for Python 
-or adjust them in `src_cpp/mutation_filter.h` for C++.
+If desired adjust model parameters in `config/config.yaml`.
 
 ### Simulated Data
 
-To **generate new simulated data** execute:
+To **generate new simulated data** and compare different numbers of clones execute:
 
     generate_results_python_r/comparison_data_generation.py
 
@@ -99,7 +91,7 @@ The same file can also be used for tree inference. Alternatively, run the C++ ve
 
     generate_results_cpp/comparison_num_clones.cpp 
 
-for tree inference (not data generation).
+for tree inference (not data generation), which is a lot faster.
 
 To **compare different optimization strategies** of tree space switching run:
 
@@ -112,63 +104,72 @@ All simulated results will be saved in `data/simulated_data/`.
 
 ### Multiple Myeloma Data
 
-To run SCITE-RNA on the Multiple Myeloma dataset:
+To run SCITE-RNA on the Multiple Myeloma datasets:
 
-1. Run mutation filtering:
+Run either 
 
-       generate_results_python_r/MM.py
+       generate_results_python_r/real_data_processing.py
 
-2. Perform tree inference in C++ for faster computation:
+or (recommended) run the faster C++ version:
 
-       generate_results_cpp/MM.cpp
+       generate_results_cpp/.cpp
 
-Results will be saved in `data/results/mm34/`.
+Results will be saved in `data/results/`.
 
 ### Run on New Data
 To use SCITE-RNA on new data:
 
-1. Prepare reference and alternative allele count files in `.txt` format. 
-Use the format provided in `data/input_data/new_data` as a reference, 
+1. Prepare reference and alternative allele count files in `.csv` format. 
+Use the format provided in `data/input_data/` as a reference, 
 where columns represent cells and rows represent SNVs.
 
 2. Set the number of bootstrap samples (optional) and run SCITE-RNA tree inference with the following script:
 
-       generate_results_cpp/run_sciterna.cpp
+       generate_results_cpp/real_data_processing.cpp
 
-3. The results are saved in `data/results/new_data/`.
+3. The results are saved in `data/results`.
 
 
 ## Generating Figures
 
+### Data Preparation
+
+To reproduce the figures quickly you can use the files provided in `data` and `data_summary`. 
+As the size and the number of raw data files was quite large, we produced summary statistics
+using 
+
+    generate_results_python_r/generate_summary_statistics.ipynb
+
 To reproduce the plots presented in the paper, follow the instructions below:
         
-- The plots are generated by default using the summary statistics generated with
-
-        generate_results_python_r/comparison_data_generation.py
- 
-<br>
-
 - **Figure 3: Comparison of tree optimization strategies**
 
       generate_results_python_r/comparison_tree_spaces_switching.py
 
+  If you want to rerun the full analysis first run with the desired number of cells and SNVs
+  
+        generate_results_python_r/comparison_data_generation.py
+        generate_results_cpp/comparison_tree_spaces_switching.cpp
+        generate_results_cpp/space_switching_results_postprocessing.cpp
 <br>
 
-- **Figure 4: Comparison to SClineager and DENDRO + variable number of clones**
-
-- **Figure A.2: Runtime comparison**
-
-    Optionally rerun DENDRO and SClineager on the simulated data first. 
+- **Figure 4: Comparison to SClineager and DENDRO including runtimes**
         
-        generate_results_python_r/comparison_clones_sclineager_dendro_sciterna.R
-    To generate the figures run
-    
         generate_results_python_r/comparison_num_clones.ipynb
+   
+  If you want to rerun the full analysis first run with the desired number of clones, SNVs, cells 
+ 
+          generate_results_python_r/comparison_data_generation.py
+          generate_results_cpp/comparison_num_clones.cpp
+          generate_results_python_r/comparison_clones_sclineager_dendro_sciterna.R       
+      
+- **Figure 5/6: Multiple myeloma**
+          
+          generate_results_python_r/results_real_data.ipynb
 
-<br>
+  Rerun the full analysis with and without bootstrapping
 
-- **Figure 5: Representative tree multiple myeloma**
-- **Figure A.1: Gene expression analysis**
-
-        generate_results_python_r/bootstrap_results_mm.ipynb 
-All figures will be saved in `data/results/figures/`.
+          generate_results_cpp/real_data_processing.cpp
+          generate_results_python_r/generate_consensus_parent_vector.py
+ 
+Figures will be saved in `data/results/figures/`.
