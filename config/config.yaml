@@ -1,8 +1,14 @@
-f: 0.95 # expected variant allele frequency for the homozygous alternative genotype
-omega: 100 # overdispersion reflecting the uncertainty of f for the homozygous case
-h_factor: 0.5 # overdispersion is reduced by this factor for the heterozygous case because of increased uncertainty
+error_rate: 0.05 # expected variant allele frequency for the homozygous alternative genotype (0.001, 0.1) if necessary the parameter bounds can be adjusted in src_python/mutation_filter.py
+overdispersion: 10 # overdispersion reflecting the uncertainty of f for the homozygous case (2.5, 100)
+overdispersion_h: 6 # overdispersion reflecting the uncertainty of the read counts in the heterozygous case (2.5, 50)
+dropout_alpha: 2 # the dropout probability for each SNV is assumed to be a sample from this beta distribution. -> Serves as a prior for parameter estimation.
+dropout_beta: 8 # dropout_alpha/(dropout_alpha+dropout_beta)=dropout probability (0.01, 0.99)
+dropout_direction: 0.5  # the dropout direction decides how frequently the reference or alternative allele is dropped out. A
+                  # value of 0.5 means that the dropout is independent of the allele. A larger value means that the
+                  # reference allele is more likely to be dropped out.
 genotype_freq: # prior of the genotype frequencies
-  R: 0.25
-  H: 0.50
-  A: 0.25
+  R: 0.33
+  H: 0.33
+  A: 0.33
 mut_freq: 0.5 # prior of frequency of mutated loci during the mutation selection step
+random_seed: 1 # random seed for reproducibility
