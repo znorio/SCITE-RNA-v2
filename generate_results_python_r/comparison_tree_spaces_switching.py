@@ -21,8 +21,8 @@ config = load_config_and_set_random_seed()
 def run_sciterna_tree_inference(spaces, num_cells_list, num_mut_list, n_tests, flipped, compare_cpp, num_rounds):
     for space in spaces:
         for n_cells, n_mut in zip(num_cells_list, num_mut_list):
-            path = f'../data/simulated_data/{n_cells}c{n_mut}m'
-            path_results = os.path.join(path, f'sciterna_tree_space_comparison{compare_cpp}_{"_".join(space)}')
+            path = f"../data/simulated_data/{n_cells}c{n_mut}m"
+            path_results = os.path.join(path, f"sciterna_tree_space_comparison{compare_cpp}_{'_'.join(space)}")
             generate_sciterna_simulation_results(path=path, pathout=path_results, n_tests=n_tests, tree_space=space,
                                                  flipped_mutation_direction=flipped, n_keep=n_mut, n_rounds=num_rounds)
 
@@ -33,11 +33,11 @@ def plot_results(num_cells_list, num_mut_list, optimal_tree_llh, n_rounds, title
     # each column corresponds to a different number of cells and mutations
     for s, (n_cells, n_mut) in enumerate(zip(num_cells_list, num_mut_list)): # s are columns
         #plot the upper row
-        setting = f'{n_cells} Cells, {n_mut} SNVs'
+        setting = f"{n_cells} Cells, {n_mut} SNVs"
         all_data, labels = prepare_plot_data(optimal_tree_llh, n_cells, n_mut, n_rounds)
-        # all data has format {'m': [1,...], 'c': [1,...], 'c_m': [1,...], 'm_c': [1,...]} labels = ['m', 'c', 'c_m', 'm_c']
+        # all data has format {"m": [1,...], "c": [1,...], "c_m": [1,...], "m_c": [1,...]} labels = ["m", "c", "c_m", "m_c"]
         if s == 0:
-            plot_boxplot(axes[0, s], all_data, labels, setting, f'{title} Predicted vs. True Tree', "")
+            plot_boxplot(axes[0, s], all_data, labels, setting, f"{title} Predicted vs. True Tree", "")
         else:
             plot_boxplot(axes[0, s], all_data, labels, setting, "", "")
 
@@ -48,7 +48,7 @@ def plot_results(num_cells_list, num_mut_list, optimal_tree_llh, n_rounds, title
         for key in all_data.keys():
             relative_data[key] = np.array(all_data[key]) - cell_tree_likelihoods
         if s == 0:
-            plot_boxplot(axes[1, s], relative_data, labels, "", f'{title} Predicted vs. Cell Tree', xlabels)
+            plot_boxplot(axes[1, s], relative_data, labels, "", f"{title} Predicted vs. Cell Tree", xlabels)
         else:
             plot_boxplot(axes[1, s], relative_data, labels, "", "", xlabels)
 
@@ -71,22 +71,22 @@ def prepare_plot_data(optimal_tree_llh, n_cells, n_mut, num_rounds):
 
 
 def plot_boxplot(ax, all_data, labels, setting, ylabel, xlabel):
-    colors = ['lightblue', 'yellow', 'turquoise', 'lightgreen']
-    medianprops = dict(color='black', linewidth=3)
+    colors = ["lightblue", "yellow", "turquoise", "lightgreen"]
+    medianprops = dict(color="black", linewidth=3)
 
     # Ensure all_data is a list of lists with consistent lengths
     all_data_list = [np.array(all_data[label]) for label in labels]
 
     box = ax.boxplot(all_data_list, widths=0.8, medianprops=medianprops, patch_artist=True, showfliers=False)
 
-    for patch, color in zip(box['boxes'], colors[:len(box['boxes'])]):
+    for patch, color in zip(box["boxes"], colors[:len(box["boxes"])]):
         patch.set_facecolor(color)
 
-    ax.axhline(0, color='orange', linestyle='--', linewidth=2)
+    ax.axhline(0, color="orange", linestyle='--', linewidth=2)
     ax.set_xticks(range(1, len(labels) + 1))
     ax.set_xticklabels(xlabel, rotation=0, fontsize=32)
     ax.set_ylabel(ylabel, fontsize=30)
-    ax.tick_params(axis='y', labelsize=20)
+    ax.tick_params(axis="y", labelsize=20)
     ax.set_title(setting, fontsize=30, pad=10, fontweight="bold")
 
 def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare_cpp, n_rounds, flipped_mutation_direction):
@@ -102,7 +102,7 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
                 optimal_tree_llh["_".join(space)] = {}
 
                 path = f"../data/simulated_data/{n_cells}c{n_mut}m"
-                path_results = os.path.join(path, f'sciterna_tree_space_comparison{compare_cpp}_{"_".join(space)}')
+                path_results = os.path.join(path, f"sciterna_tree_space_comparison{compare_cpp}_{'_'.join(space)}")
 
                 mf = MutationFilter(error_rate=config["error_rate"], overdispersion=config["overdispersion"],
                                     genotype_freq=config["genotype_freq"], mut_freq=config["mut_freq"],
@@ -114,13 +114,13 @@ def load_and_plot_results(num_cells_list, num_mut_list, spaces, n_tests, compare
                     optimal_tree_llh["_".join(space)][f"{n_cells}_{n_mut}_{r}"] = []
 
                     for i in tqdm(range(n_tests)):
-                        sciterna_parent_vec = np.loadtxt(os.path.join(path_results, f'sciterna_parent_vec/sciterna_parent_vec_{r}r{i}.txt'), dtype=int)
-                        true_parent_vec = np.loadtxt(os.path.join(path, f'parent_vec/parent_vec_{i}.txt'), dtype=int)
-                        ref = np.loadtxt(os.path.join(path, f'ref/ref_{i}.txt'))
-                        alt = np.loadtxt(os.path.join(path, f'alt/alt_{i}.txt'))
+                        sciterna_parent_vec = np.loadtxt(os.path.join(path_results, f"sciterna_parent_vec/sciterna_parent_vec_{r}r{i}.txt"), dtype=int)
+                        true_parent_vec = np.loadtxt(os.path.join(path, f"parent_vec/parent_vec_{i}.txt"), dtype=int)
+                        ref = np.loadtxt(os.path.join(path, f"ref/ref_{i}.txt"))
+                        alt = np.loadtxt(os.path.join(path, f"alt/alt_{i}.txt"))
 
-                        selected = np.loadtxt(os.path.join(path_results, f'sciterna_selected_loci/sciterna_selected_loci_{r}r{i}.txt'), dtype=int)
-                        gt1, gt2 = np.loadtxt(os.path.join(path_results, f'sciterna_inferred_mut_types/sciterna_inferred_mut_types_{r}r{i}.txt'), dtype=str)
+                        selected = np.loadtxt(os.path.join(path_results, f"sciterna_selected_loci/sciterna_selected_loci_{r}r{i}.txt"), dtype=int)
+                        gt1, gt2 = np.loadtxt(os.path.join(path_results, f"sciterna_inferred_mut_types/sciterna_inferred_mut_types_{r}r{i}.txt"), dtype=str)
                         llh_1, llh_2 = mf.get_llh_mat(ref[:, selected], alt[:, selected], gt1, gt2)
 
                         # prepare for joint calculation

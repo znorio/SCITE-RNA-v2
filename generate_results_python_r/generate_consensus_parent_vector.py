@@ -187,7 +187,7 @@ def main():
 
         os.makedirs(os.path.dirname(support_values_file), exist_ok=True)
 
-        with open(support_values_file, 'w') as f:
+        with open(support_values_file, "w") as f:
             json.dump(support_values, f, indent=4)
 
         if simulated:

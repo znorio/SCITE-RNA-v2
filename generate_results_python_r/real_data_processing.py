@@ -7,7 +7,7 @@ from src_python.generate_results import generate_sciterna_results
 
 import yaml
 
-with open('../config/config.yaml', 'r') as file:
+with open("../config/config.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 bootstrap_samples = 1000  # number of bootstrap samples if use_bootstrap=True
