@@ -13,7 +13,6 @@ class SwapOptimizer {
 private:
     int sig_digits;
     std::vector<std::string> spaces;
-    bool reverse_mutations;
     int n_decimals{};
     int n_mut_;
     int n_cells_;
@@ -21,7 +20,7 @@ private:
 public:
     explicit SwapOptimizer(std::vector<std::string> spaces = {"c", "m"}, bool reverse_mutations = true,
                            int n_mut=2, int n_cells=2, int sig_digits = 10);
-    [[nodiscard]] double getCurrentJoint() const;
+    [[nodiscard]] double getCtJoint() const;
     [[nodiscard]] double getMtJoint() const;
     void fit_llh(const std::vector<std::vector<double>>& llh_1, const std::vector<std::vector<double>>& llh_2);
     void optimize(int max_loops = 100, bool insert_nodes = true);

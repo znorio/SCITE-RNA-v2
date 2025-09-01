@@ -12,11 +12,11 @@ Defines cell lineage trees and how they are optimized.
 #include <limits>
 
 #include "cell_tree.h"
-
+#include "utils.h"
 
 // CELL TREE FUNCTIONS
 
-// initialize cell tree
+// initialize the cell tree
 CellTree::CellTree(int n_cells, int n_mut, bool reversible_mut)
         : n_cells(n_cells), n_mut(n_mut), reversible(reversible_mut) {
     if (n_cells < 3) {
@@ -89,10 +89,9 @@ void CellTree::randSubtree(bool initialTree, std::vector<int>* leaves, std::vect
 //    std::sort(local_internals.begin(), local_internals.end());
 
     // Randomly assign two children to an internal vertex
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 rng = create_rng();
     for (int parent : local_internals) {
-        std::shuffle(local_leaves.begin(), local_leaves.end(), gen);
+        std::shuffle(local_leaves.begin(), local_leaves.end(), rng);
         int child1 = local_leaves.front();
         local_leaves.erase(local_leaves.begin());
         int child2 = local_leaves.front();
@@ -122,16 +121,16 @@ void CellTree::fitMutationTree(MutationTree mt) {
     std::vector<int> mrca(mt.n_vtx, -1); // Most recent common ancestor of cells below a mutation node
     int next_internal = n_cells;
 
-    for (int mvtx : mt.rdfs(mt.main_root_mt)) { // mvtx for "mutation vertex"
+    for (int mtvx : mt.rdfs(mt.main_root_mt)) {
         std::vector<int> leaves;
-        for (int child : mt.children_list_mt[mvtx]) {
+        for (int child : mt.children_list_mt[mtvx]) {
             if (mrca[child] != -1) {
                 leaves.push_back(mrca[child]);
             }
         }
 
         for (int i = 0; i < mt.cell_loc.size(); ++i) {
-            if (mt.cell_loc[i] == mvtx) {
+            if (mt.cell_loc[i] == mtvx) {
                 leaves.push_back(i);
             }
         }
@@ -139,12 +138,12 @@ void CellTree::fitMutationTree(MutationTree mt) {
         if (leaves.empty()) { // No cell below, nothing to do
             continue;
         } else if (leaves.size() == 1) { // One cell below, no internal node added
-            mrca[mvtx] = leaves[0];
+            mrca[mtvx] = leaves[0];
         } else if (leaves.size() > 1) { // More than one cell below, add new internal node(s)
             std::vector<int> internals(leaves.size() - 1);
             std::iota(internals.begin(), internals.end(), next_internal);
             randSubtree(false, &leaves, &internals);
-            mrca[mvtx] = internals.back();
+            mrca[mtvx] = internals.back();
             next_internal += static_cast<int>(internals.size());
         }
     }
@@ -286,9 +285,12 @@ void CellTree::exhaustiveOptimize(bool leaf_only) {
             sr_candidates.push_back(i);
         }
     }
+
     // randomize order of candidate roots
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::shuffle(sr_candidates.begin(), sr_candidates.end(), std::default_random_engine(seed));
+
+    std::mt19937 rng = create_rng(); // Persistent RNG for this function
+
+    std::shuffle(sr_candidates.begin(), sr_candidates.end(), rng);
 
     for (int sr : sr_candidates) {
         if (sr == main_root_ct) {
@@ -305,14 +307,8 @@ void CellTree::exhaustiveOptimize(bool leaf_only) {
 
 // Translation of greedy_insert_experimental function
 void CellTree::greedyInsert(int anchor, int subroot) {
-//    auto start = std::chrono::high_resolution_clock::now();
     auto [bestTarget, bestJoint] = searchInsertionLoc(main_root_ct, anchor, subroot);
-//    std::cout << bestTarget << " " << bestJoint << std::endl;
-//    auto end = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double, std::milli> duration = end - start;
-//    std::cout << "Execution time: " << duration.count() << " ms" << std::endl;
     insert(anchor, bestTarget);
-//    updateAll(); // Not necessary every time
 }
 
 // search optimal insertion location of pruned subroot with anchor
@@ -410,15 +406,15 @@ std::pair<int, double> CellTree::searchInsertionLoc(int target, int anchor, int 
 
     // choose random best target
 
-    std::random_device rd;   // Seed generator
-    std::mt19937 gen(rd());  // Mersenne Twister RNG
+//    std::random_device rd;   // Seed generator
+//    std::mt19937 gen(rd());  // Mersenne Twister RNG
+    std::mt19937 rng = create_rng();
     std::uniform_int_distribution<std::vector<int>::size_type> dis(0, best_targets.size() - 1); // Uniform distribution over the vector indices
-
 //    for (int element : best_targets) {
 //        std::cout << element << " ";
 //    }
 //    std::cout << std::endl;
-    int random_best_target = best_targets[dis(gen)];
+    int random_best_target = best_targets[dis(rng)];
 //    auto min_iter = std::min_element(best_targets.begin(), best_targets.end());
 //    int random_best_target = *min_iter;
     return {random_best_target, best_joint};
@@ -736,17 +732,25 @@ std::vector<int> CellTree::rdfs(int subroot) {
     return output;
 }
 
+// get all leaves of the tree starting from subroot
+std::vector<int> CellTree::leaves(int subroot) {
+    std::vector<int> leaf_vertices;
+    for (int vtx : dfs(subroot)) {
+        if (isLeaf(vtx)) {
+            leaf_vertices.push_back(vtx);
+        }
+    }
+    return leaf_vertices;
+}
+
 
 // HELPER FUNCTIONS
 
-// add two 1d vectors
-std::vector<double> CellTree::addVectors(const std::vector<double>& a, const std::vector<double>& b) {
-    if (a.size() != b.size()) {
-        throw std::invalid_argument("Vectors must be of the same size for element-wise addition.");
-    }
-    std::vector<double> result(a.size());
-    for (size_t i = 0; i < a.size(); ++i) {
-        result[i] = a[i] + b[i];
-    }
-    return result;
+
+std::mt19937& CellTree::create_rng() {
+    static std::mt19937 rng([] {
+        load_config("../config/config.yaml");
+        return std::mt19937(std::stoi(config_variables["random_seed"]));
+    }());
+    return rng;
 }
