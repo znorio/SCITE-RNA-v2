@@ -65,6 +65,8 @@ This repository provides:
 #### C++ Requirements
 
 - CMake (>= 3.27)
+- LBFGS https://github.com/yixuan/LBFGSpp
+- Eigen https://gitlab.com/libeigen/eigen
 
 ### Cloning the Repository
 
