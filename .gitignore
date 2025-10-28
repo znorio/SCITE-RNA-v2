@@ -3,3 +3,4 @@ src_python/__pycache__/
 .idea
 data/eigen3
 data/yixuan-LBFGSpp-9db7a6d
+data/simulated_data
