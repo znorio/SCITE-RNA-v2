@@ -4,9 +4,9 @@ library(DENDRO)
 library(SClineager)
 
 n_tests <- 100
-n_cells_list <- c(50, 50, 100, 100, 100, 200, 200)
-n_mut_list <- c(50, 100, 50, 100, 200, 100, 200)
-clones_list <- c("")
+n_cells_list <- c(50)
+n_mut_list <- c(500)
+clones_list <- c("", "5", "10", "20")
 
 base_dir <- file.path("data", "simulated_data")
 
@@ -103,7 +103,7 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
       sclineager_internal(
         mutations_mat = mutations_mat_sclineager,
         coverage_mat = coverage_sclineager,
-        max_iter = 2000,
+        max_iter = 20,
         vaf_offset = 0.01,
         dfreedom = ncol(mutations_mat),
         psi = diag(10, ncol(mutations_mat)),
