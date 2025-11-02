@@ -123,7 +123,6 @@ for clone in clones:
                         flipped_mutation_direction=flipped_mutation_direction,
                         n_keep=num_mut, n_rounds=n_rounds
                     )
-
 # for clone in clones:
 #     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
 #         data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"
