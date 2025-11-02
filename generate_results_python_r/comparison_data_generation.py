@@ -17,7 +17,7 @@ config = load_config_and_set_random_seed()
 
 
 def generate_comparison_data(n_cells: int, n_mut: int, size=100, path="./comparison_data/", random_seed=None,
-                             n_clones=None, coverage_method="zinb"):
+                             n_clones=None, coverage_distribution="zinb", **kwargs):
     """
     Generates simulated data.
     """
@@ -44,11 +44,10 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path="./compari
     os.makedirs(os.path.join(path, "overdispersions_H"), exist_ok=True)
     os.makedirs(os.path.join(path, "mutation_location"), exist_ok=True)
 
-    generator = DataGenerator(n_cells, n_mut, coverage_method=coverage_method)
+    generator = DataGenerator(n_cells, n_mut, coverage_method=coverage_distribution, **kwargs)
 
     for i in tqdm(range(size)):
-        ref, alt, dropout_probs, overdispersions_H = generator.generate_reads(new_tree=True,
-                                                                                                  new_mut_type=True,
+        ref, alt, dropout_probs, overdispersions_H = generator.generate_reads(new_tree=True, new_mut_type=True,
                                                                                                   num_clones=n_clones)
 
         mut_indicator = np.zeros((n_mut, n_cells), dtype=bool)
@@ -71,23 +70,67 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path="./compari
         np.savetxt(os.path.join(path, f"mutation_location/mutation_location_{i}.txt"), generator.ct.mut_loc, fmt="%i")
 
 
-num_tests = 100  # Number of simulated samples
-n_rounds = 1  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
+num_tests = 3  # Number of simulated samples
+n_rounds = 2  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
 n_cells_list = [50]  # Number of cells in the simulated dataset
 n_mut_list = [500]  # Number of SNVs in the simulated dataset
 clones = ["", 5, 10, 20]  # Number of clones in the simulated dataset, empty string means random mutation placement
 flipped_mutation_direction = True  # Whether to allow to flip the mutation direction (change root genotype)
 tree_space = ["c", "m"]  # Tree spaces to use during tree inference and which space to start. ["c", "m] means we start optimizing a cell tree then switch to optimizing a mutation tree
 coverage_method = "zinb"  # Determines from which distribution the coverage is sampled. Can be "zinb", "poisson", "geometric" or from a real data sample
-run_tree_inference = True  # Whether to run tree inference after generating the simulated data
+run_tree_inference = False  # Whether to run tree inference after generating the simulated data
+
+default_params = {
+    'dropout': config["dropout_alpha"]/(config["dropout_alpha"] + config["dropout_beta"]),
+    'overdispersion_Het': config["overdispersion_h"],
+    'overdispersion_Hom': config["overdispersion"],
+    'error_rate': config["error_rate"],
+    'coverage_mean': 60,
+    'coverage_zero_inflation': 0.39,
+    'coverage_dispersion': 5.88
+}
+
+param_sets = {
+    'dropout': [0, 0.2, 0.4, 0.6],
+    'overdispersion_Het': [3, 6, 10, 100],
+    'overdispersion_Hom': [3, 6, 10, 100],
+    'error_rate': [0.001, 0.01, 0.05, 0.1],
+    'coverage_mean': [10, 30, 60, 100],
+    'coverage_zero_inflation': [0, 0.2, 0.4, 0.6],
+    'coverage_dispersion': [1, 2, 5, 10]
+}
 
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
-        data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"
-        # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_method=coverage_method)
-        if run_tree_inference:
-            path_results = os.path.join(data_path, "sciterna")
-            generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
-                                                 tree_space=tree_space,
-                                                 flipped_mutation_direction=flipped_mutation_direction,
-                                                 n_keep=num_mut, n_rounds=n_rounds)
+        for param_name, param_values in param_sets.items():
+            for param_value in param_values:
+                params = default_params.copy()
+                params[param_name] = param_value
+
+                param_str = f"{param_name}_{param_value}".replace('.', '_')
+                data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}_param_testing/{param_str}"
+
+                generate_comparison_data(
+                    num_cells, num_mut, num_tests, path=data_path, n_clones=clone,
+                    coverage_distribution=coverage_method, **params
+                )
+
+                if run_tree_inference:
+                    path_results = os.path.join(data_path, "sciterna")
+                    generate_sciterna_simulation_results(
+                        path=data_path, pathout=path_results, n_tests=num_tests,
+                        tree_space=tree_space,
+                        flipped_mutation_direction=flipped_mutation_direction,
+                        n_keep=num_mut, n_rounds=n_rounds
+                    )
+
+# for clone in clones:
+#     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
+#         data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"
+#         generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_distribution=coverage_method)
+#         if run_tree_inference:
+#             path_results = os.path.join(data_path, "sciterna")
+#             generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
+#                                                  tree_space=tree_space,
+#                                                  flipped_mutation_direction=flipped_mutation_direction,
+#                                                  n_keep=num_mut, n_rounds=n_rounds)

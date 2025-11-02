@@ -41,37 +41,55 @@ class DataGenerator:
         overdispersion_h – Overdispersion parameter for the read counts in the heterozygous case.
     """
 
-    def __init__(self, n_cells, n_mut,
-                 mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
-                 coverage_method="zinb", coverage_mean=60, coverage_sample=None, dropout_alpha=2,
-                 dropout_beta=8, dropout_dir=0.5, overdispersion_h=6):
+    def __init__(self, n_cells, n_mut, coverage_method="zinb", genotype_freq=None, coverage_sample=None,
+                 dropout_alpha=None, dropout_beta=None, **kwargs):
+                 # mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
+                 # coverage_method="zinb", coverage_mean=60, coverage_sample=None, dropout_alpha=2,
+                 # dropout_beta=8, dropout_dir=0.5, overdispersion_h=6):
 
-        self.coverage = None
+        self.dropout = kwargs.get("dropout", 0.2)
+        self.overdispersion_h = kwargs.get("overdispersion_Het", 6)
+        self.overdispersion = kwargs.get("overdispersion_Hom", 10)
+        self.error_rate = kwargs.get("error_rate", 0.05)
+        self.coverage_mean = kwargs.get("coverage_mean", 60)
+        self.coverage_zero_inflation = kwargs.get("coverage_zero_inflation", 0.39)
+        self.coverage_dispersion = kwargs.get("coverage_dispersion", 5.88)
+
+        if dropout_alpha is not None and dropout_beta is not None:
+            self.dropout_alpha = dropout_alpha
+            self.dropout_beta = dropout_beta
+        else:
+            self.dropout_alpha = self.dropout * 10
+            self.dropout_beta = 10 - self.dropout_alpha
+
+        self.dropout_dir = config["dropout_direction"]
+
         self.ct = CellTree(n_cells=n_cells, n_mut=n_mut)
         self.mt = MutationTree(n_mut=n_mut, n_cells=n_cells)
 
         self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
-        self.mut_prop = mut_prop
+        self.mut_prop = 1
         self.genotype_freq = [1 / 3, 1 / 3, 1 / 3] if genotype_freq is None else genotype_freq
         self.gt1 = np.random.choice(["R", "H", "A"], size=self.n_mut, replace=True, p=self.genotype_freq)
         self.gt2 = np.empty_like(self.gt1)
 
         self.coverage_method = coverage_method
-        self.coverage_mean = coverage_mean
+
+        # self.coverage_mean = coverage_mean
         if coverage_method == "sample" and coverage_sample is None:
             raise ValueError("Please provide array of coverage values to be sampled from.")
         self.coverage_sample = coverage_sample
-
-        self.dropout_alpha = dropout_alpha
-        self.dropout_beta = dropout_beta
-        self.dropout_dir = dropout_dir
-        self.overdispersion_h = overdispersion_h
+        #
+        # self.dropout_alpha = dropout_alpha
+        # self.dropout_beta = dropout_beta
+        # self.dropout_dir = dropout_dir
+        # self.overdispersion_h = overdispersion_h
 
         # Set the beta-binomial parameters
-        self.alpha_R = error_rate * overdispersion
-        self.beta_R = overdispersion - self.alpha_R
-        self.alpha_A = (1 - error_rate) * overdispersion
-        self.beta_A = overdispersion - self.alpha_A
+        self.alpha_R = self.error_rate * self.overdispersion
+        self.beta_R = self.overdispersion - self.alpha_R
+        self.alpha_A = (1 - self.error_rate) * self.overdispersion
+        self.beta_A = self.overdispersion - self.alpha_A
 
     @property
     def n_cells(self):
@@ -118,10 +136,12 @@ class DataGenerator:
                 self.coverage = geom.rvs(p=1 / (self.coverage_mean + 1), loc=-1, size=(self.n_cells, self.n_mut))
             case "poisson":
                 self.coverage = poisson.rvs(mu=self.coverage_mean, size=(self.n_cells, self.n_mut))
-            # parameters 60, 0.17, 0.38 learned from mm34 scRNA seq dataset
+            # parameters 60, 5.88, 0.38 learned from mm34 scRNA seq dataset
             case "zinb":
-                mu, theta, pi = self.coverage_mean, 0.17, 0.38
-                nb_samples = nbinom.rvs(theta, theta / (theta + mu), size=(self.n_cells, self.n_mut))
+                mu, alpha, pi = self.coverage_mean, self.coverage_dispersion, self.coverage_zero_inflation # alpha: overdispersion, pi: zero-inflation probability
+                n = 1 / alpha  # number of successes
+                p = 1 / (1 + alpha * mu)
+                nb_samples = nbinom.rvs(n, p, size=(self.n_cells, self.n_mut))
                 zero_inflation_mask = np.random.rand(self.n_cells, self.n_mut) < pi
                 self.coverage = np.where(zero_inflation_mask, 0, nb_samples)
             case "sample":
@@ -208,7 +228,11 @@ class DataGenerator:
 
         for j in range(self.n_mut):
             # Sample dropout probabilities from beta distributions for each SNV
-            dropout_prob = np.random.beta(self.dropout_alpha, self.dropout_beta)
+            if self.dropout != 0:
+                dropout_prob = np.random.beta(self.dropout_alpha, self.dropout_beta)
+            else:
+                dropout_prob = 0.0
+
             all_dropout_probs.append(dropout_prob)
 
             # Sample overdispersion parameter for heterozygous case from gamma distribution for each SNV
