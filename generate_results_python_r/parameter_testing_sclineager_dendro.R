@@ -1,14 +1,13 @@
 # Script used to run DENDRO and SClineager on simulated datasets
-
 library(DENDRO)
 library(SClineager)
 
 n_tests <- 100
-n_cells_list <- c(50)
-n_mut_list <- c(500)
-clones_list <- c("", "5", "10", "20")
+n_cells <- 50
+n_mut <- 500
 
-base_dir <- file.path("data", "simulated_data")
+base_dir <- file.path("./data", "simulated_data")
+# base_dir <- file.path("D:/PhD/SCITERNA/simulated_data")
 
 read.matrix <- function(path){
   mat <- as.matrix(read.table(path, header=FALSE, sep=" "))
@@ -40,37 +39,20 @@ merge.to.parent <- function(merge.mat){
   return(result)
 }
 
-generate.parent.vec <- function(base_path, n.tests=10, clones=5){
+generate.parent.vec <- function(base_path, n.tests=10){
   dir.create(file.path(base_path, "sclineager", "sclineager_vaf"), recursive = TRUE)
   dir.create(file.path(base_path, "dendro", "dendro_parent_vec"), recursive = TRUE)
   dir.create(file.path(base_path, "dendro", "dendro_clones"), recursive = TRUE)
   dir.create(file.path(base_path, "sclineager", "sclineager_parent_vec"), recursive = TRUE)
   dir.create(file.path(base_path, "sclineager", "sclineager_clones"), recursive = TRUE)
   dir.create(file.path(base_path, "sclineager", "sclineager_selected"), recursive = TRUE)
-  dir.create(file.path(base_path, "sciterna", "sciterna_parent_vec_clustering"), recursive = TRUE)
-  dir.create(file.path(base_path, "sciterna", "sciterna_clones"), recursive = TRUE)
 
-  cat("Theoretical number of clones: ", clones)
   sclineager_runtimes <- c()
   dendro_runtimes <- c()
 
   for (i in 0:(n.tests-1)){
-    n_round <- 0
     ref <- t(read.matrix(file.path(base_path, sprintf("ref/ref_%d.txt", i))))
     alt <- t(read.matrix(file.path(base_path, sprintf("alt/alt_%d.txt", i))))
-
-    genotype_matrix <- as.matrix(read.table(file.path(base_path, "sciterna", "sciterna_genotype",
-                                                  paste0("sciterna_genotype_", n_round, "r", i, ".txt")),
-                                        stringsAsFactors = FALSE))
-
-
-
-    mapping_dict <- c("A" = 1.0, "H" = 0.5, "R" = 0)
-
-    # Apply the mapping
-    genotype_sciterna <- matrix(mapping_dict[genotype_matrix],
-                          nrow = nrow(genotype_matrix),
-                          ncol = ncol(genotype_matrix))
 
     coverage <- ref + alt
     mut_indicator <- read.matrix(file.path(base_path, sprintf("mut_indicator/mut_indicator_%d.txt", i)))
@@ -79,15 +61,6 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
     unique_rows <- unique(t(mut_indicator))
     clones <- nrow(unique_rows) # actual number of clones
     cat(" Actual number of clones: ", clones)
-
-    dist_scite <- dist(genotype_sciterna) # use same method for DENDRO and SClineager
-    hc_scite <- hclust(dist_scite, method='ward.D')
-    memb_pred_scite <- cutree(hc_scite, k = clones)
-    cluster_scite <- DENDRO.cluster(dist_scite, plot=FALSE, type="phylogram")
-    parent_vec_scite <- merge.to.parent(cluster_scite$merge)
-    write.table(parent_vec_scite, file.path(base_path, sprintf("sciterna/sciterna_parent_vec_clustering/sciterna_parent_vec_clustering_%d.txt", i)), row.names=FALSE, col.names=FALSE)
-    write.table(memb_pred_scite, file.path(base_path, sprintf("sciterna/sciterna_clones/sciterna_clones_%d.txt", i)), row.names=FALSE, col.names=FALSE)
-
 
     start_time_sclineager <- Sys.time()
 
@@ -146,27 +119,32 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
   write.table(dendro_runtimes, file.path(base_path, "dendro/dendro_runtimes.txt"), row.names = FALSE, col.names = FALSE)
 }
 
+param_sets <- list(
+  dropout = c(0, 0.2, 0.4, 0.6),
+  overdispersion_Het = c(3, 6, 10, 100),
+  overdispersion_Hom = c(3, 6, 10, 100),
+  error_rate = c(0.001, 0.01, 0.05, 0.1),
+  coverage_mean = c(10, 30, 60, 100),
+  coverage_zero_inflation = c(0, 0.2, 0.4, 0.6),
+  coverage_dispersion = c(1, 2, 5, 10)
+)
 
-paths <- NULL
-clones <- NULL
+paths <- c()
 
-for (i in seq_along(n_cells_list)) {
-  n_cells <- n_cells_list[i]
-  n_mut <- n_mut_list[i]
-
-  for (clone in clones_list) {
-    path <- paste(base_dir, "/", n_cells, "c", n_mut, "m", clone, sep = "")
-    paths <- c(paths, path)
-    clones <- c(clones, clone)
-
+for (param_name in names(param_sets)) {
+  for (param_value in param_sets[[param_name]]) {
+    value_str <- gsub("\\.", "_", as.character(param_value))
+    param_str <- paste0(param_name, "_", value_str)
+    base_path <- file.path(base_dir, paste0(n_cells, "c", n_mut, "m_param_testing"), param_str)
+    paths <- c(paths, base_path)
   }
 }
 
 print(paths)
 
+
 for (i in seq_along(paths)) {
-  n_clones <- clones[i]
   path <- paths[i]
-  generate.parent.vec(path, n_tests, n_clones)
+  generate.parent.vec(path, n_tests)
 }
 

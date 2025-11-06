@@ -9,17 +9,19 @@ from os.path import join as opj
 NUM_TESTS = int(config.get("NUM_TESTS", 100))
 NUM_CELLS = int(config.get("NUM_CELLS", 50))
 NUM_MUTATIONS= int(config.get("NUM_MUTATIONS", 500))
-NUM_CLONES = str(config.get("NUM_CLONES", ""))
+APPENDIX = str(config.get("APPENDIX", ""))
 TESTS = list(range(NUM_TESTS))
 
 
-DATA_DIR = rf"./data/simulated_data/{NUM_CELLS}c{NUM_MUTATIONS}m{NUM_CLONES}"
+DATA_DIR = rf"data/simulated_data/{NUM_CELLS}c{NUM_MUTATIONS}m{APPENDIX}"
 GENOTYPE_DIR = opj(DATA_DIR, "phylinsic", "output/genotype")
 PHYLO_DIR = opj(DATA_DIR, "phylinsic", "output/phylogeny")
 PHYLO_LOG_DIR = opj(DATA_DIR, "phylinsic", "logs/phylogeny")
 DEMUX_DIR = opj(DATA_DIR, "phylinsic", "output/demux")
 BEAST_OUTPUT = opj(DATA_DIR, "phylinsic", "output/beast2")
-BEAST2_DIR = r"C:/Users/Norio/BEAST/BEAST.v2.6.7.Windows"
+# BEAST2_DIR = r"C:/Users/Norio/BEAST/BEAST.v2.6.7.Windows"
+BEAST2_DIR = r"/cluster/work/bewi/members/znorio/beast2/beast"
+
 PHYLINSIC_GENOTYPE_DIR = opj(DATA_DIR, "phylinsic", "phylinsic_genotype")
 PHYLINSIC_PARENT_VEC_DIR = opj(DATA_DIR, "phylinsic", "phylinsic_parent_vec")
 
@@ -35,7 +37,8 @@ cells = [f"Cell{i}\tno\tA" for i in range(1, NUM_CELLS+1)]
 with open(opj(DEMUX_DIR, "cells.txt"), "w") as f:
     f.write("Cell\tOutgroup\tCategory\n" + "\n".join(cells))
 
-LOGCOMBINER = "C:/Users/Norio/BEAST/BEAST.v2.6.7.Windows/LogCombiner.exe"
+# LOGCOMBINER = "C:/Users/Norio/BEAST/BEAST.v2.6.7.Windows/LogCombiner.exe"
+LOGCOMBINER = r"/cluster/work/bewi/members/znorio/beast2/beast/bin/logcombiner"
 RSCRIPT = "Rscript"
 JAVA = "java"
 
@@ -98,7 +101,7 @@ BEAST2_TREE_PRIOR = "yule"
 # ~100 million iterations or so for the final analysis, and
 # shorter (e.g. 1 million) when testing.
 #BEAST2_ITERATIONS = 100000000
-BEAST2_ITERATIONS = 100000
+BEAST2_ITERATIONS = 10000000
 
 
 # How many iterations to discard for burn-in.
@@ -111,7 +114,7 @@ assert BEAST2_BURNIN < BEAST2_ITERATIONS, \
 
 # How frequently (in number of iterations) to collect statistics
 # on the sampling.
-BEAST2_SAMPLE_INTERVAL = 1000
+BEAST2_SAMPLE_INTERVAL = 5000
 
 # Set the random number generator seed for the tree building.
 BEAST2_RNG_SEED = 1
@@ -140,6 +143,8 @@ rule calc_neighbor_scores2:
         start=1,
         skip=1,
         num_cores=1 #workflow.cores,
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     script:
         "phylinsic_scripts/calc_neighbor_scores1.R"
 
@@ -167,6 +172,8 @@ rule call_genotypes2:
         delta=TERNARY_DELTA,
         impute=TERNARY_IMPUTE,
         num_cores=1 #workflow.cores,
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     script:
         "phylinsic_scripts/call_genotypes1.R"
 
@@ -207,6 +214,8 @@ rule run_beast2:
         iterations=BEAST2_ITERATIONS,
         sample_interval=BEAST2_SAMPLE_INTERVAL,
         rng_seed=BEAST2_RNG_SEED,
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     shell:
         """{RSCRIPT} phylinsic_scripts/run_beast2.R -i {input} -o {output[0]} \
             --beast2_dir {params.beast2_dir} \
@@ -226,6 +235,8 @@ rule summarize_beast2:
         opj(PHYLO_DIR, "summary.ess_{test}.txt"),
     log:
         opj(PHYLO_LOG_DIR, "summary_{test}.log")
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     params:
         RSCRIPT=RSCRIPT,
         sample_interval=BEAST2_SAMPLE_INTERVAL,
@@ -250,6 +261,8 @@ rule combine_trees:
     params:
         LOGCOMBINER=LOGCOMBINER,
         perc_burnin=perc_burnin,
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     shell:
         """
         {params.LOGCOMBINER} -b {params.perc_burnin} \
@@ -266,10 +279,12 @@ rule make_mcc_tree:
     params:
         JAVA=JAVA,
         BEAST2_DIR=BEAST2_DIR,
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     shell:
         # -burnin 0 because burning already removed by tree combiner
         """
-        {params.JAVA} -Xms1g -Xmx32g \
+        {params.JAVA} -Xms1g -Xmx8g \
             -Dlauncher.wait.for.exit=true \
             -Duser.language=en \
             -Djava.library.path={params.BEAST2_DIR}/lib \
@@ -304,6 +319,8 @@ rule analyze_mcc_tree:
         RSCRIPT=RSCRIPT,
         REROOT_NEWICK=opj(PHYLO_DIR, "max_clade_cred.rerooted.newick_{test}.txt").replace("\\", "/"),
         REROOT_META=opj(PHYLO_DIR, "max_clade_cred.rerooted.metadata_{test}.txt").replace("\\", "/"),
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     shell:
         """{params.RSCRIPT} phylinsic_scripts/analyze_mcc_tree.R \
             {input[0]} \
@@ -321,6 +338,8 @@ rule newick_to_parent_vec:
         opj(DEMUX_DIR, "cells.txt"),
     output:
         opj(PHYLINSIC_PARENT_VEC_DIR, "phylinsic_parent_vec_{test}.txt"),
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
     shell:
         """python phylinsic_scripts/newick_to_parent_vec.py \
             --newick_file {input[0]} \

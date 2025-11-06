@@ -10,10 +10,28 @@ SAMPLE <- FALSE
 IMPUTE <- snakemake@params$impute
 NUM.CORES <- snakemake@params$num_cores
 
-
 library(parallel)
 source("phylinsic_scripts/beastlib.R")
 
+my.read <- function(filename, header=TRUE, skip=0, colClasses=NA, nrows=-1,
+  clean.header=TRUE, blank.lines.skip=TRUE) {
+  orig.filename <- filename
+  if(length(grep("\\.gz$", filename, perl=TRUE, ignore.case=TRUE)))
+    filename <- gzfile(orig.filename)
+  D <- read.delim(filename, header=header, as.is=TRUE, comment.char="",
+    quote="", skip=skip, colClasses=colClasses, nrows=nrows,
+    blank.lines.skip=blank.lines.skip)
+  if(header & clean.header) {
+    # Don't hash the header.
+    filename <- orig.filename
+    if(length(grep("\\.gz$", filename, perl=TRUE, ignore.case=TRUE)))
+      filename <- gzfile(orig.filename)
+    h <- read.delim(filename, header=FALSE, nrows=1, as.is=TRUE, skip=skip,
+      comment.char="", quote="")
+    names(D) <- h
+  }
+  D
+}
 
 
 my.write <- function(X, filename, row.names=FALSE, col.names=FALSE) {
@@ -59,6 +77,9 @@ data.alt <- as.data.frame(t(data.alt))
 data.ref <- cbind(SNV = paste0("SNV", seq_len(nrow(data.ref))), data.ref)
 data.alt <- cbind(SNV = paste0("SNV", seq_len(nrow(data.alt))), data.alt)
 
+colnames(data.ref)[-1] <- paste0("Cell", seq_len(ncol(data.ref) - 1))
+colnames(data.alt)[-1] <- paste0("Cell", seq_len(ncol(data.alt) - 1))
+
 if(nrow(data.ref) != nrow(data.alt)) stop("bad 1")
 if(ncol(data.ref) != ncol(data.alt)) stop("bad 2")
 if(any(data.ref[,1] != data.alt[,1])) stop("bad 3")
@@ -84,7 +105,7 @@ cell.names <- colnames(M.ref)
 M.neighbor <- matrix(NA, nrow=nrow(data.neighbor), ncol=ncol(data.neighbor))
 for(i in 1:ncol(data.neighbor)) {
   I <- match(data.neighbor[,i], cell.names)
-  if(any(is.na(I))) stop("bad")
+  if(any(is.na(I))) stop("bad neighbor names")
   M.neighbor[,i] <- I
 }
 
@@ -140,6 +161,7 @@ x1 <- rbind(colnames(data.ref), x1)
 x2 <- rbind(colnames(data.ref), x2)
 x1[is.na(x1)] <- ""
 if(any(is.na(x2))) stop("bad")
+
 write.table(x1, GENOTYPE.FILE, quote=FALSE, sep="\t",
   row.names=FALSE, col.names=FALSE)
 write.table(x2, PROBABILITY.FILE, quote=FALSE, sep="\t",

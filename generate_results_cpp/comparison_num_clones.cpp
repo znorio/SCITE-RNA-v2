@@ -16,7 +16,7 @@ Script used to run SCITE-RNA on simulated data with a variable number of cells, 
 
 int main() {
     int n_tests = 100; //number of runs
-    int n_rounds = 2; //number of optimization rounds
+    int n_rounds = 25; //number of optimization rounds
     std::vector<int> n_cells_list = {50}; // number of cells in the simulation
     std::vector<int> n_mut_list = {500}; // number of mutations in the simulation
     std::vector<std::string> tree_space = {"c", "m"}; // {"c"} {"m"} for cell lineage and mutation tree, respectively, starting optimization in the first tree space

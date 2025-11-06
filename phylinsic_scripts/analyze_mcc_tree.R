@@ -14,8 +14,8 @@ ROOTED.PHYLO.METADATA.FILE <- args$filename[7]
 
 
 library(phytools)
-source("scripts/filelib.R")
-source("scripts/beastlib.R")
+source("phylinsic_scripts/filelib.R")
+source("phylinsic_scripts/beastlib.R")
 
 
 

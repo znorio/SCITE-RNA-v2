@@ -66,7 +66,7 @@ def main():
             alt_choices = [b for b in POSSIBLE if b != ref]
             alt = rnd.choice(alt_choices)
 
-    assert len(ref) == 1, x
+        assert len(ref) == 1, x
         assert len(alt) == 1, x
         geno2base = {
             "" : "-",   # IUPAC uses a single dash or hyphen for gaps.

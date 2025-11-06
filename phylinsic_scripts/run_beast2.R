@@ -46,7 +46,8 @@ RNG.SEED <- args$rng_seed
 
 #source("/usr/local/changlab/Rlib/filelib.R")
 #source("/usr/local/changlab/Rlib/plotlib.R")
-source("scripts/beastlib.R")
+source("phylinsic_scripts/beastlib.R")
+
 library(parallel)
 
 library(ggplot2)
@@ -95,6 +96,7 @@ print(sprintf("Fitting tree over %s iterations.", x))
 
 # Run BEAST.
 launcher.path <- sprintf("%s/lib/beast.jar", BEAST2.DIR) # Changed from launcher to beast as launcher caused errors
+print(sprintf("Using BEAST2 launcher at %s", launcher.path))
 if(!file.exists(launcher.path)) stop("no launcher.jar")
 
 start.time <- Sys.time()
