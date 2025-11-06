@@ -70,7 +70,7 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path="./compari
         np.savetxt(os.path.join(path, f"mutation_location/mutation_location_{i}.txt"), generator.ct.mut_loc, fmt="%i")
 
 
-num_tests = 3  # Number of simulated samples
+num_tests = 1  # Number of simulated samples
 n_rounds = 2  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
 n_cells_list = [50]  # Number of cells in the simulated dataset
 n_mut_list = [500]  # Number of SNVs in the simulated dataset
