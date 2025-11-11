@@ -70,11 +70,11 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path="./compari
         np.savetxt(os.path.join(path, f"mutation_location/mutation_location_{i}.txt"), generator.ct.mut_loc, fmt="%i")
 
 
-num_tests = 1  # Number of simulated samples
+num_tests = 100  # Number of simulated samples
 n_rounds = 2  # Number of rounds of SCITE-RNA to optimize the SNV specific parameters like dropout probabilities
 n_cells_list = [50]  # Number of cells in the simulated dataset
 n_mut_list = [500]  # Number of SNVs in the simulated dataset
-clones = ["", 5, 10, 20]  # Number of clones in the simulated dataset, empty string means random mutation placement
+clones = [""]  # Number of clones in the simulated dataset, empty string means random mutation placement
 flipped_mutation_direction = True  # Whether to allow to flip the mutation direction (change root genotype)
 tree_space = ["c", "m"]  # Tree spaces to use during tree inference and which space to start. ["c", "m] means we start optimizing a cell tree then switch to optimizing a mutation tree
 coverage_method = "zinb"  # Determines from which distribution the coverage is sampled. Can be "zinb", "poisson", "geometric" or from a real data sample
@@ -87,17 +87,23 @@ default_params = {
     'error_rate': config["error_rate"],
     'coverage_mean': 60,
     'coverage_zero_inflation': 0.39,
-    'coverage_dispersion': 5.88
+    'coverage_dispersion': 5.88,
+    "CNV_fraction": 0.0,
+    "homoplasy_fraction": 0.0
 }
 
+# param_sets = {
+#     'dropout': [0, 0.2, 0.4, 0.6],
+#     'overdispersion_Het': [3, 6, 10, 100],
+#     'overdispersion_Hom': [3, 6, 10, 100],
+#     'error_rate': [0.001, 0.01, 0.05, 0.1],
+#     'coverage_mean': [10, 30, 60, 100],
+#     'coverage_zero_inflation': [0, 0.2, 0.4, 0.6],
+#     'coverage_dispersion': [1, 2, 5, 10]
+# }
 param_sets = {
-    'dropout': [0, 0.2, 0.4, 0.6],
-    'overdispersion_Het': [3, 6, 10, 100],
-    'overdispersion_Hom': [3, 6, 10, 100],
-    'error_rate': [0.001, 0.01, 0.05, 0.1],
-    'coverage_mean': [10, 30, 60, 100],
-    'coverage_zero_inflation': [0, 0.2, 0.4, 0.6],
-    'coverage_dispersion': [1, 2, 5, 10]
+    'CNV_fraction': [0, 0.1, 0.3, 0.5],
+    "homoplasy_fraction": [0, 0.05, 0.1, 0.2] # Fraction of loci that are affected twice by independent mutations
 }
 
 for clone in clones:

@@ -3,6 +3,7 @@ This script is used to generate simulated read counts, ground truth genotypes an
 """
 
 import numpy as np
+from networkx.algorithms.dag import ancestors, descendants
 from scipy.stats import poisson, geom, nbinom, gamma
 
 from src_python.cell_tree import CellTree
@@ -43,9 +44,6 @@ class DataGenerator:
 
     def __init__(self, n_cells, n_mut, coverage_method="zinb", genotype_freq=None, coverage_sample=None,
                  dropout_alpha=None, dropout_beta=None, **kwargs):
-                 # mut_prop=1., error_rate=0.05, overdispersion=10, genotype_freq=None,
-                 # coverage_method="zinb", coverage_mean=60, coverage_sample=None, dropout_alpha=2,
-                 # dropout_beta=8, dropout_dir=0.5, overdispersion_h=6):
 
         self.dropout = kwargs.get("dropout", 0.2)
         self.overdispersion_h = kwargs.get("overdispersion_Het", 6)
@@ -54,6 +52,8 @@ class DataGenerator:
         self.coverage_mean = kwargs.get("coverage_mean", 60)
         self.coverage_zero_inflation = kwargs.get("coverage_zero_inflation", 0.39)
         self.coverage_dispersion = kwargs.get("coverage_dispersion", 5.88)
+        self.homoplasy_fraction = kwargs.get("homoplasy_fraction", 0.0)
+        self.CNV_fraction = kwargs.get("CNV_fraction", 0.0)
 
         if dropout_alpha is not None and dropout_beta is not None:
             self.dropout_alpha = dropout_alpha
@@ -149,22 +149,8 @@ class DataGenerator:
             case _:
                 raise ValueError("Invalid coverage sampling method.")
 
-    def generate_single_read(self, genotype, coverage, dropout_prob, dropout_direction, alpha_h, beta_h):
-        """
-        Generate read counts for a single cell and mutation.
+    def generate_single_read(self, ref_alleles, alt_alleles, genotype, coverage, dropout_prob, dropout_direction, overdispersion_h):
 
-        [Arguments]
-            genotype: the genotype of the cell ("R", "H", or "A")
-            coverage: the total read coverage for the cell and mutation
-            dropout_prob: the probability of dropout for heterozygous genotypes
-            dropout_direction: the probability of dropout direction for heterozygous genotypes
-            alpha_h: the alpha parameter for the beta-binomial distribution in the heterozygous case
-            beta_h: the beta parameter for the beta-binomial distribution in the heterozygous case
-
-        [Returns]
-            n_ref: the number of reference reads
-            n_alt: the number of alternative reads
-        """
         if genotype == "R":
             n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
         elif genotype == "A":
@@ -174,19 +160,65 @@ class DataGenerator:
             dropout_occurs = np.random.rand() < dropout_prob
 
             if dropout_occurs:
-                # Determine dropout direction based on sampled probabilities
-                dropout_to_A = np.random.rand() < dropout_direction
-                if dropout_to_A:
-                    n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)  # Dropout to A
+                if np.random.rand() < dropout_direction:
+                    ref_alleles -= 1
                 else:
-                    n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)  # Dropout to R
+                    alt_alleles -= 1
+
+            if ref_alleles == 0:
+                # Only alt alleles remain; dropout to A
+                n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)
+            elif alt_alleles == 0:
+                # Only ref alleles remain; dropout to R
+                n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
             else:
-                n_alt = betabinom_rvs(coverage, alpha_h, beta_h)  # No dropout
+                # Both alleles still present
+                alpha_h = (ref_alleles / (ref_alleles + alt_alleles)) * overdispersion_h
+                beta_h = overdispersion_h - alpha_h
+                n_alt = betabinom_rvs(coverage, alpha_h, beta_h)
         else:
             raise ValueError("[generate_single_read] ERROR: invalid genotype.")
 
         n_ref = coverage - n_alt
         return n_ref, n_alt
+    # def generate_single_read(self, genotype, coverage, dropout_prob, dropout_direction, alpha_h, beta_h):
+    #     """
+    #     Generate read counts for a single cell and mutation.
+    #
+    #     [Arguments]
+    #         genotype: the genotype of the cell ("R", "H", or "A")
+    #         coverage: the total read coverage for the cell and mutation
+    #         dropout_prob: the probability of dropout for heterozygous genotypes
+    #         dropout_direction: the probability of dropout direction for heterozygous genotypes
+    #         alpha_h: the alpha parameter for the beta-binomial distribution in the heterozygous case
+    #         beta_h: the beta parameter for the beta-binomial distribution in the heterozygous case
+    #
+    #     [Returns]
+    #         n_ref: the number of reference reads
+    #         n_alt: the number of alternative reads
+    #     """
+    #     if genotype == "R":
+    #         n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
+    #     elif genotype == "A":
+    #         n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)
+    #     elif genotype == "H":
+    #         # Determine if dropout occurs
+    #         dropout_occurs = np.random.rand() < dropout_prob
+    #
+    #         if dropout_occurs:
+    #             # Determine dropout direction based on sampled probabilities
+    #             dropout_to_A = np.random.rand() < dropout_direction
+    #             if dropout_to_A:
+    #                 n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)  # Dropout to A
+    #             else:
+    #                 n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)  # Dropout to R
+    #         else:
+    #             n_alt = betabinom_rvs(coverage, alpha_h, beta_h)  # No dropout
+    #     else:
+    #         raise ValueError("[generate_single_read] ERROR: invalid genotype.")
+    #
+    #     n_ref = coverage - n_alt
+    #     return n_ref, n_alt
 
     def generate_reads(self, new_tree=False, new_mut_type=False, new_coverage=True, num_clones="", min_value=2.5,
                        shape=2):
@@ -213,6 +245,10 @@ class DataGenerator:
         if new_coverage:
             self.random_coverage()
 
+        # track the number of ref and alt alleles for CNV simulation
+        ref_alleles = np.zeros((self.n_cells, self.n_mut), dtype=int)
+        alt_alleles = np.zeros((self.n_cells, self.n_mut), dtype=int)
+
         # determine genotypes
         self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
         mut_indicator = self.mut_indicator()
@@ -220,6 +256,59 @@ class DataGenerator:
             for j in range(self.n_mut):
                 self.genotype[i, j] = self.gt2[j] if mut_indicator[i, j] else self.gt1[j]
 
+                if self.genotype[i, j] == "R":
+                    ref_alleles[i, j], alt_alleles[i, j] = 2, 0
+                elif self.genotype[i, j] == "H":
+                    ref_alleles[i, j], alt_alleles[i, j] = 1, 1
+                elif self.genotype[i, j] == "A":
+                    ref_alleles[i, j], alt_alleles[i, j] = 0, 2
+
+        # Apply CNVs
+        for j in range(self.n_mut):
+            for i in range(self.n_cells):
+                if np.random.random() < self.CNV_fraction:
+                    cnv = np.random.choice([1, 3, 4, 5, 6])
+
+                    self.coverage[i, j] = int(cnv/2 * self.coverage[i, j]) # adjust coverage according to CNV
+
+                    current_alleles = []
+                    if self.genotype[i, j] == "R":
+                        current_alleles = ["ref", "ref"]
+                    elif self.genotype[i, j] == "H":
+                        current_alleles = ["ref", "alt"]
+                    elif self.genotype[i, j] == "A":
+                        current_alleles = ["alt", "alt"]
+
+                    if cnv == 1:
+                        # Randomly drop one allele
+                        if current_alleles:
+                            dropped_allele = np.random.choice(current_alleles)
+                            if dropped_allele == "ref":
+                                ref_alleles[i, j] = ref_alleles[i, j] - 1
+                            else:
+                                alt_alleles[i, j] = alt_alleles[i, j] - 1
+                    else:
+                        # For CNVs > 1, duplicate alleles (cnv-2) times
+                        for _ in range(cnv - 2):
+                            chosen_allele = np.random.choice(current_alleles)
+                            if chosen_allele == "ref":
+                                ref_alleles[i, j] += 1
+                            else:
+                                alt_alleles[i, j] += 1
+                            # Update current_alleles to reflect the new allele count
+                            current_alleles.append(chosen_allele)
+
+        for i in range(self.n_cells):
+            for j in range(self.n_mut):
+                if alt_alleles[i, j] == 0:
+                    self.genotype[i, j] = "R"
+                elif ref_alleles[i, j] == 0:
+                    self.genotype[i, j] = "A"
+                else:
+                    self.genotype[i, j] = "H"
+
+
+        # read count generation
         ref = np.empty((self.n_cells, self.n_mut), dtype=int)
         alt = np.empty((self.n_cells, self.n_mut), dtype=int)
 
@@ -243,11 +332,10 @@ class DataGenerator:
 
             # as the cells are assumed to be independent, allelic imbalances
             # are assumed to be symmetric and only affect the overdispersion
-            alpha_H = beta_H = 0.5 * overdispersion_H
 
             for i in range(self.n_cells):
-                ref[i, j], alt[i, j] = self.generate_single_read(self.genotype[i, j], self.coverage[i, j],
-                                                                 dropout_prob, config["dropout_direction"], alpha_H, beta_H)
+                ref[i, j], alt[i, j] = self.generate_single_read(ref_alleles[i, j], alt_alleles[i,j], self.genotype[i, j], self.coverage[i, j],
+                                                                 dropout_prob, config["dropout_direction"], overdispersion_H)
 
         return ref, alt, all_dropout_probs, all_overdispersions_h
 
@@ -259,4 +347,17 @@ class DataGenerator:
         for j in range(self.n_mut):  # determine for each mutation the cells below it in the tree
             for i in self.ct.leaves(self.ct.mut_loc[j]):
                 res[i, j] = True
+
+            if np.random.rand() < self.homoplasy_fraction:
+                # place the mutation a second time independently (homoplasy)
+                loc1 = self.ct.mut_loc[j]
+                ancestors = [a for a in self.ct.ancestors(loc1)]
+                descendants = [d for d in self.ct.dfs(loc1)]
+                options = [o for o in range(len(self.ct.parent_vec)) if o not in ancestors and o not in descendants]
+
+                if len(options) == 0:
+                    continue  # no valid location for the second placement
+                loc2 = np.random.choice(options)
+                for i in self.ct.leaves(loc2):
+                    res[i, j] = True
         return res
