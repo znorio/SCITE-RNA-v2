@@ -78,8 +78,8 @@ generate.parent.vec <- function(base_path, n.tests=10){
         coverage_mat = coverage_sclineager,
         max_iter = 2000,
         vaf_offset = 0.01,
-        dfreedom = ncol(mutations_mat),
-        psi = diag(10, ncol(mutations_mat)),
+        dfreedom = ncol(mutations_mat_sclineager),
+        psi = diag(1, ncol(mutations_mat_sclineager)),
         save = F
       )
 
@@ -100,7 +100,7 @@ generate.parent.vec <- function(base_path, n.tests=10){
 
     start_time_dendro <- Sys.time()
 
-    filtered <- FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.01, cut.off.sd = 10)
+    filtered <- FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.01, cut.off.sd = 10, plot=FALSE)
     dist <- DENDRO.dist(filtered$X, filtered$N, filtered$Z, show.progress=FALSE)
 
     hc <- hclust(dist, method='ward.D')
@@ -119,14 +119,19 @@ generate.parent.vec <- function(base_path, n.tests=10){
   write.table(dendro_runtimes, file.path(base_path, "dendro/dendro_runtimes.txt"), row.names = FALSE, col.names = FALSE)
 }
 
+# param_sets <- list(
+#   dropout = c(0, 0.2, 0.4, 0.6),
+#   overdispersion_Het = c(3, 6, 10, 100),
+#   overdispersion_Hom = c(3, 6, 10, 100),
+#   error_rate = c(0.001, 0.01, 0.05, 0.1),
+#   coverage_mean = c(10, 30, 60, 100),
+#   coverage_zero_inflation = c(0, 0.2, 0.4, 0.6),
+#   coverage_dispersion = c(1, 2, 5, 10)
+# )
+
 param_sets <- list(
-  dropout = c(0, 0.2, 0.4, 0.6),
-  overdispersion_Het = c(3, 6, 10, 100),
-  overdispersion_Hom = c(3, 6, 10, 100),
-  error_rate = c(0.001, 0.01, 0.05, 0.1),
-  coverage_mean = c(10, 30, 60, 100),
-  coverage_zero_inflation = c(0, 0.2, 0.4, 0.6),
-  coverage_dispersion = c(1, 2, 5, 10)
+  CNV_fraction = c(0, 0.1, 0.3, 0.5),
+  homoplasy_fraction = c(0, 0.05, 0.1, 0.2)
 )
 
 paths <- c()

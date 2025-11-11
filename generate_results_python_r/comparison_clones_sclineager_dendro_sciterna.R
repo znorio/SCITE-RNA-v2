@@ -105,8 +105,8 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
         coverage_mat = coverage_sclineager,
         max_iter = 2000,
         vaf_offset = 0.01,
-        dfreedom = ncol(mutations_mat),
-        psi = diag(10, ncol(mutations_mat)),
+        dfreedom = ncol(mutations_mat_sclineager),
+        psi = diag(1, ncol(mutations_mat_sclineager)),
         save = F
       )
 
@@ -127,7 +127,7 @@ generate.parent.vec <- function(base_path, n.tests=10, clones=5){
 
     start_time_dendro <- Sys.time()
 
-    filtered <- FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.01, cut.off.sd = 10)
+    filtered <- FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.01, cut.off.sd = 10, plot=FALSE)
     dist <- DENDRO.dist(filtered$X, filtered$N, filtered$Z, show.progress=FALSE)
 
     hc <- hclust(dist, method='ward.D')

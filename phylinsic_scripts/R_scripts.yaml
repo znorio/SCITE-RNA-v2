@@ -13,11 +13,11 @@ dependencies:
   - r-data.table
   - bioconductor-ggtree
   - r-argparse
-  - r-remotes
-  - r-rjava
-  - zlib
-  - openjdk=11
-  - xz  # Required for compiling rJava
-  - bzip2  # Required for compiling rJava
-  - liblzma  # Required for compiling rJava
-  - biopython
+#  - r-remotes
+#  - r-rjava
+#  - zlib
+#  - openjdk=11
+#  - xz
+#  - bzip2
+#  - liblzma
+#  - biopython

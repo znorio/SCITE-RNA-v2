@@ -13,7 +13,7 @@ Script used to run SCITE-RNA on real cancer datasets.
 
 int main() {
     int bootstrap_samples = 100; // how many bootstrap samples to use for tree inference, only used if use_bootstrap is true
-    bool use_bootstrap = true; // if true, bootstrap samples of the SNVs are used, otherwise the results are computed from the original data
+    bool use_bootstrap = false; // if true, bootstrap samples of the SNVs are used, otherwise the results are computed from the original data
     int n_snps = 3000; // how many mutations to select for tree inference, only used if method is "first_k"
     double posterior_threshold = 0.05; // threshold for filtering mutations, only used if method is "threshold"
     std::string method = "threshold"; // criterion for filtering mutations, can be "threshold" (loci with posterior probability of being mutated > threshold are selected) , "first_k" (k loci with highest posterior probability of being mutated are selected) or "highest_post" (loci where highest probability is a mutation and not no mutation are selected)
@@ -31,6 +31,12 @@ int main() {
 
     std::vector<std::vector<int>> ref = read_csv(input_path + "/ref.csv");
     std::vector<std::vector<int>> alt = read_csv(input_path + "/alt.csv");
+
+//    for (auto& row : ref) {
+//        for (auto& entry : row) {
+//            entry += 1;
+//        }
+//    }
 
     generate_sciterna_results(ref, alt, input_path, output_path,
                             bootstrap_samples, use_bootstrap, tree_space,

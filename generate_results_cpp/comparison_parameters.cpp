@@ -27,20 +27,25 @@ int main() {
     load_config("../config/config.yaml");
     std::cout << "Random seed: " << config_variables["random_seed"] << std::endl;
 
-    std::vector<std::string> param_names = {
-            "dropout", "overdispersion_Het", "overdispersion_Hom", "error_rate",
-            "coverage_mean", "coverage_zero_inflation", "coverage_dispersion"
-    };
-
+    std::vector<std::string> param_names = {"CNV_fraction", "homoplasy_fraction"};
     std::vector<std::vector<std::string>> param_values = {
-            {"0", "0_2", "0_4", "0_6"},
-            {"3", "6", "10", "100"},
-            {"3", "6", "10", "100"},
-            {"0_001", "0_01", "0_05", "0_1"},
-            {"10", "30", "60", "100"},
-            {"0", "0_2", "0_4", "0_6"},
-            {"1", "2", "5", "10"}
+            {"0", "0_1", "0_3", "0_5"},
+            {"0", "0_05", "0_1", "0_2"}
     };
+//    std::vector<std::string> param_names = {
+//            "dropout", "overdispersion_Het", "overdispersion_Hom", "error_rate",
+//            "coverage_mean", "coverage_zero_inflation", "coverage_dispersion"
+//    };
+//
+//    std::vector<std::vector<std::string>> param_values = {
+//            {"0", "0_2", "0_4", "0_6"},
+//            {"3", "6", "10", "100"},
+//            {"3", "6", "10", "100"},
+//            {"0_001", "0_01", "0_05", "0_1"},
+//            {"10", "30", "60", "100"},
+//            {"0", "0_2", "0_4", "0_6"},
+//            {"1", "2", "5", "10"}
+//    };
 
 
     for (const auto& clone : clones) {
