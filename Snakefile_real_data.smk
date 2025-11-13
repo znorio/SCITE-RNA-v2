@@ -98,7 +98,7 @@ BEAST2_TREE_PRIOR = "yule"
 # ~100 million iterations or so for the final analysis, and
 # shorter (e.g. 1 million) when testing.
 #BEAST2_ITERATIONS = 100000000
-BEAST2_ITERATIONS = 10000000
+BEAST2_ITERATIONS = 100000000
 
 
 # How many iterations to discard for burn-in.

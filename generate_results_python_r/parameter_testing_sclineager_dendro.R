@@ -79,7 +79,7 @@ generate.parent.vec <- function(base_path, n.tests=10){
         max_iter = 2000,
         vaf_offset = 0.01,
         dfreedom = ncol(mutations_mat_sclineager),
-        psi = diag(1, ncol(mutations_mat_sclineager)),
+        psi = diag(10, ncol(mutations_mat_sclineager)),
         save = F
       )
 
