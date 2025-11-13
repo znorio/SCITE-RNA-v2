@@ -21,6 +21,7 @@ def write_fasta(title, sequence, width=60, handle=None):
 
 
 def main():
+    import re
     import random
 
     genotype_file = snakemake.input[0]
@@ -54,7 +55,6 @@ def main():
             POSSIBLE = ["A", "C", "G", "T"]
 
             # e.g. SNV42 → seed = 42
-            import re
             m = re.search(r"(\d+)", site)
             if m:
                 seed = int(m.group(1))
@@ -69,7 +69,7 @@ def main():
         assert len(ref) == 1, x
         assert len(alt) == 1, x
         geno2base = {
-            "" : "-",   # IUPAC uses a single dash or hyphen for gaps.
+            "" : "-",
             "R" : ref,
             "A" : alt,
             "H" : choose_het(ref, alt),

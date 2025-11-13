@@ -89,7 +89,7 @@ res_scl <-
     max_iter = 2000,
     vaf_offset = 0.01,
     dfreedom = ncol(mutations_mat_sclineager),
-    psi = diag(1, ncol(mutations_mat_sclineager)),
+    psi = diag(10, ncol(mutations_mat_sclineager)),
     save = F
   )
 end_time_sclineager <- Sys.time()
