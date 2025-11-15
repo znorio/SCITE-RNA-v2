@@ -3,7 +3,6 @@ This script is used to generate simulated read counts, ground truth genotypes an
 """
 
 import numpy as np
-from networkx.algorithms.dag import ancestors, descendants
 from scipy.stats import poisson, geom, nbinom, gamma
 
 from src_python.cell_tree import CellTree
@@ -45,6 +44,8 @@ class DataGenerator:
     def __init__(self, n_cells, n_mut, coverage_method="zinb", genotype_freq=None, coverage_sample=None,
                  dropout_alpha=None, dropout_beta=None, **kwargs):
 
+        self.ref_alleles = None
+        self.alt_alleles = None
         self.dropout = kwargs.get("dropout", 0.2)
         self.overdispersion_h = kwargs.get("overdispersion_Het", 6)
         self.overdispersion = kwargs.get("overdispersion_Hom", 10)
@@ -173,8 +174,9 @@ class DataGenerator:
                 n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
             else:
                 # Both alleles still present
-                alpha_h = (ref_alleles / (ref_alleles + alt_alleles)) * overdispersion_h
-                beta_h = overdispersion_h - alpha_h
+                cna = (ref_alleles + alt_alleles)
+                alpha_h = (alt_alleles / cna) * overdispersion_h * cna # scale with copy number to maintain hill shape
+                beta_h = overdispersion_h * cna - alpha_h
                 n_alt = betabinom_rvs(coverage, alpha_h, beta_h)
         else:
             raise ValueError("[generate_single_read] ERROR: invalid genotype.")
@@ -246,8 +248,8 @@ class DataGenerator:
             self.random_coverage()
 
         # track the number of ref and alt alleles for CNV simulation
-        ref_alleles = np.zeros((self.n_cells, self.n_mut), dtype=int)
-        alt_alleles = np.zeros((self.n_cells, self.n_mut), dtype=int)
+        self.ref_alleles = np.zeros((self.n_cells, self.n_mut), dtype=int)
+        self.alt_alleles = np.zeros((self.n_cells, self.n_mut), dtype=int)
 
         # determine genotypes
         self.genotype = np.empty((self.n_cells, self.n_mut), dtype=str)
@@ -257,11 +259,11 @@ class DataGenerator:
                 self.genotype[i, j] = self.gt2[j] if mut_indicator[i, j] else self.gt1[j]
 
                 if self.genotype[i, j] == "R":
-                    ref_alleles[i, j], alt_alleles[i, j] = 2, 0
+                    self.ref_alleles[i, j], self.alt_alleles[i, j] = 2, 0
                 elif self.genotype[i, j] == "H":
-                    ref_alleles[i, j], alt_alleles[i, j] = 1, 1
+                    self.ref_alleles[i, j], self.alt_alleles[i, j] = 1, 1
                 elif self.genotype[i, j] == "A":
-                    ref_alleles[i, j], alt_alleles[i, j] = 0, 2
+                    self.ref_alleles[i, j], self.alt_alleles[i, j] = 0, 2
 
         # Apply CNVs
         for j in range(self.n_mut):
@@ -284,25 +286,25 @@ class DataGenerator:
                         if current_alleles:
                             dropped_allele = np.random.choice(current_alleles)
                             if dropped_allele == "ref":
-                                ref_alleles[i, j] = ref_alleles[i, j] - 1
+                                self.ref_alleles[i, j] = self.ref_alleles[i, j] - 1
                             else:
-                                alt_alleles[i, j] = alt_alleles[i, j] - 1
+                                self.alt_alleles[i, j] = self.alt_alleles[i, j] - 1
                     else:
                         # For CNVs > 1, duplicate alleles (cnv-2) times
                         for _ in range(cnv - 2):
                             chosen_allele = np.random.choice(current_alleles)
                             if chosen_allele == "ref":
-                                ref_alleles[i, j] += 1
+                                self.ref_alleles[i, j] += 1
                             else:
-                                alt_alleles[i, j] += 1
+                                self.alt_alleles[i, j] += 1
                             # Update current_alleles to reflect the new allele count
                             current_alleles.append(chosen_allele)
 
         for i in range(self.n_cells):
             for j in range(self.n_mut):
-                if alt_alleles[i, j] == 0:
+                if self.alt_alleles[i, j] == 0:
                     self.genotype[i, j] = "R"
-                elif ref_alleles[i, j] == 0:
+                elif self.ref_alleles[i, j] == 0:
                     self.genotype[i, j] = "A"
                 else:
                     self.genotype[i, j] = "H"
@@ -334,7 +336,7 @@ class DataGenerator:
             # are assumed to be symmetric and only affect the overdispersion
 
             for i in range(self.n_cells):
-                ref[i, j], alt[i, j] = self.generate_single_read(ref_alleles[i, j], alt_alleles[i,j], self.genotype[i, j], self.coverage[i, j],
+                ref[i, j], alt[i, j] = self.generate_single_read(self.ref_alleles[i, j], self.alt_alleles[i,j], self.genotype[i, j], self.coverage[i, j],
                                                                  dropout_prob, config["dropout_direction"], overdispersion_H)
 
         return ref, alt, all_dropout_probs, all_overdispersions_h
@@ -355,9 +357,13 @@ class DataGenerator:
                 descendants = [d for d in self.ct.dfs(loc1)]
                 options = [o for o in range(len(self.ct.parent_vec)) if o not in ancestors and o not in descendants]
 
+                # print("prev:", len([c for c in self.ct.leaves(loc1)]))
                 if len(options) == 0:
+                    # print("Warning: could not place homoplasy mutation independently.")
                     continue  # no valid location for the second placement
                 loc2 = np.random.choice(options)
+
+                # print(len([c for c in self.ct.leaves(loc2)]))
                 for i in self.ct.leaves(loc2):
                     res[i, j] = True
         return res

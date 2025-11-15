@@ -12,8 +12,6 @@ Script used to run SCITE-RNA on simulated data with a variable number of cells, 
 #include "generate_results.h"
 
 
-
-
 int main() {
     int n_tests = 100; //number of runs
     int n_rounds = 2; //number of optimization rounds
@@ -29,8 +27,8 @@ int main() {
 
     std::vector<std::string> param_names = {"CNV_fraction", "homoplasy_fraction"};
     std::vector<std::vector<std::string>> param_values = {
-            {"0", "0_1", "0_3", "0_5"},
-            {"0", "0_05", "0_1", "0_2"}
+            {"0", "0_2", "0_5", "0_8"},
+            {"0", "0_1", "0_2", "0_5"}
     };
 //    std::vector<std::string> param_names = {
 //            "dropout", "overdispersion_Het", "overdispersion_Hom", "error_rate",

@@ -65,8 +65,11 @@ def generate_comparison_data(n_cells: int, n_mut: int, size=100, path="./compari
         np.savetxt(os.path.join(path, f"parent_vec/parent_vec_{i}.txt"), generator.ct.parent_vec, fmt="%i")
         np.savetxt(os.path.join(path, f"mut_indicator/mut_indicator_{i}.txt"), mut_indicator, fmt="%i")
         np.savetxt(os.path.join(path, f"genotype/genotype_{i}.txt"), generator.genotype, fmt="%s")
+        # np.savetxt(os.path.join(path, f"genotype/alt_alleles_{i}.txt"), generator.alt_alleles, fmt="%i")
+        # np.savetxt(os.path.join(path, f"genotype/ref_alleles_{i}.txt"), generator.ref_alleles, fmt="%i")
         np.savetxt(os.path.join(path, f"dropout_probs/dropout_probs_{i}.txt"), dropout_probs)
-        np.savetxt(os.path.join(path, f"overdispersions_H/overdispersions_H_{i}.txt"), overdispersions_H)
+        np.savetxt(os.path.join(path, f"overdispersions_H/overd"
+                                      f"ispersions_H_{i}.txt"), overdispersions_H)
         np.savetxt(os.path.join(path, f"mutation_location/mutation_location_{i}.txt"), generator.ct.mut_loc, fmt="%i")
 
 
@@ -102,8 +105,8 @@ default_params = {
 #     'coverage_dispersion': [1, 2, 5, 10]
 # }
 param_sets = {
-    'CNV_fraction': [0, 0.1, 0.3, 0.5],
-    "homoplasy_fraction": [0, 0.05, 0.1, 0.2] # Fraction of loci that are affected twice by independent mutations
+    'CNV_fraction': [0, 0.2, 0.5, 0.8],
+    "homoplasy_fraction": [0, 0.1, 0.2, 0.5] # Fraction of loci that are affected twice by independent mutations
 }
 
 for clone in clones:
