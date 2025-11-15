@@ -60,12 +60,12 @@ TERNARY_SAMPLES = 100
 # cell and its neighbors.  This controls how much weight to give
 # to its neighbors.  The default value will give each cell the
 # same weight.  Set to 0 to turn off smoothing.
-TERNARY_DELTA = float(TERNARY_K)/(TERNARY_K+1)
+TERNARY_DELTA = 0
 
 # If a cells has no reads at a site, this controls whether to
 # impute the genotype at that site, or to leave it as a missing
 # value.
-TERNARY_IMPUTE = True
+TERNARY_IMPUTE = False
 
 # Set the seed of the random number generator.  Can use to
 # make sure results are reproducible.
@@ -177,6 +177,24 @@ rule call_genotypes2:
     script:
         "phylinsic_scripts/call_genotypes1.R"
 
+# Impute genotypes for predicted vaf (Imputing made the tree inference worse)
+rule call_genotypes_impute:
+    input:
+        opj(DATA_DIR, "ref", "ref_{test}.txt"),
+        opj(DATA_DIR, "alt", "alt_{test}.txt"),
+        opj(GENOTYPE_DIR, "knn.neighbors_{test}.txt"),
+    output:
+        opj(GENOTYPE_DIR, "genotypes_impute_{test}.txt"),
+        opj(GENOTYPE_DIR, "probabilities_impute_{test}.txt"),
+    params:
+        delta=float(TERNARY_K)/(TERNARY_K+1),
+        impute=True,
+        num_cores=1 #workflow.cores,
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
+    script:
+        "phylinsic_scripts/call_genotypes1.R"
+
 
 rule make_fasta_file:
     input:
@@ -189,7 +207,7 @@ rule make_fasta_file:
 
 rule make_phylinsic_genotype_file:
     input:
-        opj(GENOTYPE_DIR, "genotypes_{test}.txt"),
+        opj(GENOTYPE_DIR, "genotypes_impute_{test}.txt"),
     output:
         opj(PHYLINSIC_GENOTYPE_DIR, "phylinsic_genotype_{test}.txt")
     script:

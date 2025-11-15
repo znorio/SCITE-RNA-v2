@@ -57,12 +57,12 @@ TERNARY_SAMPLES = 100
 # cell and its neighbors.  This controls how much weight to give
 # to its neighbors.  The default value will give each cell the
 # same weight.  Set to 0 to turn off smoothing.
-TERNARY_DELTA = float(TERNARY_K)/(TERNARY_K+1)
+TERNARY_DELTA = 0
 
 # If a cells has no reads at a site, this controls whether to
 # impute the genotype at that site, or to leave it as a missing
 # value.
-TERNARY_IMPUTE = True
+TERNARY_IMPUTE = False
 
 # Set the seed of the random number generator.  Can use to
 # make sure results are reproducible.
@@ -98,7 +98,7 @@ BEAST2_TREE_PRIOR = "yule"
 # ~100 million iterations or so for the final analysis, and
 # shorter (e.g. 1 million) when testing.
 #BEAST2_ITERATIONS = 100000000
-BEAST2_ITERATIONS = 100000000
+BEAST2_ITERATIONS = 10000000
 
 
 # How many iterations to discard for burn-in.
