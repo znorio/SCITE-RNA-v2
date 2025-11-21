@@ -6,8 +6,8 @@ n_tests <- 100
 n_cells <- 50
 n_mut <- 500
 
-base_dir <- file.path("./data", "simulated_data")
-# base_dir <- file.path("D:/PhD/SCITERNA/simulated_data")
+# base_dir <- file.path("./data", "simulated_data")
+base_dir <- file.path("D:/PhD/SCITERNA/simulated_data")
 
 read.matrix <- function(path){
   mat <- as.matrix(read.table(path, header=FALSE, sep=" "))
@@ -132,8 +132,7 @@ generate.parent.vec <- function(base_path, n.tests=10){
 # )
 
 param_sets <- list(
-  overdispersion_Het = c(3, 6, 10, 100),
-  overdispersion_Hom = c(3, 6, 10, 100)
+  error_rate = c(0.001, 0.01, 0.05, 0.1)
 )
 
 paths <- c()

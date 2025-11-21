@@ -12,6 +12,8 @@ NUM_MUTATIONS= int(config.get("NUM_MUTATIONS", 500))
 APPENDIX = str(config.get("APPENDIX", ""))
 TESTS = list(range(NUM_TESTS))
 
+wildcard_constraints:
+    test = r"\d+"
 
 DATA_DIR = rf"data/simulated_data/{NUM_CELLS}c{NUM_MUTATIONS}m{APPENDIX}"
 GENOTYPE_DIR = opj(DATA_DIR, "phylinsic", "output/genotype")
@@ -127,8 +129,9 @@ batch = "00"
 # Define the final targets
 rule all:
     input:
-        [opj(PHYLINSIC_GENOTYPE_DIR, f"phylinsic_genotype_{test}.txt") for test in range(NUM_TESTS)],
-        [opj(PHYLINSIC_PARENT_VEC_DIR, f"phylinsic_parent_vec_{test}.txt") for test in range(NUM_TESTS)],
+        # [opj(PHYLINSIC_GENOTYPE_DIR, f"phylinsic_genotype_{test}.txt") for test in range(NUM_TESTS)],
+        # [opj(PHYLINSIC_PARENT_VEC_DIR, f"phylinsic_parent_vec_{test}.txt") for test in range(NUM_TESTS)],
+        opj(DATA_DIR, "phylinsic", "phylinsic_runtimes.txt")
 
 rule calc_neighbor_scores2:
     input:
@@ -221,6 +224,8 @@ rule run_beast2:
         beast_output_dir = directory(opj(BEAST_OUTPUT,"beast2_{test}")),
         beast_model=opj(BEAST_OUTPUT, "beast2_{test}", "beast2.model.RDS"),
         tree_log=opj(BEAST_OUTPUT, "beast2_{test}", "tree.log"),
+        runtime=opj(BEAST_OUTPUT, "beast2_{test}", "run_beast2_runtime_seconds.txt"),
+
     log:
         opj(PHYLO_LOG_DIR,"beast2_{test}.log"),
     params:
@@ -363,4 +368,17 @@ rule newick_to_parent_vec:
             --newick_file {input[0]} \
             --cell_file {input[1]} \
             --output_file {output[0]}
+        """
+
+rule extract_runtimes:
+    input:
+        [opj(BEAST_OUTPUT,f"beast2_{t}","run_beast2_runtime_seconds.txt") for t in range(NUM_TESTS)]
+    output:
+        opj(DATA_DIR, "phylinsic", "phylinsic_runtimes.txt")
+    conda:
+        "phylinsic_scripts/R_scripts.yaml"
+    shell:
+        """python phylinsic_scripts/extract_runtimes.py \
+            --input_file {input} \
+            --output_file {output}
         """
