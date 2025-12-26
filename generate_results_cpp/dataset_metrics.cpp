@@ -242,7 +242,7 @@ int main() {
     vector<vector<string>> spaces = {{"c", "m"}};
     int nTests = 100;
     bool flipped_mutation_direction = false;
-    vector<string> models = {"dendro", "sciterna", "phylinsic"};
+    vector<string> models = {"dendro", "sciterna", "phylinsic", "sclineager"};
     string r;
 
     load_config("../config/config.yaml");
