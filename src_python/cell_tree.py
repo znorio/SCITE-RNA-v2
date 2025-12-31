@@ -274,121 +274,6 @@ class CellTree(PruneTree):
         """
         self.splice(next(self.siblings(subroot)))
 
-
-    # def greedy_insert_experimental2(self):
-    #
-    #     for anchor in self.pruned_roots():
-    #         subroot = self.children(anchor)[0]
-    #
-    #         llr_sub = self.llr[subroot]
-    #
-    #         mask = np.ones(self.llr.shape[0], dtype=bool)
-    #         mask[anchor] = False
-    #
-    #         base_max_no_anchor = self.llr[mask].max(axis=0)
-    #         mut_locs = self.llr[mask].argmax(axis=0)
-    #
-    #         best_llr = -np.inf
-    #         best_targets = []
-    #
-    #         # Stack: (node, state, saved_llr, saved_base_max)
-    #         stack = [(self.main_root, None)]
-    #
-    #         while stack:
-    #             node, saved_base_max = stack.pop()
-    #
-    #             parent = self.parent_vec[node]
-    #
-    #             if parent == -1:
-    #                 base_max = base_max_no_anchor
-    #             else:
-    #                 base_max = saved_base_max
-    #
-    #             anchor_llr = llr_sub + self.llr[node]
-    #
-    #             cols = (mut_locs == parent) | (anchor_llr > base_max)
-    #
-    #             if np.any(cols):
-    #                 # Ancestor adjustment only when needed
-    #                 anc = list(self.ancestors(node))
-    #                 if anc:
-    #                     llr_tmp = self.llr[mask][:, cols].copy()
-    #                     llr_tmp[[np.where(mask)[0].tolist().index(a) for a in anc]] += llr_sub[cols]
-    #                     new_base_max = base_max.copy()
-    #                     new_base_max[cols] = llr_tmp.max(axis=0)
-    #                 else:
-    #                     new_base_max = base_max
-    #             else:
-    #                 new_base_max = base_max
-    #
-    #             current_llr = np.sum(np.maximum(new_base_max, anchor_llr))
-    #
-    #             if current_llr == best_llr:
-    #                 best_targets.append(node)
-    #             elif current_llr > best_llr:
-    #                 best_llr = current_llr
-    #                 best_targets = [node]
-    #
-    #
-    #             for child in self.children(node):
-    #                 stack.append((child,new_base_max))
-    #
-    #         best_target = np.random.choice(best_targets)
-    #         self.insert(anchor, best_target)
-
-    def greedy_insert_experimental2(self):
-        """
-        Inserts a subtree at its optimal location. Generally a bit faster than greedy_insert
-        """
-        def search_insertion_loc(target):
-            best_targets = []
-
-            self.llr[anchor] -= np.inf
-            current_llr_max_without_anchor = self.llr.max(axis=0)
-            mut_locs = self.llr.argmax(axis=0)
-            best_llr = -np.inf
-            max_llr = np.zeros_like(self.llr)
-
-            for current_target in self.dfs(target):
-
-                self.llr[anchor] = self.llr[subroot] + self.llr[current_target]
-
-                parent = self.parent_vec[current_target]
-
-                if parent != -1:
-                    base_max = max_llr[parent].copy()
-                else:
-                    base_max = current_llr_max_without_anchor.copy()
-
-                cols = (mut_locs == parent) | (
-                        current_llr_max_without_anchor < self.llr[parent] + np.abs(self.llr[subroot])
-                )
-
-                if np.any(cols):
-                    anc = np.array(list(self.ancestors(current_target)))
-                    if len(anc) > 0:
-                        llr_tmp = self.llr[:, cols].copy()
-                        llr_tmp[anc] += llr_tmp[subroot]
-                        llr_tmp[anchor] -= np.inf
-                        base_max[cols] = llr_tmp.max(axis=0)
-
-                max_llr[current_target] = base_max
-                current_llr = np.sum(np.maximum(base_max, self.llr[anchor]))
-
-                if current_llr == best_llr:
-                    best_targets.append(current_target)
-                if current_llr > best_llr:
-                    best_llr = current_llr
-                    best_targets = [current_target]
-
-            return np.random.choice(best_targets), best_llr
-
-        for anchor in self.pruned_roots():
-            subroot = self.children(anchor)[0]
-            best_target, best_joint_llh = search_insertion_loc(self.main_root)
-            # print(best_target, best_joint_llh)
-            self.insert(anchor, best_target)
-
     def greedy_insert_experimental(self):
         """
         Inserts a subtree at its optimal location. Generally a bit faster than greedy_insert
@@ -396,7 +281,7 @@ class CellTree(PruneTree):
 
         def search_insertion_loc(target):
             stack = [(target, False, None, None)]
-            best_joint = self.joint #-np.inf previous joint llh
+            best_joint = -np.inf
             best_targets = []
 
             self.current_llr_max_without_anchor = np.delete(self.llr, anchor, axis=0).max(axis=0)
@@ -497,16 +382,7 @@ class CellTree(PruneTree):
 
             self.binary_prune(sr)
             self.update_llr()
-            start = time.time()
             self.greedy_insert_experimental()
-            end = time.time()
-            print("Time taken to insert subtree: %.4f seconds" % (end - start))
-            self.binary_prune(sr)
-            self.update_llr()
-            start1 = time.time()
-            self.greedy_insert_experimental2()
-            end1 = time.time()
-            print("Time taken to insert subtree 2: %.4f seconds" % (end1 - start1))
 
         self.update_all()
 
