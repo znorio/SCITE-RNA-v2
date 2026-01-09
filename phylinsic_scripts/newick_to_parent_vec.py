@@ -18,12 +18,10 @@ def main():
 
     cells = read_cell_order(args.cell_file)
     n_leaves = len(cells)
-    # mapping from cell name -> leaf index (0..n_leaves-1)
     leaf_name_to_index = {name: i for i, name in enumerate(cells)}
 
     tree = Phylo.read(args.newick_file, "newick")
 
-    # collect terminals and ensure they are in the provided cell list
     terminals = tree.get_terminals()
     for t in terminals:
         if t.name is None:
@@ -31,7 +29,6 @@ def main():
         if t.name not in leaf_name_to_index:
             raise SystemExit(f"Leaf name '{t.name}' not found in cell file {args.cell_file}.")
 
-    # assign internal nodes indices in postorder (deterministic)
     internal_nodes = list(tree.get_nonterminals(order="postorder"))
     internal_map = {node: n_leaves + i for i, node in enumerate(internal_nodes)}
 
@@ -45,7 +42,6 @@ def main():
     total_nodes = n_leaves + len(internal_nodes)
     parent = [None] * total_nodes
 
-    # helper to walk tree and set child->parent relationships
     def walk(par):
         for ch in par.clades:
             child_idx = clade_to_index[ch]

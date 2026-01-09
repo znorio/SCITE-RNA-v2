@@ -8,16 +8,6 @@
 #SBATCH --mem-per-cpu=8G
 #SBATCH --time=30:00:00
 
-# Define all parameter combinations
-#"_param_testing/CNV_fraction_0"
-#"_param_testing/CNV_fraction_0_2"
-#"_param_testing/CNV_fraction_0_5"
-#"_param_testing/CNV_fraction_0_8"
-#"_param_testing/homoplasy_fraction_0"
-#"_param_testing/homoplasy_fraction_0_1"
-#"_param_testing/homoplasy_fraction_0_2"
-#"_param_testing/homoplasy_fraction_0_5"
-
 param_combinations=(
     "_param_testing/dropout_0"
     "_param_testing/dropout_0_2"
@@ -56,7 +46,6 @@ param_combinations=(
     "_param_testing/homoplasy_fraction_0_2"
 )
 
-# Get the APPENDIX for this task
 APPENDIX=${param_combinations[$SLURM_ARRAY_TASK_ID]}
 
 # Run Snakemake with the selected APPENDIX

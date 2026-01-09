@@ -39,6 +39,8 @@ class DataGenerator:
         dropout_beta – Beta parameter of the beta distribution the dropout probability is sampled from.
         dropout_dir – Dropout direction probability.
         overdispersion_h – Overdispersion parameter for the read counts in the heterozygous case.
+        homoplasy_fraction - Fraction of loci with two mutations per locus in different branches of the tree
+        CNV_fraction - Fraction of loci affected by copy number alterations
     """
 
     def __init__(self, n_cells, n_mut, coverage_method="zinb", genotype_freq=None, coverage_sample=None,
@@ -76,17 +78,10 @@ class DataGenerator:
 
         self.coverage_method = coverage_method
 
-        # self.coverage_mean = coverage_mean
         if coverage_method == "sample" and coverage_sample is None:
             raise ValueError("Please provide array of coverage values to be sampled from.")
         self.coverage_sample = coverage_sample
-        #
-        # self.dropout_alpha = dropout_alpha
-        # self.dropout_beta = dropout_beta
-        # self.dropout_dir = dropout_dir
-        # self.overdispersion_h = overdispersion_h
 
-        # Set the beta-binomial parameters
         self.alpha_R = self.error_rate * self.overdispersion
         self.beta_R = self.overdispersion - self.alpha_R
         self.alpha_A = (1 - self.error_rate) * self.overdispersion
@@ -183,44 +178,7 @@ class DataGenerator:
 
         n_ref = coverage - n_alt
         return n_ref, n_alt
-    # def generate_single_read(self, genotype, coverage, dropout_prob, dropout_direction, alpha_h, beta_h):
-    #     """
-    #     Generate read counts for a single cell and mutation.
-    #
-    #     [Arguments]
-    #         genotype: the genotype of the cell ("R", "H", or "A")
-    #         coverage: the total read coverage for the cell and mutation
-    #         dropout_prob: the probability of dropout for heterozygous genotypes
-    #         dropout_direction: the probability of dropout direction for heterozygous genotypes
-    #         alpha_h: the alpha parameter for the beta-binomial distribution in the heterozygous case
-    #         beta_h: the beta parameter for the beta-binomial distribution in the heterozygous case
-    #
-    #     [Returns]
-    #         n_ref: the number of reference reads
-    #         n_alt: the number of alternative reads
-    #     """
-    #     if genotype == "R":
-    #         n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)
-    #     elif genotype == "A":
-    #         n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)
-    #     elif genotype == "H":
-    #         # Determine if dropout occurs
-    #         dropout_occurs = np.random.rand() < dropout_prob
-    #
-    #         if dropout_occurs:
-    #             # Determine dropout direction based on sampled probabilities
-    #             dropout_to_A = np.random.rand() < dropout_direction
-    #             if dropout_to_A:
-    #                 n_alt = betabinom_rvs(coverage, self.alpha_A, self.beta_A)  # Dropout to A
-    #             else:
-    #                 n_alt = betabinom_rvs(coverage, self.alpha_R, self.beta_R)  # Dropout to R
-    #         else:
-    #             n_alt = betabinom_rvs(coverage, alpha_h, beta_h)  # No dropout
-    #     else:
-    #         raise ValueError("[generate_single_read] ERROR: invalid genotype.")
-    #
-    #     n_ref = coverage - n_alt
-    #     return n_ref, n_alt
+
 
     def generate_reads(self, new_tree=False, new_mut_type=False, new_coverage=True, num_clones="", min_value=2.5,
                        shape=2):
@@ -357,13 +315,11 @@ class DataGenerator:
                 descendants = [d for d in self.ct.dfs(loc1)]
                 options = [o for o in range(len(self.ct.parent_vec)) if o not in ancestors and o not in descendants]
 
-                # print("prev:", len([c for c in self.ct.leaves(loc1)]))
                 if len(options) == 0:
-                    # print("Warning: could not place homoplasy mutation independently.")
                     continue  # no valid location for the second placement
+
                 loc2 = np.random.choice(options)
 
-                # print(len([c for c in self.ct.leaves(loc2)]))
                 for i in self.ct.leaves(loc2):
                     res[i, j] = True
         return res

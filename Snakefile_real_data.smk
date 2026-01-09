@@ -1,10 +1,9 @@
-# Snakemake workflow for running PhylinSic on simulated single-cell RNA-seq data.
+# Snakemake workflow for running PhylinSic on our processed real cancer single-cell RNA-seq data.
+# See https://github.com/U54Bioinformatics/PhylinSic_Project for the full PhylinSic pipeline
 
-# Import required modules
 import os
 from os.path import join as opj
 
-# Define directories and global variables
 
 APPENDIX = str(config.get("APPENDIX", ""))
 NUM_CELLS = int(config.get("NUM_CELLS", 1169))
@@ -16,8 +15,7 @@ PHYLO_DIR = opj(DATA_DIR, "phylinsic", "output/phylogeny")
 PHYLO_LOG_DIR = opj(DATA_DIR, "phylinsic", "logs/phylogeny")
 DEMUX_DIR = opj(DATA_DIR, "phylinsic", "output/demux")
 BEAST_OUTPUT = opj(DATA_DIR, "phylinsic", "output/beast2")
-# BEAST2_DIR = r"C:/Users/Norio/BEAST/BEAST.v2.6.7.Windows"
-BEAST2_DIR = r"/cluster/work/bewi/members/znorio/beast2/beast"
+BEAST2_DIR = r"/cluster/work/bewi/members/znorio/beast2/beast" #TODO replace
 
 PHYLINSIC_GENOTYPE_DIR = opj(DATA_DIR, "phylinsic", "phylinsic_genotype")
 PHYLINSIC_PARENT_VEC_DIR = opj(DATA_DIR, "phylinsic", "phylinsic_parent_vec")
@@ -34,8 +32,7 @@ cells = [f"Cell{i}\tno\tA" for i in range(1, NUM_CELLS+1)]
 with open(opj(DEMUX_DIR, "cells.txt"), "w") as f:
     f.write("Cell\tOutgroup\tCategory\n" + "\n".join(cells))
 
-# LOGCOMBINER = "C:/Users/Norio/BEAST/BEAST.v2.6.7.Windows/LogCombiner.exe"
-LOGCOMBINER = r"/cluster/work/bewi/members/znorio/beast2/beast/bin/logcombiner"
+LOGCOMBINER = r"/cluster/work/bewi/members/znorio/beast2/beast/bin/logcombiner" #TODO replace
 RSCRIPT = "Rscript"
 JAVA = "java"
 
@@ -74,46 +71,16 @@ PHYLO_RNG_SEED = 1
 # PARAMETERS - PHYLOGENETIC INFERENCE
 # -----------------------------------
 
-# Which model to use for nucleotide substitutions.  Must be one of:
-# jc69    equal mutation rate
-# hky     has transitions and transversions
-# tn93    has different transitions
-# gtr     most general
 BEAST2_SITE_MODEL = "gtr"
-
-# How to model rates of mutations across clades.  Must be one of:
-# strict  same mutation rate
-# rln     relaxed
 BEAST2_CLOCK_MODEL = "rln"
-
-# How to model branching in the tree.  Must be one of:
-# bd      birth-death
-# ccp     Coalescent Constant Population
-# cep     Coalescent Exponential Population
-# cbd     Coalescent Bayesian Skyline
-# yule    constant birth rate
 BEAST2_TREE_PRIOR = "yule"
-
-# How many iterations to run the analysis.  For our data, we run
-# ~100 million iterations or so for the final analysis, and
-# shorter (e.g. 1 million) when testing.
-#BEAST2_ITERATIONS = 100000000
 BEAST2_ITERATIONS = 10000000
 
 
 # How many iterations to discard for burn-in.
 BEAST2_BURNIN = int(BEAST2_ITERATIONS*0.50)
 
-
-assert BEAST2_BURNIN < BEAST2_ITERATIONS, \
-    "Cannot discard all samples as burnin (%d)." % BEAST2_BURNIN
-
-
-# How frequently (in number of iterations) to collect statistics
-# on the sampling.
 BEAST2_SAMPLE_INTERVAL = 5000
-
-# Set the random number generator seed for the tree building.
 BEAST2_RNG_SEED = 1
 
 
@@ -121,7 +88,6 @@ KNN_BATCHES = ["00"]
 batch = "00"
 
 
-# Define the final targets
 rule all:
     input:
         opj(PHYLINSIC_GENOTYPE_DIR, f"phylinsic_genotype.txt"),
@@ -139,7 +105,7 @@ rule calc_neighbor_scores2:
         rng_seed=PHYLO_RNG_SEED,
         start=1,
         skip=1,
-        num_cores=1 #workflow.cores,
+        num_cores=1
     conda:
         "phylinsic_scripts/R_scripts.yaml"
     script:

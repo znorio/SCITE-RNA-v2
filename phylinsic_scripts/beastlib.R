@@ -298,8 +298,7 @@ continue.beast <- function(
     stop(sprintf("Unknown tree prior: %s", TREE.PRIOR))
   }
 
-  # TODO: Should merge the creation of the priors with the code in
-  # run.beast.
+
   params <- list()
   if(!is.null(mrca.is_monophyletic))
     params[["is_monophyletic"]] <- mrca.is_monophyletic

@@ -17,8 +17,6 @@ parser$add_argument("--rng_seed", type="integer")
 args <- parser$parse_args()
 
 
-#FASTA.FILE <- snakemake@input[[1]]
-#OUT.DIR <- snakemake@output[[1]]
 FASTA.FILE <- args$input_file
 OUT.DIR <- args$output_dir
 
@@ -30,13 +28,6 @@ TREE.LOG <- file.path(OUT.DIR, "tree.log")
 TRACE.LOG <- file.path(OUT.DIR, "trace.log")
 SCREEN.LOG <- file.path(OUT.DIR, "screen.log")
 
-#SITE.MODEL <- snakemake@params$site_model
-#CLOCK.MODEL <- snakemake@params$clock_model
-#TREE.PRIOR <- snakemake@params$tree_prior
-#NUM.ITER <- snakemake@params$iterations
-#SAMPLE.INTERVAL <- snakemake@params$sample_interval
-#RNG.SEED <- snakemake@params$rng_seed
-
 SITE.MODEL <- args$site_model
 CLOCK.MODEL <- args$clock_model
 TREE.PRIOR <- args$tree_prior
@@ -44,8 +35,6 @@ NUM.ITER <- args$iterations
 SAMPLE.INTERVAL <- args$sample_interval
 RNG.SEED <- args$rng_seed
 
-#source("/usr/local/changlab/Rlib/filelib.R")
-#source("/usr/local/changlab/Rlib/plotlib.R")
 source("phylinsic_scripts/beastlib.R")
 
 library(parallel)
@@ -59,9 +48,6 @@ library(TreeTools)
 library(dplyr)
 library(data.table)
 library(ggtree)
-
-#if(!dir.exists(OUT.DIR))
-#  dir.create(OUT.DIR, recursive=TRUE, mode="0755")
 
 start_time <- Sys.time() # measuring the runtime of the beast2
 

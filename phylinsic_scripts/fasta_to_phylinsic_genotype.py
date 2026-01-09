@@ -8,7 +8,7 @@ def main():
             line = line.rstrip("\r\n")
             cols = line.split("\t")
             # If this is the header line (starts with "Mutation" or "mutation"),
-            # skip it entirely and continue.
+            # skip it and continue.
             if first and cols[0].lower() == "mutation":
                 first = False
                 continue

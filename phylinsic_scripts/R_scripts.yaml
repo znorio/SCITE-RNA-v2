@@ -21,3 +21,4 @@ dependencies:
 #  - bzip2
 #  - liblzma
 #  - biopython
+# had to install some packages manually
