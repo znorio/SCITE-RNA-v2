@@ -5,3 +5,4 @@ data/eigen3
 data/yixuan-LBFGSpp-9db7a6d
 data/simulated_data
 data/varia
+data/input_data/BT_S2/gene_expression_counts.csv # needs to be extracted from zip file manually from Github due to file size limit
