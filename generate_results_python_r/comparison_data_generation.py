@@ -107,6 +107,7 @@ param_sets = {
     "homoplasy_fraction": [0, 0.1, 0.2, 0.5] # Fraction of loci that are affected twice by independent mutations
 }
 
+# uncomment to run data simulations for different parameter settings
 # for clone in clones:
 #     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
 #         for param_name, param_values in param_sets.items():
@@ -133,7 +134,7 @@ param_sets = {
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
         data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"
-        # generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_distribution=coverage_method)
+        generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_distribution=coverage_method)
         if run_tree_inference:
             path_results = os.path.join(data_path, "sciterna")
             generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,

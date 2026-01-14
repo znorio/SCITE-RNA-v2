@@ -119,20 +119,16 @@ generate.parent.vec <- function(base_path, n.tests=10){
   write.table(dendro_runtimes, file.path(base_path, "dendro/dendro_runtimes.txt"), row.names = FALSE, col.names = FALSE)
 }
 
-# param_sets <- list(
-#   dropout = c(0, 0.2, 0.4, 0.6),
-#   overdispersion_Het = c(3, 6, 10, 100),
-#   overdispersion_Hom = c(3, 6, 10, 100),
-#   error_rate = c(0.001, 0.01, 0.05, 0.1),
-#   coverage_mean = c(10, 30, 60, 100),
-#   coverage_zero_inflation = c(0, 0.2, 0.4, 0.6),
-#   coverage_dispersion = c(1, 2, 5, 10),
-#   CNV_fraction = c(0, 0.2, 0.5, 0.8),
-#   homoplasy_fraction = c(0, 0.1, 0.2, 0.5)
-# )
-
 param_sets <- list(
-  error_rate = c(0.001, 0.01, 0.05, 0.1)
+  dropout = c(0, 0.2, 0.4, 0.6),
+  overdispersion_Het = c(3, 6, 10, 100),
+  overdispersion_Hom = c(3, 6, 10, 100),
+  error_rate = c(0.001, 0.01, 0.05, 0.1),
+  coverage_mean = c(10, 30, 60, 100),
+  coverage_zero_inflation = c(0, 0.2, 0.4, 0.6),
+  coverage_dispersion = c(1, 2, 5, 10),
+  CNV_fraction = c(0, 0.2, 0.5, 0.8),
+  homoplasy_fraction = c(0, 0.1, 0.2, 0.5)
 )
 
 paths <- c()

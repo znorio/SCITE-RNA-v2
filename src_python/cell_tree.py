@@ -250,7 +250,7 @@ class CellTree(PruneTree):
 
         else:
             self.mut_loc = self.llr.argmax(axis=0)
-            loc_joint = np.array([self.llr[self.mut_loc[j], j] for j in range(self.n_mut)]) #+ self.loc_joint_1 TODO uncomment
+            loc_joint = np.array([self.llr[self.mut_loc[j], j] for j in range(self.n_mut)]) + self.loc_joint_1
             # self.loc_joint_1 = Likelihood of all cells having genotype 1 -> no mutation
             # self.mut_loc choose the mutation location with the highest LLR of being mutated. For hidden nodes the
             # LLR is the sum of the children LLRs
