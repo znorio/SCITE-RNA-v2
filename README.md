@@ -40,6 +40,7 @@ This repository provides:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── simulated_data           # Simulated data and inference results <br>
 ├── generate_results_cpp/       # C++ scripts to run SCITE-RNA on various datasets <br>
 ├── generate_results_python_r/  # Python and R scripts for simulating data, inferring trees and visualization <br>
+├── phylinsic_scripts/          # Code to run PhylinSic https://github.com/U54Bioinformatics/PhylinSic_Project <br>
 ├── src_cpp/                    # C++ source files for SCITE-RNA <br>
 ├── src_python/                 # Python source files for SCITE-RNA <br>
 ├── config/                     # Model parameters <br>
@@ -61,6 +62,7 @@ This repository provides:
 - jupyter
 - pyyaml
 - graphviz
+- dendropy 
 
 #### C++ Requirements
 
