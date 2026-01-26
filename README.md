@@ -54,14 +54,15 @@ This repository provides:
 #### Python Libraries:
 - numpy
 - pandas
+- scikit-learn
 - matplotlib
 - seaborn
 - scipy
 - numba
-- math
 - jupyter
 - pyyaml
-- graphviz
+- python-graphviz
+- pygraphviz
 - dendropy 
 
 #### C++ Requirements
