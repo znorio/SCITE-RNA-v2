@@ -65,6 +65,11 @@ This repository provides:
 - pygraphviz
 - dendropy 
 
+Using conda:
+
+    conda env create -f environment.yml
+
+
 #### C++ Requirements
 
 - CMake (>= 3.27)
@@ -87,7 +92,7 @@ If desired adjust model parameters in `config/config.yaml`.
 
 ### Simulated Data
 
-To **generate new simulated data** and compare different numbers of clones execute:
+To **generate new simulated data** with various parameter settings and different numbers of clones execute:
 
     generate_results_python_r/comparison_data_generation.py
 
@@ -107,9 +112,9 @@ mutation tree optimization, starting from a random cell lineage tree.
 
 All simulated results will be saved in `data/simulated_data/`.
 
-### Multiple Myeloma Data
+### Cancer Data
 
-To run SCITE-RNA on the Multiple Myeloma datasets:
+To run SCITE-RNA on the cancer datasets:
 
 Run either 
 
@@ -140,12 +145,7 @@ where columns represent cells and rows represent SNVs.
 ### Data Preparation
 
 To reproduce the figures quickly you can use the files provided in `data` and `data_summary`. 
-As the size and the number of raw data files was quite large, we produced summary statistics
-using 
-
-    generate_results_python_r/generate_summary_statistics.ipynb
-
-To reproduce the plots presented in the paper, follow the instructions below:
+As the size and the number of raw data files was quite large, we produced summary statistics. To reproduce the plots presented in the paper, follow the instructions below:
         
 - **Figure 3: Comparison of tree optimization strategies**
 
@@ -158,7 +158,7 @@ To reproduce the plots presented in the paper, follow the instructions below:
         generate_results_cpp/space_switching_results_postprocessing.cpp
 <br>
 
-- **Figure 4: Comparison to SClineager and DENDRO including runtimes**
+- **Figure 4: Comparison to SClineager, PhylinSic and DENDRO including runtimes**
         
         generate_results_python_r/comparison_num_clones.ipynb
    
@@ -168,7 +168,7 @@ To reproduce the plots presented in the paper, follow the instructions below:
           generate_results_cpp/comparison_num_clones.cpp
           generate_results_python_r/comparison_clones_sclineager_dendro_sciterna.R       
       
-- **Figure 5/6: Multiple myeloma**
+- **Figure 5/6/7: Cancer datasets**
           
           generate_results_python_r/results_real_data.ipynb
 

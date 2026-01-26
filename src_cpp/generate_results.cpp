@@ -176,7 +176,7 @@ void generate_sciterna_results(
         const std::string& path = "./comparison_data/",
         std::string pathout = "./comparison_data/results",
         int n_bootstrap = 100,
-        bool use_bootstrap = true,
+        bool use_bootstrap = false,
         const std::vector<std::string>& tree_space = {"c", "m"},
         bool flipped_mutation_direction = true,
         int n_keep = 50,

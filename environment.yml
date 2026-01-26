@@ -1,4 +1,4 @@
-name: sciterna
+name: sciterna2
 channels:
   - bioconda
   - conda-forge
