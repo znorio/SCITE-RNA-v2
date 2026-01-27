@@ -1,15 +1,18 @@
 """
 Script used to generate simulated datasets. The number of cells and SNVs and the number of clones simulated can be set.
-Tree inference is run as well. However, you might want to use generate_results_cpp/comparison_num_clones.cpp for
-tree inference as it is faster.
+Additionally, you have the option to set various other simulation parameters. Tree inference can be run as well.
+However, you might want to use generate_results_cpp/comparison_num_clones.cpp for tree inference as it is faster.
 """
+
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src_python.data_generator import DataGenerator
 from src_python.mutation_tree import MutationTree
 from src_python.utils import load_config_and_set_random_seed
 from src_python.generate_results import generate_sciterna_simulation_results
 
-import os
 from tqdm import tqdm
 import numpy as np
 
