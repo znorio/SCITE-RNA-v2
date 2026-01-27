@@ -45,9 +45,9 @@ This repository provides:
 ├── src_python/                 # Python source files for SCITE-RNA <br>
 ├── config/                     # Model parameters <br>
 ├── CMakeLists.txt              # Primary configuration file for CMake <br>
-├── README.md                   # Project overview and setup instructions
-├── environment.yml             # Conda environment file with required Python packages
-├── Snakefile                   # Snakemake file to run the PhylinSic pipeline on simulated data
+├── README.md                   # Project overview and setup instructions <br>
+├── environment.yml             # Conda environment file with required Python packages <br>
+├── Snakefile                   # Snakemake file to run the PhylinSic pipeline on simulated data <br>
 └── Snakefile_real_data.smk     # Snakemake file to run the PhylinSic pipeline on cancer data
 
 ## Installation
@@ -125,7 +125,7 @@ Run either
 
 or (recommended) run the faster C++ version:
 
-       generate_results_cpp/.cpp
+       generate_results_cpp/real_data_processing.cpp
 
 Results will be saved in `data/results/`.
 
