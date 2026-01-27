@@ -45,7 +45,10 @@ This repository provides:
 ├── src_python/                 # Python source files for SCITE-RNA <br>
 ├── config/                     # Model parameters <br>
 ├── CMakeLists.txt              # Primary configuration file for CMake <br>
-└── README.md                   # Project overview and setup instructions
+├── README.md                   # Project overview and setup instructions
+├── environment.yml             # Conda environment file with required Python packages
+├── Snakefile                   # Snakemake file to run the PhylinSic pipeline on simulated data
+└── Snakefile_real_data.smk     # Snakemake file to run the PhylinSic pipeline on cancer data
 
 ## Installation
 
