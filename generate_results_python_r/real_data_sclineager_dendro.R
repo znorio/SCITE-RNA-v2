@@ -117,26 +117,26 @@ for (clone in clones) {
     memb_pred_scite <- cutree(hc_scite, k = clones)
     cluster_scite <- DENDRO.cluster(dist_scite, plot=FALSE, type="phylogram")
     parent_vec_scite <- merge.to.parent(cluster_scite$merge)
-    write.table(memb_pred_scite, file.path(base_path, "results", sample, sprintf("sciterna/sciterna_clones/sciterna_clones_%d.txt", clone)), row.names=FALSE, col.names=FALSE)
+    write.table(memb_pred_scite, file.path(base_path, "results", sample, "sciterna", "sciterna_clones", paste0("sciterna_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 
-#   Cluster the genotype matrix into k=clones
-  dist_scl <- dist(t(res_scl[["genotype_mat"]])) # use same method for DENDRO and SClineager
-  hc_scl <- hclust(dist_scl, method='ward.D')
-  memb_pred_scl <- cutree(hc_scl, k = clone)
-  cluster_scl <- DENDRO.cluster(dist_scl, plot=FALSE, type="phylogram")
-  parent_vec_scl <- merge.to.parent(cluster_scl$merge)
+    dist_scl <- dist(t(res_scl[["genotype_mat"]])) # use same method for DENDRO and SClineager
+    hc_scl <- hclust(dist_scl, method='ward.D')
+    memb_pred_scl <- cutree(hc_scl, k = clone)
+    cluster_scl <- DENDRO.cluster(dist_scl, plot=FALSE, type="phylogram")
+    parent_vec_scl <- merge.to.parent(cluster_scl$merge)
 
-  write.table(memb_pred_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_clones", paste0("sclineager_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
+    write.table(memb_pred_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_clones", paste0("sclineager_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 
-  hc <- hclust(dist,method="ward.D")
-  memb_pred <- cutree(hc, k = clone)
-  cluster <- DENDRO.cluster(dist, plot=FALSE, type="phylogram")
-  dendro_parent_vec <- merge.to.parent(cluster$merge)
+    hc <- hclust(dist,method="ward.D")
+    memb_pred <- cutree(hc, k = clone)
+    cluster <- DENDRO.cluster(dist, plot=FALSE, type="phylogram")
+    dendro_parent_vec <- merge.to.parent(cluster$merge)
 
-  write.table(memb_pred, file.path(base_path, "results", sample, "dendro", "dendro_clones", paste0("dendro_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
+    write.table(memb_pred, file.path(base_path, "results", sample, "dendro", "dendro_clones", paste0("dendro_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 }
 
 write.table(t(res_scl[["genotype_mat"]]), file = file.path(base_path, "results", sample, "sclineager", "sclineager_vaf", paste0("sclineager_vaf.txt")), row.names = FALSE, col.names = FALSE)
 write.table(parent_vec_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_parent_vec", paste0("sclineager_parent_vec.txt")), row.names=FALSE, col.names=FALSE)
 write.table(dendro_parent_vec, file.path(base_path, "results", sample, "dendro", "dendro_parent_vec", paste0("dendro_parent_vec.txt")), row.names=FALSE, col.names=FALSE)
+write.table(parent_vec_scite, file.path(base_path, "results", sample, sprintf("sciterna/sciterna_parent_vec_clustering/sciterna_parent_vec_clustering.txt")), row.names=FALSE, col.names=FALSE)
 write.table(parent_vec_scite, file.path(base_path, "results", sample, sprintf("sciterna/sciterna_parent_vec_clustering/sciterna_parent_vec_clustering.txt")), row.names=FALSE, col.names=FALSE)
