@@ -9,11 +9,10 @@ The code and datasets provided here enable users to replicate the experiments an
 - [Installation](#installation)
   - [Requirements](#requirements)
   - [Cloning the Repository](#cloning-the-repository)
-  - [Data Preparation](#data-preparation)
 - [Running the Model](#running-the-model)
   - [Set Model Parameters](#set-model-parameters)
   - [Simulated Data](#simulated-data)
-  - [Multiple Myeloma Data](#multiple-myeloma-data)
+  - [Cancer Data](#multiple-myeloma-data)
   - [Run on New Data](#run-on-new-data)
 - [Generating Figures](#generating-figures)
 
@@ -27,7 +26,7 @@ We maximize the likelihood of the inferred tree by alternating between the cell 
 This repository provides:
 1. Scripts to execute SCITE-RNA. The model is split into C++ `src_cpp` and Python files `src_python`. Especially for large numbers of cells and SNVs it is recommended to use the C++ code, as it is significantly faster. The inferred trees should be comparable between the C++ and Python implementations, but as the method is stochastic likely won't produce the exact same tree. 
 2. Data used in the paper are available in the `data_summary/`and `data/` directories, which contain all necessary files to reproduce the figures.
-3. Visualization scripts to generate plots as presented in the paper.
+3. Visualization scripts/notebooks to generate plots as presented in the paper.
 
 
 ## Repository Structure
@@ -36,11 +35,11 @@ This repository provides:
 ├── data_summary/               # Summary data files, as the raw output is quite large <br>
 ├── data/                       # Input data files and results <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── input_data               # Alternative and reference read counts among other files. <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── results                  # Inferred trees of the multiple myeloma dataset and consensus tree results <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── results                  # Inferred trees of the cancer datasets and consensus tree results <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── simulated_data           # Simulated data and inference results <br>
 ├── generate_results_cpp/       # C++ scripts to run SCITE-RNA on various datasets <br>
 ├── generate_results_python_r/  # Python and R scripts for simulating data, inferring trees and visualization <br>
-├── phylinsic_scripts/          # Slightly adapted code to run PhylinSic https://github.com/U54Bioinformatics/PhylinSic_Project <br>
+├── phylinsic_scripts/          # Slightly adapted code to run PhylinSic https://github.com/U54Bioinformatics/PhylinSic_Project on our simulated data <br>
 ├── src_cpp/                    # C++ source files for SCITE-RNA <br>
 ├── src_python/                 # Python source files for SCITE-RNA <br>
 ├── config/                     # Model parameters <br>
