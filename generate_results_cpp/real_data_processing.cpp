@@ -18,7 +18,7 @@ int main() {
     double posterior_threshold = 0.05; // threshold for filtering mutations, only used if method is "threshold"
     std::string method = "threshold"; // criterion for filtering mutations, can be "threshold" (loci with posterior probability of being mutated > threshold are selected) , "first_k" (k loci with highest posterior probability of being mutated are selected) or "highest_post" (loci where highest probability is a mutation and not no mutation are selected)
     int n_rounds = 2; // how many rounds of tree inference and parameter optimization to perform
-    std::string sample = "BT_S2"; // specify the sample name, e.g. "mm16", "mm34"
+    std::string sample = "test"; // specify the sample name, e.g. "mm16", "mm34"
     bool flipped_mutation_direction = true; // if true, we allow the model to switch the root genotype/mutation direction during tree inference
     bool only_preprocessing = false; // if true, only the mutation filtering step is performed, no tree inference or parameter optimization
     std::vector<std::string> tree_space = {"c", "m"}; // which tree spaces to use during optimization, "c" for cell lineage tree, "m" for mutation tree, the order determines in which space the optimization starts
