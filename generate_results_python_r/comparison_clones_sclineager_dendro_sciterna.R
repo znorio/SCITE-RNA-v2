@@ -43,44 +43,20 @@ merge.to.parent <- function(merge.mat) {
 generate_parent_vec <- function(base_path, n_tests = 10, clones = 5, 
 run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
   if (run_sclineager) {
-    dir.create(
-      file.path(base_path, "sclineager", "sclineager_vaf"),
-      recursive = TRUE
-    )
-    dir.create(
-      file.path(base_path, "sclineager", "sclineager_parent_vec"),
-      recursive = TRUE
-    )
-    dir.create(
-      file.path(base_path, "sclineager", "sclineager_clones"),
-      recursive = TRUE
-    )
-    dir.create(
-      file.path(base_path, "sclineager", "sclineager_selected"),
-      recursive = TRUE
-    )
+    dir.create(file.path(base_path, "sclineager", "sclineager_vaf"), recursive = TRUE)
+    dir.create(file.path(base_path, "sclineager", "sclineager_parent_vec"), recursive = TRUE)
+    dir.create(file.path(base_path, "sclineager", "sclineager_clones"), recursive = TRUE)
+    dir.create(file.path(base_path, "sclineager", "sclineager_selected"), recursive = TRUE)
   }
 
   if (run_sciterna_clustering) {
-    dir.create(
-      file.path(base_path, "sciterna", "sciterna_parent_vec_clustering"),
-      recursive = TRUE
-    )
-    dir.create(
-      file.path(base_path, "sciterna", "sciterna_clones"),
-      recursive = TRUE
-    )
+    dir.create(file.path(base_path, "sciterna", "sciterna_parent_vec_clustering"), recursive = TRUE)
+    dir.create(file.path(base_path, "sciterna", "sciterna_clones"), recursive = TRUE)
   }
 
   if (run_dendro) {
-    dir.create(
-      file.path(base_path, "dendro", "dendro_parent_vec"),
-      recursive = TRUE
-    )
-    dir.create(
-      file.path(base_path, "dendro", "dendro_clones"),
-      recursive = TRUE
-    )
+    dir.create(file.path(base_path, "dendro", "dendro_parent_vec"), recursive = TRUE)
+    dir.create(file.path(base_path, "dendro", "dendro_clones"), recursive = TRUE)
   }
 
   cat("Theoretical number of clones: ", clones, "\n")
@@ -119,11 +95,7 @@ run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
       dist_scite <- dist(genotype_sciterna)
       hc_scite <- hclust(dist_scite, method = "ward.D")
       memb_pred_scite <- cutree(hc_scite, k = n_clones)
-      cluster_scite <- DENDRO.cluster(
-        dist_scite,
-        plot = FALSE,
-        type = "phylogram"
-      )
+      cluster_scite <- DENDRO.cluster(dist_scite, plot = FALSE, type = "phylogram")
       parent_vec_scite <- merge.to.parent(cluster_scite$merge)
       write.table(
         parent_vec_scite,
@@ -151,11 +123,7 @@ run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
     if (run_sclineager) {
       start_time_sclineager <- Sys.time()
 
-      keep <- apply(
-        mutations_mat,
-        1,
-        function(x) max(x, na.rm = TRUE) - min(x, na.rm = TRUE) > 0.01
-      )
+      keep <- apply(mutations_mat, 1, function(x) max(x, na.rm = TRUE) - min(x, na.rm = TRUE) > 0.01)
       keep_numeric <- as.numeric(keep)
       write.table(
         keep_numeric,
@@ -185,21 +153,11 @@ run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
       dist_scl <- dist(t(res_scl[["genotype_mat"]]))
       hc_scl <- hclust(dist_scl, method = "ward.D")
       memb_pred_scl <- cutree(hc_scl, k = n_clones)
-      cluster_scl <- DENDRO.cluster(
-        dist_scl,
-        plot = FALSE,
-        type = "phylogram"
-      )
+      cluster_scl <- DENDRO.cluster(dist_scl, plot = FALSE, type = "phylogram")
       parent_vec_scl <- merge.to.parent(cluster_scl$merge)
 
       end_time_sclineager <- Sys.time()
-      runtime_sclineager <- as.numeric(
-        difftime(
-          end_time_sclineager,
-          start_time_sclineager,
-          units = "secs"
-        )
-      )
+      runtime_sclineager <- as.numeric(difftime(end_time_sclineager, start_time_sclineager, units = "secs"))
       sclineager_runtimes <- c(sclineager_runtimes, runtime_sclineager)
 
       write.table(
@@ -254,17 +212,11 @@ run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
 
       hc <- hclust(dist, method = "ward.D")
       memb_pred <- cutree(hc, k = n_clones)
-      cluster <- DENDRO.cluster(
-        dist,
-        plot = FALSE,
-        type = "phylogram"
-      )
+      cluster <- DENDRO.cluster(dist, plot = FALSE, type = "phylogram")
       dendro_parent_vec <- merge.to.parent(cluster$merge)
 
       end_time_dendro <- Sys.time()
-      runtime_dendro <- as.numeric(
-        difftime(end_time_dendro, start_time_dendro, units = "secs")
-      )
+      runtime_dendro <- as.numeric(difftime(end_time_dendro, start_time_dendro, units = "secs"))
       dendro_runtimes <- c(dendro_runtimes, runtime_dendro)
 
       write.table(
