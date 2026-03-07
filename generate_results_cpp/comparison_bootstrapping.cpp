@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
     bool reshuffle_nodes = true; // whether to reshuffle the nodes in the mutation tree space by pruning and re-inserting individual nodes
     bool load_from_file = false; // if true, load the selected mutations and genotypes from file, otherwise preprocess the data
     bool reduced_output = true; // if true doesn't save the genotype and mutation indicator files
+    bool flipped_mutation_direction = true; // allow to change the root genotype during tree inference
 
     generate_sciterna_results(ref, alt, input_path, output_path,
                               bootstrap_samples, use_bootstrap, tree_space,

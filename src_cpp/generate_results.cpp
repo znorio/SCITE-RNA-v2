@@ -19,14 +19,15 @@ void create_directories(const std::string& pathout, bool reduced_ouput) {
     std::vector<std::string> dirs = {};
     if (reduced_ouput) {
         dirs = {
-            "sciterna_selected_loci",
-            "sciterna_inferred_mut_types",
+//            "sciterna_selected_loci",
+//            "sciterna_inferred_mut_types",
             "sciterna_parent_vec",
-            "sciterna_individual_dropout_probs",
-            "sciterna_individual_overdispersions_H",
-            "sciterna_global_parameters",
-            "sciterna_flipped",
-            "sciterna_mutation_location"
+//            "sciterna_individual_dropout_probs",
+//            "sciterna_individual_overdispersions_H",
+//            "sciterna_global_parameters",
+//            "sciterna_flipped",
+//            "sciterna_mutation_location"
+            "sciterna_genotype"
         };
     }
     else{
@@ -99,19 +100,19 @@ void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vec
         dropout_probs_round = individual_dropouts;
         overdispersion_h_round = individual_overdispersions;
 
-        save_vector_to_file(pathout + "/sciterna_selected_loci/sciterna_selected_loci_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", selected);
-        save_char_matrix_to_file(pathout + "/sciterna_inferred_mut_types/sciterna_inferred_mut_types_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", {gt1, gt2});
         save_vector_to_file(pathout + "/sciterna_parent_vec/sciterna_parent_vec_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.parent_vector_ct);
-        save_vector_to_file(pathout + "/sciterna_mutation_location/sciterna_mutation_location_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.mut_loc);
-        save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_dropouts);
-        save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_overdispersions);
-        save_double_vector_to_file(pathout + "/sciterna_global_parameters/sciterna_global_parameters_" + std::to_string(r) + "r" +
-        std::to_string(i) + ".txt", {dropout_prob, overdispersion, error_rate, overdispersion_h});
-        save_vector_to_file(pathout + "/sciterna_flipped/sciterna_flipped_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", std::vector<int>(flipped.begin(), flipped.end()));
+        save_char_matrix_to_file(pathout + "/sciterna_genotype/sciterna_genotype_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", genotype);
 
         if (!reduced_output){
+            save_vector_to_file(pathout + "/sciterna_selected_loci/sciterna_selected_loci_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", selected);
+            save_char_matrix_to_file(pathout + "/sciterna_inferred_mut_types/sciterna_inferred_mut_types_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", {gt1, gt2});
+            save_vector_to_file(pathout + "/sciterna_mutation_location/sciterna_mutation_location_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", optimizer.ct.mut_loc);
+            save_double_vector_to_file(pathout + "/sciterna_individual_dropout_probs/sciterna_individual_dropout_probs_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_dropouts);
+            save_double_vector_to_file(pathout + "/sciterna_individual_overdispersions_H/sciterna_individual_overdispersions_H_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", individual_overdispersions);
+            save_double_vector_to_file(pathout + "/sciterna_global_parameters/sciterna_global_parameters_" + std::to_string(r) + "r" +
+            std::to_string(i) + ".txt", {dropout_prob, overdispersion, error_rate, overdispersion_h});
+            save_vector_to_file(pathout + "/sciterna_flipped/sciterna_flipped_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", std::vector<int>(flipped.begin(), flipped.end()));
             save_matrix_to_file(pathout + "/sciterna_mut_indicator/sciterna_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", mutation_matrix);
-            save_char_matrix_to_file(pathout + "/sciterna_genotype/sciterna_genotype_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", genotype);
             save_matrix_to_file(pathout + "/sciterna_complete_mut_indicator/sciterna_complete_mut_indicator_" + std::to_string(r) + "r" + std::to_string(i) + ".txt", complete_mut_indicator);
         }
     }
@@ -137,8 +138,18 @@ void generate_sciterna_simulation_results(
 
     for (int i = 0; i < n_tests; ++i) {
         auto start_time = std::chrono::high_resolution_clock::now();
-        std::vector<std::vector<int>> alt = load_txt(path + "/alt/alt_" + std::to_string(i) + ".txt");
-        std::vector<std::vector<int>> ref = load_txt(path + "/ref/ref_" + std::to_string(i) + ".txt");
+
+        auto alt_path = std::filesystem::path(path) / "alt" / ("alt_" + std::to_string(i) + ".txt");
+        if (!std::filesystem::exists(alt_path)) {
+            std::cerr << "Warning: input file `" << alt_path.string() << "` does not exist." << std::endl;
+        }
+        std::vector<std::vector<int>> alt = load_txt(alt_path.string());
+
+        auto ref_path = std::filesystem::path(path) / "ref" / ("ref_" + std::to_string(i) + ".txt");
+        if (!std::filesystem::exists(ref_path)) {
+            std::cerr << "Warning: input file `" << ref_path.string() << "` does not exist." << std::endl;
+        }
+        std::vector<std::vector<int>> ref = load_txt(ref_path.string());
 
         int n_snvs = static_cast<int>(alt[0].size());
         int n_cells = static_cast<int>(alt.size());
@@ -162,6 +173,7 @@ void generate_sciterna_simulation_results(
 
         auto end_time = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end_time - start_time;
+        std::cout << "Run " << i << " completed in " << elapsed.count() << " seconds." << std::endl;
         runtimes.push_back(elapsed.count());
     }
 

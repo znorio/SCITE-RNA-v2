@@ -108,7 +108,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Convert bootstrap samples of trees to consensus parent vectors")
     parser.add_argument("--input_folder", type=str, help="Path to the input folder containing bootstrap tree files.", default="mm34") # "50c500m"
-    parser.add_argument("--base_path", type=str, help="Base path for the files", default="../data/results") # "/cluster/work/bewi/members/znorio/SCITE-RNA-v2/data/results"
+    parser.add_argument("--base_path", type=str, help="Base path for the files", default="../data/results")
     parser.add_argument("--model", type=str, help="Model used for the bootstrap samples.", default="sciterna")
     parser.add_argument("--simulated", type=bool, help="Run on simulated data.", default=False)
     parser.add_argument("--n_samples", type=int, help="Number of simulated samples to process.", default=100)

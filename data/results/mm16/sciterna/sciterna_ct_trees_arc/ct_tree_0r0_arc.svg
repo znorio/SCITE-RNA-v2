@@ -416,7 +416,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan258">SRR3934377</tspan></text>
+                   id="tspan258">SRR6710284</tspan></text>
             </g>
           </g>
           <g
@@ -504,7 +504,7 @@
              transform="matrix(0.98465839,0.13533818,-0.13533818,0.98465839,1427.2582,1245.5187)">
             <path
                d="M -23,28.751181 H 812"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path308" />
           </g>
           <g
@@ -512,7 +512,7 @@
              transform="matrix(0.98465839,0.13533818,-0.13533818,0.98465839,2226.8008,1355.4133)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path312" />
           </g>
           <g
@@ -526,12 +526,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text322"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan320">SRR3934366</tspan></text>
+                   id="tspan320">SRR6710273</tspan></text>
             </g>
           </g>
           <g
@@ -586,7 +586,7 @@
              transform="matrix(0.95705868,0.26815527,-0.26815527,0.95705868,1481.997,1285.3258)">
             <path
                d="M -23,28.751181 H 754"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path352" />
           </g>
           <g
@@ -594,7 +594,7 @@
              transform="matrix(0.95705868,0.26815527,-0.26815527,0.95705868,2203.6193,1487.5148)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path356" />
           </g>
           <g
@@ -608,12 +608,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text366"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan364">SRR3934351</tspan></text>
+                   id="tspan364">SRR6710258</tspan></text>
             </g>
           </g>
           <g
@@ -668,7 +668,7 @@
              transform="matrix(0.91163078,0.39597713,-0.39597713,0.91163078,1528.1067,1339.6432)">
             <path
                d="M -23,28.751181 H 696"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path396" />
           </g>
           <g
@@ -676,7 +676,7 @@
              transform="matrix(0.91163078,0.39597713,-0.39597713,0.91163078,2162.6017,1615.2433)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path400" />
           </g>
           <g
@@ -690,12 +690,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text410"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan408">SRR3934367</tspan></text>
+                   id="tspan408">SRR6710274</tspan></text>
             </g>
           </g>
           <g
@@ -816,7 +816,7 @@
              transform="matrix(0.84922093,0.51642268,-0.51642268,0.84922093,1661.4922,1466.7887)">
             <path
                d="M -23,28.751181 H 522"
-               style="fill:none;stroke:#800080;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path476" />
           </g>
           <g
@@ -824,7 +824,7 @@
              transform="matrix(0.84922093,0.51642268,-0.51642268,0.84922093,2104.7855,1736.3613)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#800080;fill-opacity:1;fill-rule:evenodd;stroke:#800080;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path480" />
           </g>
           <g
@@ -838,12 +838,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#800080;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text490"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan488">SRR3934356</tspan></text>
+                   id="tspan488">SRR6710263</tspan></text>
             </g>
           </g>
           <g
@@ -898,7 +898,7 @@
              transform="matrix(0.72638939,0.67840034,-0.67840034,0.72638939,1639.2973,1597.9387)">
             <path
                d="M -23,11.5 H 232"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path520" />
           </g>
           <g
@@ -915,7 +915,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m 509.03795,545.04581 c 24.8075,-23.17845 48.03128,-48.03064 69.49134,-74.37658"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path530" />
           </g>
           <g
@@ -931,7 +931,7 @@
              transform="matrix(0.77099169,0.62724826,-0.62724826,0.77099169,1851.8921,1702.8368)">
             <path
                d="M -23,28.751181 H 232"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path538" />
           </g>
           <g
@@ -939,7 +939,7 @@
              transform="matrix(0.77099169,0.62724826,-0.62724826,0.77099169,2030.7622,1848.3584)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path542" />
           </g>
           <g
@@ -953,12 +953,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text552"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan550">SRR3934369</tspan></text>
+                   id="tspan550">SRR6710276</tspan></text>
             </g>
           </g>
           <g
@@ -980,7 +980,7 @@
              transform="matrix(0.67840034,0.72638939,-0.72638939,0.67840034,1784.6248,1780.5767)">
             <path
                d="M -23,28.751181 H 232"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path564" />
           </g>
           <g
@@ -988,7 +988,7 @@
              transform="matrix(0.67840034,0.72638939,-0.72638939,0.67840034,1942.0137,1949.099)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path568" />
           </g>
           <g
@@ -1002,12 +1002,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text578"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan576">SRR3934370</tspan></text>
+                   id="tspan576">SRR6710277</tspan></text>
             </g>
           </g>
           <g
@@ -1029,7 +1029,7 @@
              transform="matrix(0.15003297,0.98252668,-0.98252668,0.15003297,1340.0955,1764.2922)">
             <path
                d="M -23,11.5 H 58"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path590" />
           </g>
           <g
@@ -1046,7 +1046,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="M -175.44103,544.39042 C -120.15857,562.19266 -61.202164,571.80788 0,571.80788 c 122.82394,0 236.60318,-38.72503 329.79417,-104.63156"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path600" />
           </g>
           <g
@@ -1089,7 +1089,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan620">SRR3934372</tspan></text>
+                   id="tspan620">SRR6710279</tspan></text>
             </g>
           </g>
           <g
@@ -1111,7 +1111,7 @@
              transform="matrix(-0.30471495,0.94605358,-0.94605358,-0.30471495,1083.137,1805.3447)">
             <path
                d="M -23,11.5 H 58"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path634" />
           </g>
           <g
@@ -1128,7 +1128,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="M -469.43571,420.03035 C -354.09721,548.84744 -186.51531,629.91098 0,629.91098 c 46.822179,0 92.451186,-5.10858 136.36005,-14.79876"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path644" />
           </g>
           <g
@@ -1144,7 +1144,7 @@
              transform="matrix(0.21466251,0.97045792,-0.97045792,0.21466251,1398.8472,1869.9937)">
             <path
                d="M -23,11.5 H 58"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path652" />
           </g>
           <g
@@ -1161,7 +1161,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -29.372706,687.38983 c 9.739915,0.40909 19.5321842,0.61569 29.372706,0.61569 114.19759,0 221.89686,-27.8226 316.68901,-77.05901"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path662" />
           </g>
           <g
@@ -1204,7 +1204,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan682">SRR3934386</tspan></text>
+                   id="tspan682">SRR6710293</tspan></text>
             </g>
           </g>
           <g
@@ -1226,7 +1226,7 @@
              transform="matrix(-0.0424121,0.99301047,-0.99301047,-0.0424121,1231.7521,1945.104)">
             <path
                d="M -23,11.5 H 58"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path696" />
           </g>
           <g
@@ -1243,7 +1243,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="M -225.88152,711.2882 C -154.62731,733.89583 -78.738035,746.0928 0,746.0928 c 56.563719,0 111.65729,-6.29446 164.61846,-18.22115"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path706" />
           </g>
           <g
@@ -1259,7 +1259,7 @@
              transform="matrix(0.21880291,0.9695328,-0.9695328,0.21880291,1426.9131,1981.9948)">
             <path
                d="M -23,11.5 H 58"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path714" />
           </g>
           <g
@@ -1276,7 +1276,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="M 82.545676,799.98909 C 147.50878,793.36528 210.18393,779.00894 269.63597,757.85524"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path724" />
           </g>
           <g
@@ -1319,7 +1319,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan744">SRR3934394</tspan></text>
+                   id="tspan744">SRR6710301</tspan></text>
             </g>
           </g>
           <g
@@ -1341,7 +1341,7 @@
              transform="matrix(0.10164195,0.98870495,-0.98870495,0.10164195,1344.2768,2055.2919)">
             <path
                d="M -23,11.5 H 58"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path758" />
           </g>
           <g
@@ -1358,7 +1358,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m 0,862.24956 c 60.263409,0 119.08286,-6.1823 175.85873,-17.94727"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path768" />
           </g>
           <g
@@ -1401,7 +1401,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan788">SRR3934391</tspan></text>
+                   id="tspan788">SRR6710298</tspan></text>
             </g>
           </g>
           <g
@@ -1423,7 +1423,7 @@
              transform="matrix(0,0.99391578,-0.99391578,0,1261.43,2118.4335)">
             <path
                d="M -23,11.5 H 58"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path802" />
           </g>
           <g
@@ -1440,7 +1440,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -62.847911,918.20832 c 20.767984,1.40058 41.724843,2.1122 62.847911,2.1122 21.199179,0 42.23095,-0.71676 63.072399,-2.12737"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path812" />
           </g>
           <g
@@ -1483,7 +1483,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan832">SRR3934378</tspan></text>
+                   id="tspan832">SRR6710285</tspan></text>
             </g>
           </g>
           <g
@@ -1505,7 +1505,7 @@
              transform="matrix(-0.06782721,0.99159873,-0.99159873,-0.06782721,1215.3068,2175.9422)">
             <path
                d="M -23,28.751181 H 58"
-               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path846" />
           </g>
           <g
@@ -1513,7 +1513,7 @@
              transform="matrix(-0.06782721,0.99159873,-0.99159873,-0.06782721,1211.3729,2233.4549)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path850" />
           </g>
           <g
@@ -1527,12 +1527,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text860"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan858">SRR3934389</tspan></text>
+                   id="tspan858">SRR6710296</tspan></text>
             </g>
           </g>
           <g
@@ -1571,7 +1571,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -328.25307,755.48349 c 51.03394,22.20469 104.7557,39.38977 160.54188,50.93185"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path882" />
           </g>
           <g
@@ -1614,7 +1614,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan902">SRR3934390</tspan></text>
+                   id="tspan902">SRR6710297</tspan></text>
             </g>
           </g>
           <g
@@ -1653,7 +1653,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -414.61862,800.04277 c 36.20251,18.80002 73.84244,35.21488 112.71163,49.03642"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path926" />
           </g>
           <g
@@ -1696,7 +1696,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan946">SRR3934387</tspan></text>
+                   id="tspan946">SRR6710294</tspan></text>
             </g>
           </g>
           <g
@@ -1745,7 +1745,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan972">SRR3934392</tspan></text>
+                   id="tspan972">SRR6710299</tspan></text>
             </g>
           </g>
           <g
@@ -1784,7 +1784,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -602.63288,332.20493 c 50.45373,91.33018 121.06582,169.96947 205.83522,229.91686"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path996" />
           </g>
           <g
@@ -1827,7 +1827,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1016">SRR3934384</tspan></text>
+                   id="tspan1016">SRR6710291</tspan></text>
             </g>
           </g>
           <g
@@ -1866,7 +1866,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -714.98487,213.87806 c 30.86641,103.33498 83.52343,197.26773 152.63869,276.46589"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1040" />
           </g>
           <g
@@ -1899,7 +1899,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -672.81722,474.96243 c 32.53381,46.0024 69.6667,88.52129 110.7292,126.88723"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1058" />
           </g>
           <g
@@ -1942,7 +1942,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1078">SRR3934381</tspan></text>
+                   id="tspan1078">SRR6710288</tspan></text>
             </g>
           </g>
           <g
@@ -1981,7 +1981,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -769.82781,468.23215 c 21.39376,35.09863 45.12033,68.61935 70.96432,100.34675"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1102" />
           </g>
           <g
@@ -2024,7 +2024,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1122">SRR3934373</tspan></text>
+                   id="tspan1122">SRR6710280</tspan></text>
             </g>
           </g>
           <g
@@ -2073,7 +2073,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1148">SRR3934393</tspan></text>
+                   id="tspan1148">SRR6710300</tspan></text>
             </g>
           </g>
           <g
@@ -2112,7 +2112,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -792.54659,137.02483 c 11.00767,64.12179 29.60773,125.6491 54.84161,183.62339"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1172" />
           </g>
           <g
@@ -2155,7 +2155,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1192">SRR3934383</tspan></text>
+                   id="tspan1192">SRR6710290</tspan></text>
             </g>
           </g>
           <g
@@ -2194,7 +2194,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -860.25642,59.092617 c 4.05195,59.866603 14.21451,118.057083 29.86903,173.952783"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1216" />
           </g>
           <g
@@ -2237,7 +2237,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1236">SRR3934374</tspan></text>
+                   id="tspan1236">SRR6710281</tspan></text>
             </g>
           </g>
           <g
@@ -2276,7 +2276,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -920.32052,0 c 0,42.648473 2.90097,84.619387 8.51635,125.72618"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1260" />
           </g>
           <g
@@ -2319,7 +2319,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1280">SRR3934379</tspan></text>
+                   id="tspan1280">SRR6710286</tspan></text>
             </g>
           </g>
           <g
@@ -2368,7 +2368,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1306">SRR3934388</tspan></text>
+                   id="tspan1306">SRR6710295</tspan></text>
             </g>
           </g>
           <g
@@ -2423,7 +2423,7 @@
              transform="matrix(-0.98465839,-0.13533818,0.13533818,-0.98465839,771.93252,1213.1361)">
             <path
                d="M -23,28.751181 H 507.5"
-               style="fill:none;stroke:#a52a2a;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1338" />
           </g>
           <g
@@ -2431,7 +2431,7 @@
              transform="matrix(-0.98465839,-0.13533818,0.13533818,-0.98465839,272.21838,1144.4519)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#a52a2a;fill-opacity:1;fill-rule:evenodd;stroke:#a52a2a;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1342" />
           </g>
           <g
@@ -2445,12 +2445,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#a52a2a;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1352"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1350">SRR3934350</tspan></text>
+                   id="tspan1350">SRR6710257</tspan></text>
             </g>
           </g>
           <g
@@ -2505,7 +2505,7 @@
              transform="matrix(-0.92461842,-0.3646222,0.3646222,-0.92461842,733.39843,1058.5655)">
             <path
                d="M -23,11.5 H 145"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1382" />
           </g>
           <g
@@ -2522,7 +2522,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -610.77277,-316.53028 c -21.46089,41.32646 -38.85053,85.10649 -51.63757,130.80877"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1392" />
           </g>
           <g
@@ -2538,7 +2538,7 @@
              transform="matrix(-0.95705868,-0.26815527,0.26815527,-0.95705868,573.03992,1090.0014)">
             <path
                d="M -23,28.751181 H 290"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1400" />
           </g>
           <g
@@ -2546,7 +2546,7 @@
              transform="matrix(-0.95705868,-0.26815527,0.26815527,-0.95705868,295.49291,1012.2364)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1404" />
           </g>
           <g
@@ -2560,12 +2560,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1414"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1412">SRR3934353</tspan></text>
+                   id="tspan1412">SRR6710260</tspan></text>
             </g>
           </g>
           <g
@@ -2587,7 +2587,7 @@
              transform="matrix(-0.88248313,-0.4572659,0.4572659,-0.88248313,627.64021,940.39247)">
             <path
                d="M -23,11.5 H 145"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1426" />
           </g>
           <g
@@ -2604,7 +2604,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m -711.69761,-432.82525 c -19.64908,32.24006 -37.16908,65.92008 -52.36467,100.84474"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1436" />
           </g>
           <g
@@ -2620,7 +2620,7 @@
              transform="matrix(-0.91163078,-0.39597713,0.39597713,-0.91163078,468.87378,941.86458)">
             <path
                d="M -23,28.751181 H 145"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1444" />
           </g>
           <g
@@ -2628,7 +2628,7 @@
              transform="matrix(-0.91163078,-0.39597713,0.39597713,-0.91163078,336.68731,884.4479)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1448" />
           </g>
           <g
@@ -2642,12 +2642,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1458"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1456">SRR3934354</tspan></text>
+                   id="tspan1456">SRR6710261</tspan></text>
             </g>
           </g>
           <g
@@ -2669,7 +2669,7 @@
              transform="matrix(-0.84922093,-0.51642268,0.51642268,-0.84922093,518.10699,838.37123)">
             <path
                d="M -23,28.751181 H 145"
-               style="fill:none;stroke:#a52a2a;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1470" />
           </g>
           <g
@@ -2677,7 +2677,7 @@
              transform="matrix(-0.84922093,-0.51642268,0.51642268,-0.84922093,394.96996,763.48994)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#a52a2a;fill-opacity:1;fill-rule:evenodd;stroke:#a52a2a;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1474" />
           </g>
           <g
@@ -2691,12 +2691,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#a52a2a;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1484"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1482">SRR3934365</tspan></text>
+                   id="tspan1482">SRR6710272</tspan></text>
             </g>
           </g>
           <g
@@ -2751,7 +2751,7 @@
              transform="matrix(-0.72638939,-0.67840034,0.67840034,-0.72638939,786.9054,833.1395)">
             <path
                d="M -23,11.5 H 181.25"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1514" />
           </g>
           <g
@@ -2784,7 +2784,7 @@
              transform="matrix(-0.77099169,-0.62724826,0.62724826,-0.77099169,608.9113,765.27443)">
             <path
                d="M -23,28.751181 H 181.25"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1532" />
           </g>
           <g
@@ -2792,7 +2792,7 @@
              transform="matrix(-0.77099169,-0.62724826,0.62724826,-0.77099169,469.16906,651.58568)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1536" />
           </g>
           <g
@@ -2806,12 +2806,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1546"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1544">SRR3934349</tspan></text>
+                   id="tspan1544">SRR6710256</tspan></text>
             </g>
           </g>
           <g
@@ -2860,7 +2860,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1570">SRR3934385</tspan></text>
+                   id="tspan1570">SRR6710292</tspan></text>
             </g>
           </g>
           <g
@@ -2915,7 +2915,7 @@
              transform="matrix(-0.57317167,-0.81199927,0.81199927,-0.57317167,825.78713,698.5803)">
             <path
                d="M -23,28.751181 H 290"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1602" />
           </g>
           <g
@@ -2923,7 +2923,7 @@
              transform="matrix(-0.57317167,-0.81199927,0.81199927,-0.57317167,659.56734,463.10051)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1606" />
           </g>
           <g
@@ -2937,12 +2937,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1616"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1614">SRR3934364</tspan></text>
+                   id="tspan1614">SRR6710271</tspan></text>
             </g>
           </g>
           <g
@@ -3024,7 +3024,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1658">SRR3934359</tspan></text>
+                   id="tspan1658">SRR6710266</tspan></text>
             </g>
           </g>
           <g
@@ -3046,7 +3046,7 @@
              transform="matrix(-0.23532389,-0.96565586,0.96565586,-0.23532389,1057.2321,507.24947)">
             <path
                d="M -23,11.5 H 72.5"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1672" />
           </g>
           <g
@@ -3079,7 +3079,7 @@
              transform="matrix(-0.33284213,-0.936528,0.936528,-0.33284213,941.97267,468.62706)">
             <path
                d="M -23,28.751181 H 145"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1690" />
           </g>
           <g
@@ -3087,7 +3087,7 @@
              transform="matrix(-0.33284213,-0.936528,0.936528,-0.33284213,893.71056,332.8305)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1694" />
           </g>
           <g
@@ -3101,12 +3101,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1704"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1702">SRR3934361</tspan></text>
+                   id="tspan1702">SRR6710268</tspan></text>
             </g>
           </g>
           <g
@@ -3128,7 +3128,7 @@
              transform="matrix(-0.13533818,-0.98465839,0.98465839,-0.13533818,1124.3769,419.96543)">
             <path
                d="M -23,11.5 H 72.5"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1716" />
           </g>
           <g
@@ -3161,7 +3161,7 @@
              transform="matrix(-0.20221814,-0.97312712,0.97312712,-0.20221814,1036.5632,363.33988)">
             <path
                d="M -23,28.751181 H 72.5"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1734" />
           </g>
           <g
@@ -3169,7 +3169,7 @@
              transform="matrix(-0.20221814,-0.97312712,0.97312712,-0.20221814,1021.9024,292.78816)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1738" />
           </g>
           <g
@@ -3183,12 +3183,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1748"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1746">SRR3934368</tspan></text>
+                   id="tspan1746">SRR6710275</tspan></text>
             </g>
           </g>
           <g
@@ -3237,7 +3237,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1772">SRR3934382</tspan></text>
+                   id="tspan1772">SRR6710289</tspan></text>
             </g>
           </g>
           <g
@@ -3259,7 +3259,7 @@
              transform="matrix(0.30875036,-0.9447443,0.9447443,0.30875036,1347.4343,915.0659)">
             <path
                d="M -23,11.5 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1786" />
           </g>
           <g
@@ -3292,7 +3292,7 @@
              transform="matrix(0.13533818,-0.98465839,0.98465839,0.13533818,1300.5589,798.21523)">
             <path
                d="M -23,11.5 H 265.83333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1804" />
           </g>
           <g
@@ -3325,7 +3325,7 @@
              transform="matrix(0.06782721,-0.99159873,0.99159873,0.06782721,1270.5408,530.95741)">
             <path
                d="M -23,28.751181 H 265.83333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1822" />
           </g>
           <g
@@ -3333,7 +3333,7 @@
              transform="matrix(0.06782721,-0.99159873,0.99159873,0.06782721,1288.5716,267.35742)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1826" />
           </g>
           <g
@@ -3347,12 +3347,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1836"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1834">SRR3934358</tspan></text>
+                   id="tspan1834">SRR6710265</tspan></text>
             </g>
           </g>
           <g
@@ -3401,7 +3401,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1860">SRR3934375</tspan></text>
+                   id="tspan1860">SRR6710282</tspan></text>
             </g>
           </g>
           <g
@@ -3423,7 +3423,7 @@
              transform="matrix(0.47226592,-0.87454758,0.87454758,0.47226592,1455.8831,844.68799)">
             <path
                d="M -23,11.5 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1874" />
           </g>
           <g
@@ -3456,7 +3456,7 @@
              transform="matrix(0.33284213,-0.936528,0.936528,0.33284213,1410.6948,712.5153)">
             <path
                d="M -23,28.751181 H 425.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1892" />
           </g>
           <g
@@ -3464,7 +3464,7 @@
              transform="matrix(0.33284213,-0.936528,0.936528,0.33284213,1552.2636,314.17872)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1896" />
           </g>
           <g
@@ -3478,12 +3478,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1906"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1904">SRR3934357</tspan></text>
+                   id="tspan1904">SRR6710264</tspan></text>
             </g>
           </g>
           <g
@@ -3505,7 +3505,7 @@
              transform="matrix(0.60056008,-0.79195717,0.79195717,0.60056008,1579.4245,796.67215)">
             <path
                d="M -23,11.5 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1918" />
           </g>
           <g
@@ -3538,7 +3538,7 @@
              transform="matrix(0.4572659,-0.88248313,0.88248313,0.4572659,1531.0533,645.47827)">
             <path
                d="M -23,28.751181 H 319"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1936" />
           </g>
           <g
@@ -3546,7 +3546,7 @@
              transform="matrix(0.4572659,-0.88248313,0.88248313,0.4572659,1676.9211,363.96615)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1940" />
           </g>
           <g
@@ -3560,12 +3560,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text1950"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan1948">SRR3934363</tspan></text>
+                   id="tspan1948">SRR6710270</tspan></text>
             </g>
           </g>
           <g
@@ -3587,7 +3587,7 @@
              transform="matrix(0.72638939,-0.67840034,0.67840034,0.72638939,1728.9707,787.03289)">
             <path
                d="M -23,11.5 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1962" />
           </g>
           <g
@@ -3620,7 +3620,7 @@
              transform="matrix(0.62724826,-0.77099169,0.77099169,0.62724826,1728.2197,644.07738)">
             <path
                d="M -23,11.5 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1980" />
           </g>
           <g
@@ -3653,7 +3653,7 @@
              transform="matrix(0.57317167,-0.81199927,0.81199927,0.57317167,1732.7375,516.56376)">
             <path
                d="M -23,28.751181 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path1998" />
           </g>
           <g
@@ -3661,7 +3661,7 @@
              transform="matrix(0.57317167,-0.81199927,0.81199927,0.57317167,1793.6847,430.22117)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2002" />
           </g>
           <g
@@ -3675,12 +3675,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text2012"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan2010">SRR3934360</tspan></text>
+                   id="tspan2010">SRR6710267</tspan></text>
             </g>
           </g>
           <g
@@ -3729,7 +3729,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan2036">SRR3934376</tspan></text>
+                   id="tspan2036">SRR6710283</tspan></text>
             </g>
           </g>
           <g
@@ -3751,7 +3751,7 @@
              transform="matrix(0.81199927,-0.57317167,0.57317167,0.81199927,1873.962,795.56877)">
             <path
                d="M -23,11.5 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2050" />
           </g>
           <g
@@ -3784,7 +3784,7 @@
              transform="matrix(0.77099169,-0.62724826,0.62724826,0.77099169,1912.715,674.00258)">
             <path
                d="M -23,28.751181 H 106.33333"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2068" />
           </g>
           <g
@@ -3792,7 +3792,7 @@
              transform="matrix(0.77099169,-0.62724826,0.62724826,0.77099169,1994.6971,607.30518)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2072" />
           </g>
           <g
@@ -3806,12 +3806,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text2082"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan2080">SRR3934352</tspan></text>
+                   id="tspan2080">SRR6710259</tspan></text>
             </g>
           </g>
           <g
@@ -3860,7 +3860,7 @@
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan2106">SRR3934380</tspan></text>
+                   id="tspan2106">SRR6710287</tspan></text>
             </g>
           </g>
           <g
@@ -3882,7 +3882,7 @@
              transform="matrix(0.94734562,-0.30067399,0.30067399,0.94734562,1358.0375,1203.7185)">
             <path
                d="M -23,11.5 H 290"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2120" />
           </g>
           <g
@@ -3899,7 +3899,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m 388.10454,-80.83784 c -5.55878,-26.82577 -13.82879,-52.65906 -24.51072,-77.20055"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2130" />
           </g>
           <g
@@ -3915,7 +3915,7 @@
              transform="matrix(0.91163078,-0.39597713,0.39597713,0.91163078,1610.4279,1062.2885)">
             <path
                d="M -23,28.751181 H 580"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2138" />
           </g>
           <g
@@ -3923,7 +3923,7 @@
              transform="matrix(0.91163078,-0.39597713,0.39597713,0.91163078,2139.1737,832.62177)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2142" />
           </g>
           <g
@@ -3937,12 +3937,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text2152"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan2150">SRR3934371</tspan></text>
+                   id="tspan2150">SRR6710278</tspan></text>
             </g>
           </g>
           <g
@@ -3964,7 +3964,7 @@
              transform="matrix(0.97312712,-0.20221814,0.20221814,0.97312712,1644.5687,1156.3335)">
             <path
                d="M -23,11.5 H 290"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2164" />
           </g>
           <g
@@ -3981,7 +3981,7 @@
              transform="matrix(0.99391578,0,0,0.99391578,1250,1250)">
             <path
                d="m 680.09701,-93.776716 c -4.27655,-31.306004 -10.66383,-61.940064 -19.01374,-91.754054"
-               style="fill:none;stroke:#000000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2174" />
           </g>
           <g
@@ -3997,7 +3997,7 @@
              transform="matrix(0.95705868,-0.26815527,0.26815527,0.95705868,1910.2686,1035.3247)">
             <path
                d="M -23,28.751181 H 290"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2182" />
           </g>
           <g
@@ -4005,7 +4005,7 @@
              transform="matrix(0.95705868,-0.26815527,0.26815527,0.95705868,2187.8156,957.55965)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2186" />
           </g>
           <g
@@ -4019,12 +4019,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text2196"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan2194">SRR3934355</tspan></text>
+                   id="tspan2194">SRR6710262</tspan></text>
             </g>
           </g>
           <g
@@ -4046,7 +4046,7 @@
              transform="matrix(0.98465839,-0.13533818,0.13533818,0.98465839,1933.3504,1127.2307)">
             <path
                d="M -23,28.751181 H 290"
-               style="fill:none;stroke:#0000ff;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:none;stroke:#ff0000;stroke-width:23;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2208" />
           </g>
           <g
@@ -4054,7 +4054,7 @@
              transform="matrix(0.98465839,-0.13533818,0.13533818,0.98465839,2218.9013,1087.9827)">
             <path
                d="m 57.502363,28.751181 c 0,15.878839 -12.872343,28.751182 -28.751182,28.751182 C 12.872342,57.502363 0,44.63002 0,28.751181 0,12.872342 12.872342,0 28.751181,0 44.63002,0 57.502363,12.872342 57.502363,28.751181 Z"
-               style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+               style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
                id="path2212" />
           </g>
           <g
@@ -4068,12 +4068,12 @@
               <text
                  xml:space="preserve"
                  transform="translate(0.515625,30)"
-                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                 style="font-variant:normal;font-weight:normal;font-size:30px;font-family:Verdana;-inkscape-font-specification:VerdanaStandard;writing-mode:lr-tb;fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none"
                  id="text2222"><tspan
                    x="0 22 44 65.484375 84.484375 103.48438 122.48438 141.48438 160.48438 179.48438"
                    y="0"
                    sodipodi:role="line"
-                   id="tspan2220">SRR3934362</tspan></text>
+                   id="tspan2220">SRR6710269</tspan></text>
             </g>
           </g>
           <g

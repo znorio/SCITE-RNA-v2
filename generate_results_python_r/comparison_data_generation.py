@@ -84,7 +84,7 @@ clones = [""]  # Number of clones in the simulated dataset, empty string means r
 flipped_mutation_direction = True  # Whether to allow to flip the mutation direction (change root genotype)
 tree_space = ["c", "m"]  # Tree spaces to use during tree inference and which space to start. ["c", "m] means we start optimizing a cell tree then switch to optimizing a mutation tree
 coverage_method = "zinb"  # Determines from which distribution the coverage is sampled. Can be "zinb", "poisson", "geometric" or from a real data sample
-run_tree_inference = True  # Whether to run tree inference after generating the simulated data
+run_tree_inference = False  # Whether to run tree inference after generating the simulated data
 
 default_params = {
     'dropout': config["dropout_alpha"]/(config["dropout_alpha"] + config["dropout_beta"]),
@@ -98,17 +98,17 @@ default_params = {
     "homoplasy_fraction": 0.0
 }
 
-param_sets = {
-    'dropout': [0, 0.2, 0.4, 0.6],
-    'overdispersion_Het': [3, 6, 10, 100],
-    'overdispersion_Hom': [3, 6, 10, 100],
-    'error_rate': [0.001, 0.01, 0.05, 0.1],
-    'coverage_mean': [10, 30, 60, 100],
-    'coverage_zero_inflation': [0, 0.2, 0.4, 0.6],
-    'coverage_dispersion': [1, 2, 5, 10],
-    'CNV_fraction': [0, 0.2, 0.5, 0.8],
-    "homoplasy_fraction": [0, 0.1, 0.2, 0.5] # Fraction of loci that are affected twice by independent mutations
-}
+# param_sets = {
+#     'dropout': [0, 0.2, 0.4, 0.6],
+#     'overdispersion_Het': [3, 6, 10, 100],
+#     'overdispersion_Hom': [3, 6, 10, 100],
+#     'error_rate': [0.001, 0.01, 0.05, 0.1],
+#     'coverage_mean': [10, 30, 60, 100],
+#     'coverage_zero_inflation': [0, 0.2, 0.4, 0.6],
+#     'coverage_dispersion': [1, 2, 5, 10],
+#     'CNV_fraction': [0, 0.2, 0.5, 0.8],
+#     "homoplasy_fraction": [0, 0.1, 0.2, 0.5] # Fraction of loci that are affected twice by independent mutations
+# }
 
 # uncomment to run data simulations for different parameter settings
 # for clone in clones:
