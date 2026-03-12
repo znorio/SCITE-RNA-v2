@@ -20,7 +20,7 @@ PHYLO_DIR = opj(DATA_DIR, "phylinsic", "output/phylogeny")
 PHYLO_LOG_DIR = opj(DATA_DIR, "phylinsic", "logs/phylogeny")
 DEMUX_DIR = opj(DATA_DIR, "phylinsic", "output/demux")
 BEAST_OUTPUT = opj(DATA_DIR, "phylinsic", "output/beast2")
-BEAST2_DIR = r"/beast2/beast" #TODO replace
+BEAST2_DIR = r"/beast2/beast.v2.6.7" #TODO replace
 
 PHYLINSIC_GENOTYPE_DIR = opj(DATA_DIR, "phylinsic", "phylinsic_genotype")
 PHYLINSIC_PARENT_VEC_DIR = opj(DATA_DIR, "phylinsic", "phylinsic_parent_vec")

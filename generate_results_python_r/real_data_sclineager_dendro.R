@@ -6,7 +6,7 @@ library(SClineager)
 base_path <- file.path("data")
 
 sample <- "BT_S2"
-clones <- c(2,3,4,5)
+clones <- c(2,3,4,5,6)
 
 read.matrix <- function(path){
   mat <- as.matrix(read.table(path, header=FALSE, sep=" "))

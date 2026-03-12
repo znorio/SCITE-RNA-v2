@@ -4,9 +4,9 @@
 library(DENDRO)
 library(SClineager)
 
-n_tests <- 100
-n_cells_list <- c(5000, 2000, 500, 200)
-n_mut_list <- c(200, 500, 1000, 2000)
+n_tests <- 1
+n_cells_list <- c(50)
+n_mut_list <- c(500)
 clones_list <- c("")
 
 base_dir <- file.path("data", "simulated_data")
@@ -40,7 +40,7 @@ merge.to.parent <- function(merge.mat) {
 
   return(result)
 }
-generate_parent_vec <- function(base_path, n_tests = 10, clones = 5, 
+generate.parent.vec <- function(base_path, n_tests = 10, clones = 5,
 run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
   if (run_sclineager) {
     dir.create(file.path(base_path, "sclineager", "sclineager_vaf"), recursive = TRUE)
@@ -280,6 +280,6 @@ print(paths)
 for (i in seq_along(paths)) {
   n_clones <- clones[i]
   path <- paths[i]
-  generate.parent.vec(path, n_tests, n_clones, run_sclineager = FALSE,
-                      run_sciterna_clustering = FALSE, run_dendro = TRUE)
+  generate.parent.vec(path, n_tests, n_clones, run_sclineager = TRUE,
+                      run_sciterna_clustering = FALSE, run_dendro = FALSE)
 }
