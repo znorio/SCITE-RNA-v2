@@ -197,7 +197,7 @@ void generate_sciterna_results(
         bool only_preprocessing = false,
         const std::string& method = "threshold",
         bool insert_nodes = true,
-        bool load_from_file = true,
+        bool load_from_file = false,
         bool reduced_output = false) {
 
     load_config("../config/config.yaml");
