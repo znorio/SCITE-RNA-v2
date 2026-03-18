@@ -107,13 +107,13 @@ def main():
     from src_python.cell_tree import CellTree
 
     parser = argparse.ArgumentParser(description="Convert bootstrap samples of trees to consensus parent vectors")
-    parser.add_argument("--input_folder", type=str, help="Path to the input folder containing bootstrap tree files.", default="mm16") # "50c500m"
-    parser.add_argument("--base_path", type=str, help="Base path for the files", default=r"D:\PhD\SCITERNA\results") #../data/results")
+    parser.add_argument("--input_folder", type=str, help="Path to the input folder containing bootstrap tree files.", default="BT_S2") # "50c500m"
+    parser.add_argument("--base_path", type=str, help="Base path for the files", default=r"../data/results")
     parser.add_argument("--model", type=str, help="Model used for the bootstrap samples.", default="sciterna")
     parser.add_argument("--simulated", type=bool, help="Run on simulated data.", default=False)
     parser.add_argument("--n_samples", type=int, help="Number of simulated samples to process.", default=100)
     parser.add_argument("--round", type=int, help="Which round to use. Each round updates optimized SNV specific and global parameters like dropout probabilities", default=1)
-    parser.add_argument("--n_bootstrap", type=int, help="Number of bootstrap samples to process.", default=1000)
+    parser.add_argument("--n_bootstrap", type=int, help="Number of bootstrap samples to process.", default=178)
     args = parser.parse_args()
 
     model = args.model
@@ -129,7 +129,7 @@ def main():
         if simulated:
             path = os.path.join(base_path, rf"{input_folder}/{model}_{s}_bootstrap")
         else:
-            path = os.path.join(base_path, rf"{input_folder}") #/{model}_bootstrap")
+            path = os.path.join(base_path, rf"{input_folder}/{model}_bootstrap")
 
         taxa = TaxonNamespace()
         trees = TreeList(taxon_namespace=taxa)
@@ -166,7 +166,7 @@ def main():
                 if norm is not None:
                     split_counter[norm] += 1
 
-        consensus_tree = trees.consensus(min_freq=0.01, resolve_polytomies=True, suppress_unifurcations=True)
+        consensus_tree = trees.consensus(min_freq=0.001, resolve_polytomies=True, suppress_unifurcations=True)
         consensus_tree.resolve_polytomies(update_bipartitions=False)
         annotate_clade_frequencies(consensus_tree, split_counter, total_trees=n_bootstrap)
         print(consensus_tree.as_ascii_plot(show_internal_node_labels=True))

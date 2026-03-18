@@ -4,9 +4,9 @@
 library(DENDRO)
 library(SClineager)
 
-n_tests <- 1
-n_cells_list <- c(50)
-n_mut_list <- c(500)
+n_tests <- 100
+n_cells_list <- c(200)
+n_mut_list <- c(5000)
 clones_list <- c("")
 
 base_dir <- file.path("data", "simulated_data")
@@ -41,7 +41,8 @@ merge.to.parent <- function(merge.mat) {
   return(result)
 }
 generate.parent.vec <- function(base_path, n_tests = 10, clones = 5,
-run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
+run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE,
+test_index = NULL) {
   if (run_sclineager) {
     dir.create(file.path(base_path, "sclineager", "sclineager_vaf"), recursive = TRUE)
     dir.create(file.path(base_path, "sclineager", "sclineager_parent_vec"), recursive = TRUE)
@@ -63,7 +64,19 @@ run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
   sclineager_runtimes <- c()
   dendro_runtimes <- c()
 
-  for (i in 0:(n_tests - 1)) {
+  # If a specific test index was provided, only run that test. Otherwise run all tests 0..(n_tests-1)
+  if (!is.null(test_index)) {
+    indices <- as.integer(test_index)
+    if (any(is.na(indices))) stop("Provided test_index is not an integer")
+    # validate range
+    if (any(indices < 0) || any(indices > (n_tests - 1))) {
+      stop(sprintf("Provided test_index out of range. Must be between 0 and %d", n_tests - 1))
+    }
+  } else {
+    indices <- 0:(n_tests - 1)
+  }
+
+  for (i in indices) {
     n_round <- 0
     ref <- t(read.matrix(file.path(base_path, sprintf("ref/ref_%d.txt", i))))
     alt <- t(read.matrix(file.path(base_path, sprintf("alt/alt_%d.txt", i))))
@@ -241,18 +254,28 @@ run_sclineager = TRUE, run_sciterna_clustering = TRUE, run_dendro = TRUE) {
   }
 
   if (run_sclineager) {
+    # If a single test index was requested, include it in the runtime filename
+    idx_suffix <- ""
+    if (!is.null(test_index) && length(indices) == 1) {
+      idx_suffix <- sprintf("_%d", indices)
+    }
     write.table(
       sclineager_runtimes,
-      file.path(base_path, "sclineager/sclineager_runtimes.txt"),
+      file.path(base_path, sprintf("sclineager/sclineager_runtimes%s.txt", idx_suffix)),
       row.names = FALSE,
       col.names = FALSE
     )
   }
 
   if (run_dendro) {
+    # If a single test index was requested, include it in the runtime filename
+    idx_suffix <- ""
+    if (!is.null(test_index) && length(indices) == 1) {
+      idx_suffix <- sprintf("_%d", indices)
+    }
     write.table(
       dendro_runtimes,
-      file.path(base_path, "dendro/dendro_runtimes.txt"),
+      file.path(base_path, sprintf("dendro/dendro_runtimes%s.txt", idx_suffix)),
       row.names = FALSE,
       col.names = FALSE
     )
@@ -277,9 +300,36 @@ for (i in seq_along(n_cells_list)) {
 
 print(paths)
 
+# Parse command line arguments to allow running a specific test index.
+# Usage examples:
+# Rscript comparison_clones_sclineager_dendro_sciterna.R --test=5
+# Rscript comparison_clones_sclineager_dendro_sciterna.R --test=2,4,7
+args <- commandArgs(trailingOnly = TRUE)
+test_index <- NULL
+if (length(args) > 0) {
+  for (arg in args) {
+    if (arg %in% c("--help", "-h")) {
+      cat("Usage: Rscript comparison_clones_sclineager_dendro_sciterna.R [--test=IDX[,IDX...]]\n")
+      quit(status = 0)
+    }
+
+    # accept --test=NUM, --test-index=NUM, or -t=NUM
+    if (grepl('^--test(?:-index)?=', arg) || grepl('^-t=', arg)) {
+      val <- sub('^[^=]*=', '', arg)
+      # support comma separated list
+      parts <- strsplit(val, ",")[[1]]
+      parts <- trimws(parts)
+      idx <- as.integer(parts)
+      if (any(is.na(idx))) stop("Provided test index contains non-integer values: ", val)
+      test_index <- idx
+    }
+  }
+}
+
 for (i in seq_along(paths)) {
   n_clones <- clones[i]
   path <- paths[i]
   generate.parent.vec(path, n_tests, n_clones, run_sclineager = TRUE,
-                      run_sciterna_clustering = FALSE, run_dendro = FALSE)
+                      run_sciterna_clustering = FALSE, run_dendro = FALSE,
+                      test_index = test_index)
 }

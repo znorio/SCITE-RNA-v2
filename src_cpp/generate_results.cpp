@@ -73,6 +73,17 @@ void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vec
 
     for (int r = 0; r < n_rounds; ++r) {
 
+        // Skip this round if parent vector file already exists and is non-empty
+        std::filesystem::path parent_file = std::filesystem::path(pathout) / "sciterna_parent_vec" / ("sciterna_parent_vec_" + std::to_string(r) + "r" + std::to_string(i) + ".txt");
+        std::error_code ec;
+        if (std::filesystem::exists(parent_file)) {
+            auto sz = std::filesystem::file_size(parent_file, ec);
+            if (!ec && sz > 0) {
+                std::cout << "Skipping round " << r << " for run " << i << " since " << parent_file.string() << " exists and is non-empty." << std::endl;
+                continue;
+            }
+        }
+
         auto [llh_1, llh_2] = mf.get_llh_mat(slice_columns(ref, selected),
                                              slice_columns(alt, selected), gt1, gt2, true,
                                              dropout_probs_round, overdispersion_h_round);

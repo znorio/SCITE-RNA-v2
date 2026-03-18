@@ -20,7 +20,7 @@ int main() {
     int n_rounds = 2; // how many rounds of tree inference and parameter optimization to perform
     std::string sample = "BT_S2"; // specify the sample name, e.g. "mm16", "mm34"
     bool flipped_mutation_direction = true; // if true, we allow the model to switch the root genotype/mutation direction during tree inference
-    bool only_preprocessing = true; // if true, only the mutation filtering step is performed, no tree inference or parameter optimization
+    bool only_preprocessing = false; // if true, only the mutation filtering step is performed, no tree inference or parameter optimization
     std::vector<std::string> tree_space = {"c", "m"}; // which tree spaces to use during optimization, "c" for cell lineage tree, "m" for mutation tree, the order determines in which space the optimization starts
     bool reshuffle_nodes = false; // false makes optimization faster for large numbers of mutations as individual nodes are not pruned and reinserted, instead only pruning and reattaching of subtrees is performed
     bool load_from_file = false; // if true, the selected mutations and genotypes are loaded from file, otherwise they are computed from the data
