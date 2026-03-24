@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for i in $(seq 1 10); do
+for i in $(seq 0 10); do
   sbatch \
     --job-name="sc${i}" \
     --mem-per-cpu=32G \

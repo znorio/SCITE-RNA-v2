@@ -73,15 +73,32 @@ void process_rounds(MutationFilter &mf, SwapOptimizer &optimizer, const std::vec
 
     for (int r = 0; r < n_rounds; ++r) {
 
-        // Skip this round if parent vector file already exists and is non-empty
+        // Skip this round if parent vector and genotype files already exist and are non-empty
         std::filesystem::path parent_file = std::filesystem::path(pathout) / "sciterna_parent_vec" / ("sciterna_parent_vec_" + std::to_string(r) + "r" + std::to_string(i) + ".txt");
-        std::error_code ec;
+        std::filesystem::path genotype_file = std::filesystem::path(pathout) / "sciterna_genotype" / ("sciterna_genotype_" + std::to_string(r) + "r" + std::to_string(i) + ".txt");
+
+        std::error_code ec_parent, ec_geno;
+        bool parent_ok = false;
+        bool genotype_ok = false;
+
         if (std::filesystem::exists(parent_file)) {
-            auto sz = std::filesystem::file_size(parent_file, ec);
-            if (!ec && sz > 0) {
-                std::cout << "Skipping round " << r << " for run " << i << " since " << parent_file.string() << " exists and is non-empty." << std::endl;
-                continue;
+            auto sz = std::filesystem::file_size(parent_file, ec_parent);
+            if (!ec_parent && sz > 0) {
+                parent_ok = true;
             }
+        }
+
+        if (std::filesystem::exists(genotype_file)) {
+            auto sz2 = std::filesystem::file_size(genotype_file, ec_geno);
+            if (!ec_geno && sz2 > 0) {
+                genotype_ok = true;
+            }
+        }
+
+        if (parent_ok && genotype_ok) {
+            std::cout << "Skipping round " << r << " for run " << i << " since " << parent_file.string()
+                      << " and " << genotype_file.string() << " exist and are non-empty." << std::endl;
+            continue;
         }
 
         auto [llh_1, llh_2] = mf.get_llh_mat(slice_columns(ref, selected),

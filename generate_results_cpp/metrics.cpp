@@ -214,8 +214,8 @@ std::vector<std::vector<double>> mapGenotype(
 int main() {
     unordered_map<char, float> mappingDict = {{'A', 1.0}, {'H', 0.5}, {'R', 0.0}};
 
-    vector<int> numCellsList = {5000, 2000, 1000, 500, 200};
-    vector<int> numMutList = {200, 500, 1000, 2000, 5000};
+    vector<int> numCellsList = {1000};
+    vector<int> numMutList = {1000};
     vector<vector<string>> spaces = {{"c", "m"}};
     int nTests = 100;
     bool flipped_mutation_direction = false;
