@@ -316,7 +316,6 @@ if (length(args) > 0) {
     # accept --test=NUM, --test-index=NUM, or -t=NUM
     if (grepl('^--test(?:-index)?=', arg) || grepl('^-t=', arg)) {
       val <- sub('^[^=]*=', '', arg)
-      # support comma separated list
       parts <- strsplit(val, ",")[[1]]
       parts <- trimws(parts)
       idx <- as.integer(parts)
@@ -330,6 +329,6 @@ for (i in seq_along(paths)) {
   n_clones <- clones[i]
   path <- paths[i]
   generate.parent.vec(path, n_tests, n_clones, run_sclineager = TRUE,
-                      run_sciterna_clustering = FALSE, run_dendro = FALSE,
+                      run_sciterna_clustering = FALSE, run_dendro = TRUE,
                       test_index = test_index)
 }

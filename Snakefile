@@ -20,7 +20,7 @@ PHYLO_DIR = opj(DATA_DIR, "phylinsic", "output/phylogeny")
 PHYLO_LOG_DIR = opj(DATA_DIR, "phylinsic", "logs/phylogeny")
 DEMUX_DIR = opj(DATA_DIR, "phylinsic", "output/demux")
 BEAST_OUTPUT = opj(DATA_DIR, "phylinsic", "output/beast2")
-BEAST2_DIR = r"/cluster/work/bewi/members/znorio/beast2/beast"
+BEAST2_DIR = r"/beast2/beast"
 
 
 PHYLINSIC_GENOTYPE_DIR = opj(DATA_DIR, "phylinsic", "phylinsic_genotype")
@@ -38,7 +38,7 @@ cells = [f"Cell{i}\tno\tA" for i in range(1, NUM_CELLS+1)]
 with open(opj(DEMUX_DIR, "cells.txt"), "w") as f:
     f.write("Cell\tOutgroup\tCategory\n" + "\n".join(cells))
 
-LOGCOMBINER = r"/cluster/work/bewi/members/znorio/beast2/beast/bin/logcombiner"
+LOGCOMBINER = r"/beast2/beast/bin/logcombiner"
 RSCRIPT = "Rscript"
 JAVA = "java"
 

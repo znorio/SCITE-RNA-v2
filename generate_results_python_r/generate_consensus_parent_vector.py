@@ -113,7 +113,7 @@ def main():
     parser.add_argument("--simulated", type=bool, help="Run on simulated data.", default=False)
     parser.add_argument("--n_samples", type=int, help="Number of simulated samples to process.", default=100)
     parser.add_argument("--round", type=int, help="Which round to use. Each round updates optimized SNV specific and global parameters like dropout probabilities", default=1)
-    parser.add_argument("--n_bootstrap", type=int, help="Number of bootstrap samples to process.", default=178)
+    parser.add_argument("--n_bootstrap", type=int, help="Number of bootstrap samples to process.", default=200)
     args = parser.parse_args()
 
     model = args.model

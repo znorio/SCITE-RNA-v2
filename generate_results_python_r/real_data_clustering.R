@@ -75,11 +75,11 @@ genotype_sclineager <- as.matrix(read.table(file.path(base_path, "results", samp
 dist_scl <- dist(genotype_sclineager)
 hc_scl <- hclust(dist_scl, method='ward.D')
 
-# mut_indicator <- matrix(ifelse(round(mutations_mat, 1) > 0.3, 1, 0), nrow = nrow(mutations_mat),
-#                         ncol = ncol(mutations_mat))
-# filtered <- FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.02, cut.off.sd = 10, plot=FALSE)
-# dist_dendro <- DENDRO.dist(filtered$X,filtered$N,filtered$Z,show.progress=TRUE)
-# hc_dendro <- hclust(dist_dendro, method='ward.D')
+mut_indicator <- matrix(ifelse(round(mutations_mat, 1) > 0.3, 1, 0), nrow = nrow(mutations_mat),
+                        ncol = ncol(mutations_mat))
+filtered <- FilterCellMutation(alt, coverage, mut_indicator, cut.off.VAF = 0.02, cut.off.sd = 10, plot=FALSE)
+dist_dendro <- DENDRO.dist(filtered$X,filtered$N,filtered$Z,show.progress=TRUE)
+hc_dendro <- hclust(dist_dendro, method='ward.D')
 
 for (clone in clones) {
     memb_pred_scite <- cutree(hc_scite, k = clone)
@@ -91,6 +91,6 @@ for (clone in clones) {
     memb_pred_scl <- cutree(hc_scl, k = clone)
     write.table(memb_pred_scl, file.path(base_path, "results", sample, "sclineager", "sclineager_clones", paste0("sclineager_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 
-    # memb_pred <- cutree(hc_dendro, k = clone)
-    # write.table(memb_pred, file.path(base_path, "results", sample, "dendro", "dendro_clones", paste0("dendro_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
+    memb_pred <- cutree(hc_dendro, k = clone)
+    write.table(memb_pred, file.path(base_path, "results", sample, "dendro", "dendro_clones", paste0("dendro_clones_", clone, ".txt")), row.names=FALSE, col.names=FALSE)
 }

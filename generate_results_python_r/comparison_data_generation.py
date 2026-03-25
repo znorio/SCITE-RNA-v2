@@ -98,7 +98,7 @@ default_params = {
     "homoplasy_fraction": 0.0
 }
 
-param_sets = {
+# param_sets = {
     # 'dropout': [0, 0.2, 0.4, 0.6],
     # 'overdispersion_Het': [3, 6, 10, 100],
     # 'overdispersion_Hom': [3, 6, 10, 100],
@@ -106,41 +106,41 @@ param_sets = {
     # 'coverage_mean': [10, 30, 60, 100],
     # 'coverage_zero_inflation': [0, 0.2, 0.4, 0.6],
     # 'coverage_dispersion': [1, 2, 5, 10],
-    'CNV_fraction': [0, 0.2, 0.5, 0.8],
+    # 'CNV_fraction': [0, 0.2, 0.5, 0.8],
     # "homoplasy_fraction": [0, 0.1, 0.2, 0.5] # Fraction of loci that are affected twice by independent mutations
-}
-
-# uncomment to run data simulations for different parameter settings
-for clone in clones:
-    for num_cells, num_mut in zip(n_cells_list, n_mut_list):
-        for param_name, param_values in param_sets.items():
-            for param_value in param_values:
-                params = default_params.copy()
-                params[param_name] = param_value
-
-                param_str = f"{param_name}_{param_value}".replace('.', '_')
-                data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}_param_testing/{param_str}"
-
-                generate_comparison_data(
-                    num_cells, num_mut, num_tests, path=data_path, n_clones=clone,
-                    coverage_distribution=coverage_method, **params
-                )
-
-                if run_tree_inference:
-                    path_results = os.path.join(data_path, "sciterna")
-                    generate_sciterna_simulation_results(
-                        path=data_path, pathout=path_results, n_tests=num_tests,
-                        tree_space=tree_space,
-                        flipped_mutation_direction=flipped_mutation_direction,
-                        n_keep=num_mut, n_rounds=n_rounds
-                    )
+# }
+#
+# # uncomment to run data simulations for different parameter settings
 # for clone in clones:
 #     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
-#         data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"
-#         generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_distribution=coverage_method)
-#         if run_tree_inference:
-#             path_results = os.path.join(data_path, "sciterna")
-#             generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
-#                                                  tree_space=tree_space,
-#                                                  flipped_mutation_direction=flipped_mutation_direction,
-#                                                  n_keep=num_mut, n_rounds=n_rounds)
+#         for param_name, param_values in param_sets.items():
+#             for param_value in param_values:
+#                 params = default_params.copy()
+#                 params[param_name] = param_value
+#
+#                 param_str = f"{param_name}_{param_value}".replace('.', '_')
+#                 data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}_param_testing/{param_str}"
+#
+#                 generate_comparison_data(
+#                     num_cells, num_mut, num_tests, path=data_path, n_clones=clone,
+#                     coverage_distribution=coverage_method, **params
+#                 )
+#
+#                 if run_tree_inference:
+#                     path_results = os.path.join(data_path, "sciterna")
+#                     generate_sciterna_simulation_results(
+#                         path=data_path, pathout=path_results, n_tests=num_tests,
+#                         tree_space=tree_space,
+#                         flipped_mutation_direction=flipped_mutation_direction,
+#                         n_keep=num_mut, n_rounds=n_rounds
+#                     )
+for clone in clones:
+    for num_cells, num_mut in zip(n_cells_list, n_mut_list):
+        data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"
+        generate_comparison_data(num_cells, num_mut, num_tests, path=data_path, n_clones=clone, coverage_distribution=coverage_method)
+        if run_tree_inference:
+            path_results = os.path.join(data_path, "sciterna")
+            generate_sciterna_simulation_results(path=data_path, pathout=path_results, n_tests=num_tests,
+                                                 tree_space=tree_space,
+                                                 flipped_mutation_direction=flipped_mutation_direction,
+                                                 n_keep=num_mut, n_rounds=n_rounds)
