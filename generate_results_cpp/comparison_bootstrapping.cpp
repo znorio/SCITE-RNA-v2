@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string sample_dir = argv[1]; // e.g., "50c500m" (only for simulated data), otherwise use real_data_processing.cpp
-    int idx = std::stoi(argv[2]); // simulated sample id
+    std::string sample_dir = "500c100m"; //argv[1]; // e.g., "50c500m" (only for simulated data), otherwise use real_data_processing.cpp
+    int idx = 0; //std::stoi(argv[2]); // simulated sample id
 
     std::string input_path = "../data/simulated_data/" + sample_dir + "/";
     std::string output_path = "../data/results/" + sample_dir + "/sciterna_" + std::to_string(idx);

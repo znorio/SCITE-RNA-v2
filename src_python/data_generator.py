@@ -170,7 +170,7 @@ class DataGenerator:
             else:
                 # Both alleles still present
                 cna = (ref_alleles + alt_alleles)
-                alpha_h = (alt_alleles / cna) * overdispersion_h * cna # scale with copy number to maintain hill shape
+                alpha_h = (alt_alleles / cna) * overdispersion_h * cna # scale with copy number as higher copy numbers should lead to less variation in read counts
                 beta_h = overdispersion_h * cna - alpha_h
                 n_alt = betabinom_rvs(coverage, alpha_h, beta_h)
         else:
@@ -275,7 +275,7 @@ class DataGenerator:
 
         # Apply CNVs
         self.apply_tree_cnas()
-        # for j in range(self.n_mut):
+        # for j in range(self.n_mut): # Uncomment to apply random CNAs
         #     for i in range(self.n_cells):
         #         if np.random.random() < self.CNV_fraction:
         #             cnv = np.random.choice([1, 3, 4, 5, 6])
