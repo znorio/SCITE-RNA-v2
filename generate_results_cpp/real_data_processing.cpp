@@ -32,12 +32,6 @@ int main() {
     std::vector<std::vector<int>> ref = read_csv(input_path + "/ref.csv");
     std::vector<std::vector<int>> alt = read_csv(input_path + "/alt.csv");
 
-//    for (auto& row : ref) {
-//        for (auto& entry : row) {
-//            entry += 1;
-//        }
-//    }
-
     generate_sciterna_results(ref, alt, input_path, output_path,
                             bootstrap_samples, use_bootstrap, tree_space,
                             flipped_mutation_direction, n_snps, posterior_threshold,

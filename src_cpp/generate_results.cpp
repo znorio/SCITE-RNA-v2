@@ -19,14 +19,7 @@ void create_directories(const std::string& pathout, bool reduced_ouput) {
     std::vector<std::string> dirs = {};
     if (reduced_ouput) {
         dirs = {
-//            "sciterna_selected_loci",
-//            "sciterna_inferred_mut_types",
             "sciterna_parent_vec",
-//            "sciterna_individual_dropout_probs",
-//            "sciterna_individual_overdispersions_H",
-//            "sciterna_global_parameters",
-//            "sciterna_flipped",
-//            "sciterna_mutation_location"
             "sciterna_genotype"
         };
     }
