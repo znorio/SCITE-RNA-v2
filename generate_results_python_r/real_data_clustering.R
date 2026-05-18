@@ -1,4 +1,4 @@
-# Script used to run DENDRO and SClineager on cancer datasets
+# Script used to run DENDRO and SClineager on cancer datasets and cluster SCITE-RNA's genotype matrix.
 library(DENDRO)
 library(SClineager)
 
@@ -31,7 +31,6 @@ merge.to.parent <- function(merge.mat){
 dir.create(file.path(base_path, "results", sample, "dendro", "dendro_clones"), recursive = TRUE)
 dir.create(file.path(base_path, "results", sample, "sclineager", "sclineager_clones"), recursive = TRUE)
 dir.create(file.path(base_path, "results", sample, "sciterna", "sciterna_clones"), recursive = TRUE)
-dir.create(file.path(base_path, "results", sample, "phylinsic", "phylinsic_clones"), recursive = TRUE)
 dir.create(file.path(base_path, "results", sample, "sciterna_bootstrap", "sciterna_bootstrap_clones"), recursive = TRUE)
 dir.create(file.path(base_path, "results", sample, "sciterna_bootstrap", "sciterna_clustering_parent_vec"), recursive = TRUE)
 

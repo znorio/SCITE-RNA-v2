@@ -98,7 +98,7 @@ default_params = {
     "homoplasy_fraction": 0.0
 }
 
-# param_sets = {
+# param_sets = { # Uncomment to test different simulation parameter settings.
     # 'dropout': [0, 0.2, 0.4, 0.6],
     # 'overdispersion_Het': [3, 6, 10, 100],
     # 'overdispersion_Hom': [3, 6, 10, 100],
@@ -134,6 +134,7 @@ default_params = {
 #                         flipped_mutation_direction=flipped_mutation_direction,
 #                         n_keep=num_mut, n_rounds=n_rounds
 #                     )
+
 for clone in clones:
     for num_cells, num_mut in zip(n_cells_list, n_mut_list):
         data_path = f"../data/simulated_data/{num_cells}c{num_mut}m{clone}"

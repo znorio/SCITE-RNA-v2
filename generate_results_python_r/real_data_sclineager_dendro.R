@@ -1,4 +1,4 @@
-# Script used to run DENDRO and SClineager on cancer datasets
+# Script used to run DENDRO and SClineager on cancer datasets and cluster the SCITE-RNA genotype matrix
 
 library(DENDRO)
 library(SClineager)

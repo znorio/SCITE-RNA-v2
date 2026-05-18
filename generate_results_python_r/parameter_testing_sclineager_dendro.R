@@ -14,7 +14,7 @@ read.matrix <- function(path){
   return(mat)
 }
 
-read.str.matrix <- function(path) {
+read.str.matrix <- function(path){
   mat <- as.matrix(read.table(path, header=FALSE, sep=" "))
   mat[mat == "A"] <- 1
   mat[mat == "H"] <- 0.5
